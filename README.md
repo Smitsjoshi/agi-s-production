@@ -19,6 +19,7 @@ AGI-S is built to be the one-stop solution for all your AI needs. Our mission is
 - **Vision Analysis**: Upload images or PDFs and ask questions about them.
 - **Discover Dashboard**: View trending stocks and news with AI-powered actions.
 - **User Authentication**: Secure user sign-in.
+- **API & Developer Access**: Public API for developers to integrate their own tools/services. Webhooks for event-driven workflows.
 
 ## Upcoming Features
 
@@ -30,12 +31,11 @@ AGI-S is built to be the one-stop solution for all your AI needs. Our mission is
 6.  **Contextual Awareness & Smart Suggestions**: The AI proactively suggests next steps, insights, or automations based on context. Context-aware actions (e.g., if a meeting is discussed, offer to schedule it).
 7.  **Advanced Search & Retrieval**: Semantic search across all past interactions, files, and connected apps. Smart filtering and tagging of content.
 8.  **Custom AI Agents**: Users can configure specialized AI agents for different tasks (coding, writing, research, etc.)—and switch between them. Allow creation of custom agent personalities or behaviors.
-9.  **API & Developer Access**: Public API for developers to integrate their own tools/services. Webhooks for event-driven workflows.
-10. **Security, Privacy, & Transparency**: End-to-end encryption for sensitive data. Clear data usage policies, opt-in memory features, and transparency logs.
-11. **Accessible UI/UX**: Responsive design for desktop, mobile, and tablet. Accessibility features: screen reader support, high-contrast mode, keyboard navigation.
-12. **Knowledge Integration**: Connect and search personal or organizational knowledge bases (wikis, docs, etc.). Web search and citation features for up-to-date information.
-13. **Analytics & Insights**: Dashboards showing usage statistics, productivity gains, and task summaries.
-14. **Multi-language Support**: Interface and AI capabilities in multiple languages for global reach.
+9.  **Security, Privacy, & Transparency**: End-to-end encryption for sensitive data. Clear data usage policies, opt-in memory features, and transparency logs.
+10. **Accessible UI/UX**: Responsive design for desktop, mobile, and tablet. Accessibility features: screen reader support, high-contrast mode, keyboard navigation.
+11. **Knowledge Integration**: Connect and search personal or organizational knowledge bases (wikis, docs, etc.). Web search and citation features for up-to-date information.
+12. **Analytics & Insights**: Dashboards showing usage statistics, productivity gains, and task summaries.
+13. **Multi-language Support**: Interface and AI capabilities in multiple languages for global reach.
 
 ## Getting Started
 

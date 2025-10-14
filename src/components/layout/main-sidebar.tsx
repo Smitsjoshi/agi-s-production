@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Compass, MessageSquare, Users, Clapperboard, Palette, Cpu, Landmark, Wind, BookCheck, ShieldHalf, Briefcase, Sparkles, User, LogOut, Workflow, Code, Star, BookOpen, GitMerge, Puzzle } from 'lucide-react';
+import { Compass, MessageSquare, Users, Clapperboard, Palette, Cpu, Landmark, Wind, BookCheck, ShieldHalf, Briefcase, Sparkles, User, LogOut, Workflow, Code, Star, BookOpen, GitMerge, Puzzle, Key } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -49,6 +49,7 @@ const businessNavItems: NavItem[] = [
 
 const exploreNavItems: NavItem[] = [
     { href: '/discover', icon: Compass, label: 'Discover', description: 'Your daily brief of market trends and top headlines.' },
+    { href: '/api', icon: Key, label: 'API', description: 'Integrate your own tools and services with AGI-S.' },
 ];
 
 const createNavItems: NavItem[] = [
