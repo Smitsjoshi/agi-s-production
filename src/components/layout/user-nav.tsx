@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { LogIn, User as UserIcon, Moon, Sun } from 'lucide-react';
+import { LogIn, User as UserIcon, Moon, Sun, Contrast } from 'lucide-react';
 import { useSession } from '@/hooks/use-session';
 import { useTheme } from '@/hooks/use-theme';
 import {
@@ -20,11 +20,14 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSidebar } from '../ui/sidebar';
+import { useKbd } from '@/hooks/use-kbd';
 
 export function UserNav() {
   const { user, signOut, isLoading } = useSession();
   const { setTheme, theme } = useTheme();
   const { state } = useSidebar();
+
+  useKbd('t', () => setTheme(theme === 'dark' ? 'light' : 'dark'));
 
   if (isLoading) {
     return (
@@ -92,6 +95,10 @@ export function UserNav() {
                 <DropdownMenuItem onClick={() => setTheme('light')}>Light</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme('dark')}>Dark</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme('system')}>System</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme('high-contrast')}>
+                  <Contrast className="mr-2" />
+                  High Contrast
+                </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
