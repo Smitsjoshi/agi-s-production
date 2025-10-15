@@ -6,7 +6,7 @@ AGI-S is a comprehensive, AI-powered web application built with Next.js, React, 
 
 AGI-S is built to be the one-stop solution for all your AI needs. Our mission is to provide a single, seamless interface that consolidates the power of numerous specialized AI tools into one unified platform. This may result in a comprehensive application with many pages and powerful offerings, but our core goal is to fulfill all your requirements in one place, providing a truly integrated and powerful experience.
 
-## Features
+## S1.0  Features
 
 - **Multi-modal AI Chat**: Interact with AI using text, images, and PDFs across different modes.
 - **AI Modes**: Switch between specialized AI agents for different tasks:
@@ -21,7 +21,7 @@ AGI-S is built to be the one-stop solution for all your AI needs. Our mission is
 - **User Authentication**: Secure user sign-in.
 - **API & Developer Access**: Public API for developers to integrate their own tools/services. Webhooks for event-driven workflows.
 
-## Upcoming Features
+## S1.2  Features
 
 1.  **Unified Multi-Modal Input**: Support for text, voice, image, and file uploads as input. Allow users to switch modalities seamlessly during a session.
 2.  **Plugin/Extension Ecosystem**: Enable third-party plugins or "skills" to extend AI capabilities (e.g., code execution, calendar integration, email, web browsing). A plugin marketplace or manager for users to discover and enable new capabilities.
@@ -36,6 +36,7 @@ AGI-S is built to be the one-stop solution for all your AI needs. Our mission is
 11. **Knowledge Integration**: Connect and search personal or organizational knowledge bases (wikis, docs, etc.). Web search and citation features for up-to-date information.
 12. **Analytics & Insights**: Dashboards showing usage statistics, productivity gains, and task summaries.
 13. **Multi-language Support**: Interface and AI capabilities in multiple languages for global reach.
+14. **Smart Notifications & Automations**: Rule-based notifications (e.g., “Notify me if AI generates a new summary”). Scheduled tasks and reminders.
 
 ## Getting Started
 

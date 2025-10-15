@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import { SessionProvider } from "@/components/providers/session-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { LanguageProvider } from "@/components/language-provider";
+import { TranslateProvider } from "@/components/translate-provider";
+import { TourProvider } from "@/components/tour-provider";
 import "./globals.css";
 import { Inter, Space_Grotesk } from 'next/font/google';
 
@@ -34,7 +37,13 @@ export default function RootLayout({
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-body antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <SessionProvider>
-            {children}
+            <LanguageProvider>
+              <TranslateProvider>
+                <TourProvider>
+                  {children}
+                </TourProvider>
+              </TranslateProvider>
+            </LanguageProvider>
           </SessionProvider>
         </ThemeProvider>
         <Toaster />

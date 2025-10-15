@@ -265,7 +265,7 @@ export function ChatInterface() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={`Ask ${mode}...`}
-              className="flex-1 resize-none border-0 shadow-none focus-visible:ring-0 text-base py-3"
+              className="chat-input flex-1 resize-none border-0 shadow-none focus-visible:ring-0 text-base py-3"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
