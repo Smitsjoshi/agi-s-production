@@ -11,7 +11,6 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import puppeteer from 'puppeteer';
 import { LiveWebAgentInputSchema, LiveWebAgentOutputSchema, SearchResultSchema } from '@/lib/types';
-export type { LiveWebAgentInput, LiveWebAgentOutput } from '@/lib/types';
 
 
 // Define a tool for the AI to navigate to a URL

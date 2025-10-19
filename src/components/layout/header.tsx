@@ -8,9 +8,7 @@ import { usePathname } from "next/navigation";
 import useLocalStorage from "@/hooks/use-local-storage";
 import { useToast } from "@/hooks/use-toast";
 import type { ChatMessage } from "@/lib/types";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
-import { useTranslation } from "@/components/translate-provider";
 import { useTour } from "@/components/tour-provider";
 
 
@@ -18,7 +16,6 @@ export function Header() {
     const pathname = usePathname();
     const { toast } = useToast();
     const [, setMessages] = useLocalStorage<ChatMessage[]>('chat-history', []);
-    const { t } = useTranslation();
     const { startTour } = useTour();
 
     const isAskPage = pathname.startsWith('/ask');
@@ -27,7 +24,7 @@ export function Header() {
         window.dispatchEvent(new Event('new-chat'));
         setMessages([]);
         if (isAskPage) {
-            toast({ title: t('New Chat') });
+            toast({ title: 'New Chat' });
         }
     };
 
@@ -57,11 +54,8 @@ export function Header() {
       </Button>
       <Button variant="outline" onClick={handleNewChat} className="new-chat-button">
           <PlusCircle className="mr-2" />
-          {t('New Chat')}
+          New Chat
       </Button>
-      <div className="language-switcher">
-        <LanguageSwitcher />
-      </div>
     </header>
   );
 }

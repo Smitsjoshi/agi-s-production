@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -13,11 +13,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@/hooks/use-session';
 
 const formSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email address.' }),
-  password: z.string().min(1, { message: 'Password is required.' }),
+  otp: z.string().min(6, { message: 'Your one-time password must be 6 characters.' }).max(6, { message: 'Your one-time password must be 6 characters.' }),
 });
 
-export function SignInForm() {
+export function OtpForm() {
   const { signIn, isLoading } = useSession();
   const { toast } = useToast();
   const router = useRouter();
@@ -25,27 +24,22 @@ export function SignInForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      otp: '',
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (values.email === 'mmsjsmit@gmail.com' && values.password === 'i am smit') {
+    try {
+      const user = await signIn(values.otp);
       toast({
         title: 'Authentication Successful',
-        description: 'Welcome back!',
+        description: `Welcome, ${user.name}!`,
       });
-      
-      // Simulate sign-in and redirect
-      setTimeout(() => {
-        signIn();
-        router.push('/ask');
-      }, 1000);
-    } else {
+      router.push('/ask');
+    } catch (error) {
       toast({
         title: 'Authentication Failed',
-        description: 'Invalid credentials. Please contact Smit for support.',
+        description: 'Invalid access code. Please try again.',
         variant: 'destructive',
       });
     }
@@ -56,25 +50,12 @@ export function SignInForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="email"
+          name="otp"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email Address</FormLabel>
+              <FormLabel>Access Code</FormLabel>
               <FormControl>
-                <Input placeholder="name@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="********" {...field} />
+                <Input placeholder="_ _ _ _ _ _" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -84,10 +65,7 @@ export function SignInForm() {
           {isLoading ? (
             <Loader2 className="animate-spin" />
           ) : (
-            <>
-              <Mail className="mr-2" />
-              Sign In
-            </>
+            'Submit'
           )}
         </Button>
       </form>

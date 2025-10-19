@@ -1,9 +1,8 @@
-
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Compass, MessageSquare, Users, Clapperboard, Palette, Cpu, Landmark, Wind, BookCheck, ShieldHalf, Briefcase, Sparkles, User, LogOut, Workflow, Code, Star, BookOpen, GitMerge, Puzzle, Key, LifeBuoy, HelpCircle, Bell } from 'lucide-react';
+import { Compass, MessageSquare, Users, Clapperboard, Palette, Cpu, Landmark, Wind, BookCheck, ShieldHalf, Briefcase, Sparkles, User, LogOut, Workflow, Code, Star, BookOpen, GitMerge, Puzzle, Key, LifeBuoy, HelpCircle, Bell, Lock, GitCommit } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -31,49 +30,50 @@ type NavItem = {
     icon: React.ElementType;
     label: string;
     description: string;
+    locked?: boolean;
 }
 
 const coreNavItems: NavItem[] = [
-  { href: '/ask', icon: MessageSquare, label: 'Ask', description: 'The main AI chat interface for multi-modal interactions.' },
-  { href: '/canvas', icon: Cpu, label: 'Canvas', description: 'Your goal-oriented autonomous web agent.' },
-  { href: '/codex', icon: Code, label: 'CodeX', description: 'Your AI pair programmer for generating frontend components.' },
-  { href: '/workflows', icon: GitMerge, label: 'Workflows', description: 'Automate tasks by creating powerful, connected flows.' },
-  { href: '/agents', icon: Users, label: 'Agents', description: 'Interact with specialized AI agents or create your own.' },
-  { href: '/extensions', icon: Puzzle, label: 'Extensions', description: 'Extend the functionality of AGI-S with custom plugins.' },
+  { href: '/ask', icon: MessageSquare, label: 'Ask', description: 'The main AI chat interface for multi-modal interactions.', locked: false },
+  { href: '/canvas', icon: Cpu, label: 'Canvas', description: 'Your goal-oriented autonomous web agent.', locked: true },
+  { href: '/codex', icon: Code, label: 'CodeX', description: 'Your AI pair programmer for generating frontend components.', locked: true },
+  { href: '/workflows', icon: GitMerge, label: 'Workflows', description: 'Automate tasks by creating powerful, connected flows.', locked: true },
+  { href: '/agents', icon: Users, label: 'Agents', description: 'Interact with specialized AI agents or create your own.', locked: true },
+  { href: '/extensions', icon: Puzzle, label: 'Extensions', description: 'Extend the functionality of AGI-S with custom plugins.', locked: true },
 ];
 
 const businessNavItems: NavItem[] = [
-    { href: '/dashboard', icon: Briefcase, label: 'Dashboard', description: 'AI-powered command center for market intelligence.' },
-    { href: '/workspaces', icon: Users, label: 'Workspaces', description: 'Collaborate with your team and share AI projects.' },
+    { href: '/dashboard', icon: Briefcase, label: 'Dashboard', description: 'AI-powered command center for market intelligence.', locked: true },
+    { href: '/workspaces', icon: Users, label: 'Workspaces', description: 'Collaborate with your team and share AI projects.', locked: true },
 ];
 
 const exploreNavItems: NavItem[] = [
-    { href: '/discover', icon: Compass, label: 'Discover', description: 'Your daily brief of market trends and top headlines.' },
-    { href: '/notifications', icon: Bell, label: 'Notifications', description: 'Manage your notification settings.' },
-    { href: '/api', icon: Key, label: 'API', description: 'Integrate your own tools and services with AGI-S.' },
-    { href: '/support', icon: LifeBuoy, label: 'Support', description: 'Get help and submit feedback.' },
-    { href: '/faq', icon: HelpCircle, label: 'FAQ', description: 'Find answers to common questions.' },
+    { href: '/discover', icon: Compass, label: 'Discover', description: 'Your daily brief of market trends and top headlines.', locked: true },
+    { href: '/notifications', icon: Bell, label: 'Notifications', description: 'Manage your notification settings.', locked: true },
+    { href: '/api', icon: Key, label: 'API', description: 'Integrate your own tools and services with AGI-S.', locked: true },
+    { href: '/support', icon: LifeBuoy, label: 'Support', description: 'Get help and submit feedback.', locked: false },
+    { href: '/faq', icon: HelpCircle, label: 'FAQ', description: 'Find answers to common questions.', locked: true },
 ];
 
 const createNavItems: NavItem[] = [
-  { href: '/continuum', icon: Landmark, label: 'Continuum', description: 'AI-powered historical & future event simulator.' },
-  { href: '/aether', icon: Wind, label: 'Aether', description: 'Your AI-powered dream journal and visualizer.' },
-  { href: '/cosmos', icon: Star, label: 'Cosmos', description: 'Generate entire fictional universes and lorebooks with a prompt.' },
-  { href: '/media', icon: Clapperboard, label: 'Media', description: 'Generate video or audio content from text.' },
-  { href: '/creator', icon: Palette, label: 'Creator', description: 'Analyze images/PDFs or generate new visual content.' },
+  { href: '/continuum', icon: Landmark, label: 'Continuum', description: 'AI-powered historical & future event simulator.', locked: true },
+  { href: '/aether', icon: Wind, label: 'Aether', description: 'Your AI-powered dream journal and visualizer.', locked: true },
+  { href: '/cosmos', icon: Star, label: 'Cosmos', description: 'Generate entire fictional universes and lorebooks with a prompt.', locked: true },
+  { href: '/media', icon: Clapperboard, label: 'Media', description: 'Generate video or audio content from text.', locked: true },
+  { href: '/creator', icon: Palette, label: 'Creator', description: 'Analyze images/PDFs or generate new visual content.', locked: true },
 ];
 
 const productivityNavItems: NavItem[] = [
-  { href: '/synthesis', icon: BookCheck, label: 'Synthesis', description: 'Your AI Data Analyst & Report Generator.' },
-  { href: '/blueprint', icon: Workflow, label: 'Blueprint', description: 'Deconstructs goals into actionable plans with tools.' },
+  { href: '/synthesis', icon: BookCheck, label: 'Synthesis', description: 'Your AI Data Analyst & Report Generator.', locked: true },
+  { href: '/blueprint', icon: Workflow, label: 'Blueprint', description: 'Deconstructs goals into actionable plans with tools.', locked: true },
 ];
 
 const strategyNavItems: NavItem[] = [
-    { href: '/crucible', icon: ShieldHalf, label: 'Crucible', description: 'The AI Red Team & Decision Simulator to pressure-test ideas.' },
+    { href: '/crucible', icon: ShieldHalf, label: 'Crucible', description: 'The AI Red Team & Decision Simulator to pressure-test ideas.', locked: true },
 ];
 
 const learnNavItems: NavItem[] = [
-    { href: '/catalyst', icon: BookOpen, label: 'Catalyst', description: 'Generates personalized learning paths and curriculums on any topic.' },
+    { href: '/catalyst', icon: BookOpen, label: 'Catalyst', description: 'Generates personalized learning paths and curriculums on any topic.', locked: true },
 ];
 
 
@@ -82,6 +82,32 @@ const NavGroup = ({ title, items, state, pathname, playNavSound }: { title: stri
     return items.map((item) => {
       const Icon = item.icon;
       const isActive = pathname.startsWith(item.href);
+
+      if (item.locked) {
+        return (
+          <SidebarMenuItem key={item.href}>
+            <div className="relative">
+              <SidebarMenuButton
+                isActive={isActive}
+                disabled
+                tooltip={(
+                  <div>
+                    <p className="font-bold">{item.label}</p>
+                    <p className="text-sm text-muted-foreground">This feature is coming soon.</p>
+                  </div>
+                )}
+              >
+                <Icon />
+                <span className={cn(state === 'collapsed' && 'opacity-0')}>
+                  {item.label}
+                </span>
+                 <Lock className="absolute top-1/2 right-3 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              </SidebarMenuButton>
+            </div>
+          </SidebarMenuItem>
+        );
+      }
+
       return (
         <SidebarMenuItem key={item.href} onClick={() => !isActive && playNavSound()}>
           <Link href={item.href}>

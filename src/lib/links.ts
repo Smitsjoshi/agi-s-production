@@ -45,6 +45,7 @@ export const links = [
         description: 'Configure your Supernova settings.'
       },
     ],
+    locked: true,
   },
   {
     title: 'Continuum',
@@ -59,6 +60,7 @@ export const links = [
         description: 'Configure your Continuum settings.'
       },
     ],
+    locked: true,
   },
   {
     title: 'Dimension',
@@ -73,6 +75,7 @@ export const links = [
         description: 'Configure your Dimension settings.'
       },
     ],
+    locked: true,
   },
   {
     title: 'Fabric',
@@ -87,6 +90,7 @@ export const links = [
         description: 'Configure your Fabric settings.'
       },
     ],
+    locked: true,
   },
   {
     title: 'Spacetime',
@@ -101,6 +105,7 @@ export const links = [
         description: 'Configure your Spacetime settings.'
       },
     ],
+    locked: true,
   },
   {
     title: 'Wormhole',
@@ -115,6 +120,7 @@ export const links = [
         description: 'Configure your Wormhole settings.'
       },
     ],
+    locked: true,
   },
   {
     title: 'Multiverse',
@@ -129,5 +135,6 @@ export const links = [
         description: 'Configure your Multiverse settings.'
       },
     ],
+    locked: true,
   },
 ];
