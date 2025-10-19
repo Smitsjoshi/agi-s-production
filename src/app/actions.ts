@@ -11,14 +11,19 @@ export async function askAi(
   file?: { type: 'image' | 'pdf' | 'csv' | 'json'; data: string },
   options?: any,
 ) {
-  const result = await cosmicFlow(query);
+  try {
+    const result = await cosmicFlow(query);
 
-  // Save chat to Firestore
-  await addChatMessage({
-    query,
-    answer: result,
-    timestamp: new Date(),
-  });
+    // Save chat to Firestore
+    await addChatMessage({
+      query,
+      answer: result,
+      timestamp: new Date(),
+    });
 
-  return { answer: result };
+    return { answer: result };
+  } catch (error: any) {
+    console.error(error);
+    return { error: error.message || 'An unknown error occurred.' };
+  }
 }
