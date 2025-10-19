@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "deploy": "firebase apphosting:backends:create --project $PROJECT_ID --location us-central1"
+    "deploy": "npm run build && firebase deploy --only apphosting"
   },
   "dependencies": {
     "@genkit-ai/google-genai": "^1.20.0",
