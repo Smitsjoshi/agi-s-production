@@ -7,7 +7,6 @@ import { Header } from "@/components/layout/header";
 import { UpgradeBanner } from "@/components/upgrade-banner";
 import { useEffect, useState } from "react";
 import Loading from "@/app/(main)/loading";
-import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 
 export function MainLayoutClient({ children }: { children: React.ReactNode }) {
   const [isMounted, setIsMounted] = useState(false);
@@ -34,7 +33,6 @@ export function MainLayoutClient({ children }: { children: React.ReactNode }) {
       </SidebarInset>
       <SidebarRail />
       <MouseFollower />
-      <FloatingChatButton />
     </SidebarProvider>
   );
 }

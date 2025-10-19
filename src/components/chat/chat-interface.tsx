@@ -71,6 +71,16 @@ export function ChatInterface() {
   }, []);
 
   useEffect(() => {
+    const handleNewChat = () => {
+      setMessages([]);
+    };
+    window.addEventListener('new-chat', handleNewChat);
+    return () => {
+      window.removeEventListener('new-chat', handleNewChat);
+    };
+  }, [setMessages]);
+
+  useEffect(() => {
     if (scrollAreaRef.current) {
         const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
         if (viewport) {

@@ -24,6 +24,7 @@ export function Header() {
     const isAskPage = pathname.startsWith('/ask');
 
     const handleNewChat = () => {
+        window.dispatchEvent(new Event('new-chat'));
         setMessages([]);
         if (isAskPage) {
             toast({ title: t('New Chat') });
