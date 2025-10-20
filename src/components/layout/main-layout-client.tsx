@@ -8,7 +8,7 @@ import { UpgradeBanner } from "@/components/upgrade-banner";
 import { useEffect, useState } from "react";
 import Loading from "@/app/(main)/loading";
 import { useSession } from "@/hooks/use-session";
-import { OtpForm } from "@/components/auth/otp-form";
+import { OtpForm } from "@/components/auth/access code form";
 
 export function MainLayoutClient({ children }: { children: React.ReactNode }) {
   const [isMounted, setIsMounted] = useState(false);

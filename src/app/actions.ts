@@ -12,6 +12,14 @@ export async function askAi(
   options?: any,
 ) {
   try {
+    // Basic validation
+    if (!query && !file) {
+      throw new Error("Either a query or a file must be provided.");
+    }
+
+    // Here, you would add more complex logic based on the `mode` and `file` type.
+    // For this example, we'll keep it simple and just use the cosmicFlow.
+    
     const result = await cosmicFlow(query);
 
     // Save chat to Firestore
@@ -22,8 +30,15 @@ export async function askAi(
     });
 
     return { answer: result };
+
   } catch (error: any) {
-    console.error(error);
-    return { error: error.message || 'An unknown error occurred.' };
+    console.error("[askAi Error]", error);
+    // Log the error to your preferred logging service
+
+    return { 
+      error: process.env.NODE_ENV === 'development' 
+        ? error.message 
+        : 'An unexpected error occurred. Please try again.'
+    };
   }
 }
