@@ -6,7 +6,7 @@ import { Globe, ArrowRight, Cpu, CheckCircle, Shield, GitMerge, Mic, Paperclip, 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { askAi } from '@/app/actions';
+import { ualOrchestrator } from '@/lib/ual/orchestrator';
 import type { LiveWebAgentOutput, SearchResult } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BrowserFrame } from './browser-frame';
@@ -89,74 +89,23 @@ const AgentLoadingView = ({ goal, logs }: { goal: string, logs: LogEntry[] }) =>
     </div>
 );
 
-const AgentOutputView = ({ output }: { output: LiveWebAgentOutput }) => (
+const AgentOutputView = ({ output, onReset }: { output: any, onReset: () => void }) => (
     <div className="p-4 sm:p-8 space-y-8 max-w-5xl mx-auto">
         <div>
             <h2 className="text-3xl font-bold text-zinc-100 mb-3 flex items-center gap-3"><CheckCircle className="text-green-500"/> Task Completed</h2>
-            <p className="text-zinc-300 leading-relaxed">{output.summary}</p>
+            <pre className="bg-gray-100 p-4 whitespace-pre-wrap">{JSON.stringify(output, null, 2)}</pre>
+            <Button onClick={onReset} className="mt-4">Reset</Button>
         </div>
-        {output.results && output.results.length > 0 && (
-            <div className="border-t border-zinc-700/50 pt-6">
-                <h3 className="text-xl font-semibold text-zinc-100 mb-4">Sources & Actions</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {output.results.map((result, index) => <SearchResultCard key={result.url || index} result={result} />)}
-                </div>
-            </div>
-        )}
     </div>
 );
 
 export function LiveWebAgentInterface() {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [agentOutput, setAgentOutput] = useState<LiveWebAgentOutput | null>(null);
+  const [agentOutput, setAgentOutput] = useState<any | null>(null);
   const [currentGoal, setCurrentGoal] = useState('');
   const [agentLogs, setAgentLogs] = useState<LogEntry[]>([]);
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (isLoading) {
-      const executeAgent = async () => {
-        const logMap: Record<LogEntry['source'], { icon: React.ElementType, color: string }> = {
-            'U.A.L': { icon: Cpu, color: 'text-yellow-400' },
-            'ANALYZER': { icon: Search, color: 'text-blue-400' },
-            'PLANNER': { icon: GitMerge, color: 'text-purple-400' },
-            'EXECUTOR': { icon: Shield, color: 'text-green-400' },
-            'SYNTHESIZER': { icon: CheckCircle, color: 'text-teal-400' },
-        };
-
-        const initialLogs: Omit<LogEntry, 'icon' | 'color'>[] = [
-            { source: 'U.A.L', message: `Received new directive: "${currentGoal}"`},
-            { source: 'ANALYZER', message: 'Parsing goal and identifying key objectives.' },
-            { source: 'PLANNER', message: 'Formulating a multi-step execution plan.' },
-        ];
-
-        initialLogs.forEach((log, index) => {
-            setTimeout(() => {
-                setAgentLogs(prev => [...prev, { ...log, ...logMap[log.source] }]);
-            }, index * 100);
-        });
-
-        try {
-          // @ts-ignore
-          const result: LiveWebAgentOutput = await askAi(currentGoal, 'Canvas', []);
-          setAgentLogs(prev => [...prev, { source: 'EXECUTOR', message: 'Executing plan and interacting with web tools...', ...logMap['EXECUTOR'] }]);
-          setTimeout(() => {
-            setAgentLogs(prev => [...prev, { source: 'SYNTHESIZER', message: 'Compiling findings and generating final summary.', ...logMap['SYNTHESIZER'] }]);
-            setAgentOutput(result);
-            setIsLoading(false);
-          }, 1500);
-        } catch (error) {
-          console.error(error);
-          toast({ variant: 'destructive', title: 'Error', description: 'The AI agent failed. Please try a simpler goal.' });
-          setIsLoading(false);
-          setCurrentGoal('');
-        }
-      };
-      executeAgent();
-    }
-  }, [isLoading, currentGoal, toast]);
-
 
   const handleSubmit = async (goal: string) => {
     if (!goal.trim()) return;
@@ -166,11 +115,26 @@ export function LiveWebAgentInterface() {
     setAgentOutput(null);
     setAgentLogs([]);
     setQuery('');
+
+    try {
+      const result = await ualOrchestrator.handleRequest(goal);
+      setAgentOutput(result);
+    } catch (error: any) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setIsLoading(false);
+      setCurrentGoal('');
+    }
   };
 
   const handleFormSubmit = (e: FormEvent) => {
       e.preventDefault();
       handleSubmit(query);
+  };
+
+  const handleReset = () => {
+    setAgentOutput(null);
   };
 
   const handleFutureFeatureClick = () => {
@@ -193,7 +157,7 @@ export function LiveWebAgentInterface() {
           <div className="h-full w-full flex flex-col">
             <div className="flex-grow overflow-y-auto"><AnimatePresence mode="wait">
                 {isLoading ? <motion.div key="loading"><AgentLoadingView goal={currentGoal} logs={agentLogs} /></motion.div>
-                 : agentOutput ? <motion.div key="output"><AgentOutputView output={agentOutput} /></motion.div>
+                 : agentOutput ? <motion.div key="output"><AgentOutputView output={agentOutput} onReset={handleReset} /></motion.div>
                  : <motion.div key="input"><AgentIdleView /></motion.div>}
             </AnimatePresence></div>
             <div className="flex-shrink-0 p-4 z-10"><motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="w-full max-w-4xl mx-auto">

@@ -35,6 +35,7 @@ type NavItem = {
 
 const coreNavItems: NavItem[] = [
   { href: '/ask', icon: MessageSquare, label: 'Ask', description: 'The main AI chat interface for multi-modal interactions.', locked: false },
+  { href: '/ual', icon: GitCommit, label: 'UAL', description: 'The Universal Action Layer.', locked: false },
   { href: '/canvas', icon: Cpu, label: 'Canvas', description: 'Your goal-oriented autonomous web agent.', locked: true },
   { href: '/codex', icon: Code, label: 'CodeX', description: 'Your AI pair programmer for generating frontend components.', locked: true },
   { href: '/workflows', icon: GitMerge, label: 'Workflows', description: 'Automate tasks by creating powerful, connected flows.', locked: true },
