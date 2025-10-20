@@ -8,6 +8,7 @@ interface TourContextType {
   startTour: () => void;
   nextStep: () => void;
   stopTour: () => void;
+  setCurrentStep: (step: number) => void;
 }
 
 const TourContext = createContext<TourContextType | null>(null);
@@ -31,7 +32,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <TourContext.Provider value={{ isTourActive, currentStep, startTour, nextStep, stopTour }}>
+    <TourContext.Provider value={{ isTourActive, currentStep, startTour, nextStep, stopTour, setCurrentStep }}>
       {children}
     </TourContext.Provider>
   );

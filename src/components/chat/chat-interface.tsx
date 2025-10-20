@@ -172,7 +172,7 @@ export function ChatInterface() {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col tour-chat-interface">
       <div className="flex-1 overflow-y-auto">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
           <div className="p-4 md:p-6 space-y-6">
@@ -210,7 +210,7 @@ export function ChatInterface() {
           >
              <Popover>
               <PopoverTrigger asChild>
-                  <Button variant="outline" className="shrink-0 w-44 justify-start font-medium" disabled={isLoading}>
+                  <Button variant="outline" className="shrink-0 w-44 justify-start font-medium tour-mode-selector" disabled={isLoading}>
                       <ModeIcon className="h-4 w-4 mr-2 text-primary" />
                       <span className="flex-1 text-left truncate text-sm">{mode}</span>
                   </Button>
@@ -321,7 +321,7 @@ export function ChatInterface() {
                 type="button"
                 variant={isListening ? "destructive" : "ghost"}
                 size="icon"
-                className="shrink-0 h-8 w-8"
+                className="shrink-0 h-8 w-8 tour-microphone-button"
                 onClick={() => {
                   if (isListening) {
                     stopListening();
@@ -337,7 +337,7 @@ export function ChatInterface() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="shrink-0 h-8 w-8"
+                className="shrink-0 h-8 w-8 tour-attachment-button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading}
               >

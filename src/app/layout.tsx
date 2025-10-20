@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { LanguageProvider } from "@/components/language-provider";
 import { TranslateProvider } from "@/components/translate-provider";
 import { TourProvider } from "@/components/tour-provider";
+import { TourTooltip } from "@/components/tour-tooltip";
 import "./globals.css";
 import { Inter, Space_Grotesk } from 'next/font/google';
 
@@ -41,6 +42,7 @@ export default function RootLayout({
               <TranslateProvider>
                 <TourProvider>
                   {children}
+                  <TourTooltip />
                 </TourProvider>
               </TranslateProvider>
             </LanguageProvider>
