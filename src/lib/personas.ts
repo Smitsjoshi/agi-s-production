@@ -1,4 +1,4 @@
-import { DollarSign, Scale, Users, HardHat, Briefcase, Microscope } from 'lucide-react';
+import { DollarSign, Scale, Users, HardHat, Briefcase, Microscope, Cpu, GitCommit, Search, Code, BarChart2, Brush } from 'lucide-react';
 import type { AdversaryPersona } from './types';
 
 export const ADVERSARY_PERSONAS: AdversaryPersona[] = [
@@ -38,4 +38,38 @@ export const ADVERSARY_PERSONAS: AdversaryPersona[] = [
         description: 'Identifies potential regulatory hurdles, data privacy risks, and intellectual property issues.',
         icon: Microscope,
     },
+];
+
+export const HIVE_MIND_AGENTS = [
+    {
+        id: 'orchestrator',
+        name: 'Orchestrator',
+        description: 'The central agent that delegates tasks to the swarm.',
+        icon: GitCommit,
+    },
+    {
+        id: 'researcher',
+        name: 'Researcher',
+        description: 'An agent specialized in gathering information from the web and other sources.',
+        icon: Search,
+    },
+    {
+        id: 'coder',
+        name: 'Coder',
+        description: 'An agent specialized in writing and debugging code.',
+        icon: Code,
+    },
+    {
+        id: 'analyst',
+        name: 'Analyst',
+        description: 'An agent specialized in analyzing data and identifying patterns.',
+        icon: BarChart2,
+    },
+    {
+        id: 'visualizer',
+        name: 'Visualizer',
+        description: 'An agent specialized in creating visualizations and user interfaces.',
+        icon: Brush,
+    },
+
 ];
