@@ -29,13 +29,14 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       // Simulate API call
       setTimeout(() => {
-        const userData = userMap[email];
+        const lowercasedEmail = email.toLowerCase();
+        const userData = userMap[lowercasedEmail];
         if (userData && userData.pass === pass) {
           const newUser: User = {
-            id: email,
+            id: lowercasedEmail,
             name: userData.name,
             email: userData.email,
-            avatarUrl: `https://picsum.photos/seed/${email}/100/100`,
+            avatarUrl: `https://picsum.photos/seed/${lowercasedEmail}/100/100`,
             pages: userData.pages,
           };
           setUser(newUser);

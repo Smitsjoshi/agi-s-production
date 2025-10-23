@@ -17,6 +17,7 @@ import { Separator } from '../ui/separator';
 import { useSound } from '@/hooks/use-sound';
 import { Logo } from '../logo';
 import { useSpeechToText } from '@/hooks/use-speech-to-text';
+import { useSession } from '@/hooks/use-session';
 
 const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: string, isPersona?: boolean, isPremium?: boolean }> = {
   'AI Knowledge': { icon: BrainCircuit, description: 'Quick, web-powered answers.' },
@@ -50,6 +51,8 @@ export function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<{ name: string; type: 'image' | 'pdf'; data: string } | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const { user } = useSession();
+  const hasFullAccess = user?.pages.includes('all');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -117,7 +120,7 @@ export function ChatInterface() {
     e.preventDefault();
     if (!input.trim() && !file) return;
 
-    if (AI_MODE_DETAILS[mode].isPremium) {
+    if (AI_MODE_DETAILS[mode].isPremium && !hasFullAccess) {
       toast({
         title: 'Premium Feature',
         description: 'Upgrade to unlock this feature.',
@@ -223,11 +226,12 @@ export function ChatInterface() {
                    <div className="grid gap-2">
                     {MAIN_AI_MODES.map((m) => {
                       const { icon: Icon, description, isPremium } = AI_MODE_DETAILS[m];
+                      const isLocked = isPremium && !hasFullAccess;
                       return (
                         <div
                           key={m}
                           onClick={() => {
-                            if (isPremium) {
+                            if (isLocked) {
                               toast({
                                 title: 'Premium Feature',
                                 description: 'Upgrade to unlock this feature.',
@@ -239,14 +243,14 @@ export function ChatInterface() {
                           className={cn(
                             'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
                              mode === m ? 'bg-secondary' : 'hover:bg-muted/50',
-                             isPremium && 'cursor-not-allowed opacity-50'
+                             isLocked && 'cursor-not-allowed opacity-50'
                           )}
                         >
                             <Icon className="h-5 w-5 mt-0.5 text-primary" />
                             <div>
                                 <div className="flex items-center gap-2">
                                   <p className="font-medium text-sm">{m}</p>
-                                  {isPremium && <Lock className="h-3 w-3" />}
+                                  {isLocked && <Lock className="h-3 w-3" />}
                                 </div>
                                 <p className="text-xs text-muted-foreground">{description}</p>
                             </div>
@@ -264,11 +268,12 @@ export function ChatInterface() {
                    <div className="grid gap-2">
                     {PERSONAS.map((m) => {
                       const { icon: Icon, description, isPremium } = AI_MODE_DETAILS[m];
+                      const isLocked = isPremium && !hasFullAccess;
                       return (
                         <div
                           key={m}
                           onClick={() => {
-                            if (isPremium) {
+                            if (isLocked) {
                               toast({
                                 title: 'Premium Feature',
                                 description: 'Upgrade to unlock this feature.',
@@ -280,14 +285,14 @@ export function ChatInterface() {
                           className={cn(
                             'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
                              mode === m ? 'bg-secondary' : 'hover:bg-muted/50',
-                             isPremium && 'cursor-not-allowed opacity-50'
+                             isLocked && 'cursor-not-allowed opacity-50'
                           )}
                         >
                             <Icon className="h-5 w-5 mt-0.5 text-primary" />
                             <div>
                                 <div className="flex items-center gap-2">
                                   <p className="font-medium text-sm">{m}</p>
-                                  {isPremium && <Lock className="h-3 w-3" />}
+                                  {isLocked && <Lock className="h-3 w-3" />}
                                 </div>
                                 <p className="text-xs text-muted-foreground">{description}</p>
                             </div>

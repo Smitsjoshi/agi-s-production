@@ -1,5 +1,5 @@
-import { HiveMind } from '@/components/hive/hive-interface';
+import { HiveInterface } from '@/components/hive/hive-interface';
 
 export default function HivePage() {
-  return <HiveMind />;
+  return <HiveInterface />;
 }

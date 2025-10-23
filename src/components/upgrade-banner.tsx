@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,11 +7,18 @@ import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import { remoteConfig } from '@/lib/firebase/firebase-config';
 import { fetchAndActivate, getBoolean } from 'firebase/remote-config';
+import { useSession } from '@/hooks/use-session';
 
 export function UpgradeBanner() {
   const [isVisible, setIsVisible] = useState(false);
+  const { user } = useSession();
 
   useEffect(() => {
+    if (user?.pages.includes('all')) {
+        setIsVisible(false);
+        return;
+    }
+
     fetchAndActivate(remoteConfig)
       .then(() => {
         const isBannerVisible = getBoolean(remoteConfig, 'upgrade_banner_visible');
@@ -21,7 +27,7 @@ export function UpgradeBanner() {
       .catch((err) => {
         console.error('Error fetching remote config:', err);
       });
-  }, []);
+  }, [user]);
 
   const handleDismiss = () => {
     setIsVisible(false);
