@@ -4,7 +4,7 @@ import { Action } from '../types';
 
 const webSearchAction: Action = {
   name: 'webSearch',
-  description: 'Performs a web search on a specified search engine.',
+  description: 'Performs a web search and returns the results as a structured list.',
   parameters: [
     {
       name: 'query',
@@ -20,28 +20,28 @@ const webSearchAction: Action = {
     },
   ],
   execute: async (args: { query: string; engine?: string }) => {
-    if (typeof window === 'undefined') {
-      return 'Could not perform search. This action can only be run in a browser.';
-    }
-
     const { query, engine = 'google' } = args;
-    let searchUrl = '';
 
-    switch (engine.toLowerCase()) {
-      case 'bing':
-        searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
-        break;
-      case 'duckduckgo':
-        searchUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
-        break;
-      case 'google':
-      default:
-        searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-        break;
+    try {
+      const response = await fetch('/api/web-search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query, engine }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return `Error performing web search: ${errorData.error}`;
+      }
+
+      const data = await response.json();
+      return JSON.stringify(data.results, null, 2);
+    } catch (error) {
+      console.error('Error in webSearch action:', error);
+      return 'An unexpected error occurred while performing the web search.';
     }
-
-    window.open(searchUrl, '_blank');
-    return `Searching for "${query}" on ${engine}.`;
   },
 };
 

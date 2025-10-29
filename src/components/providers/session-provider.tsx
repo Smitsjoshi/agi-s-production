@@ -1,7 +1,7 @@
 'use client';
 
 import type { User } from '@/lib/types';
-import React, { createContext, useState, useMemo } from 'react';
+import React, { createContext, useState, useMemo, useEffect } from 'react';
 
 interface SessionContextType {
   user: User | null;
@@ -13,44 +13,34 @@ interface SessionContextType {
 
 export const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
-const userMap: { [key: string]: { name: string; email: string, pass: string, pages: string[] } } = {
-    'mmsjsmit@gmail.com': { name: 'Smit', email: 'mmsjsmit@gmail.com', pass: '123456', pages:['all'] },
-    'kvkdgt12345@gmail.com': { name: 'Kvkdgt', email: 'kvkdgt12345@gmail.com', pass: '123321', pages: ['/ask', '/support', '/faq'] },
-    'yashgk543@gmail.com': { name: 'Yash', email: 'yashgk543@gmail.com', pass: '123321', pages: ['/ask', '/support', '/faq'] },
-  };
-
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const isSignedIn = !!user;
 
+  useEffect(() => {
+    // Auto-sign-in the user with full access
+    const autoUser: User = {
+      id: 'mmsjsmit@gmail.com',
+      name: 'Smit Joshi',
+      email: 'mmsjsmit@gmail.com',
+      avatarUrl: `https://picsum.photos/seed/mmsjsmit@gmail.com/100/100`,
+      pages: ['all'],
+    };
+    setUser(autoUser);
+    setIsLoading(false);
+  }, []);
+
   const signIn = (email: string, pass: string): Promise<User> => {
+    // This function is no longer used for login but kept for compatibility
     return new Promise((resolve, reject) => {
-      setIsLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        const lowercasedEmail = email.toLowerCase();
-        const userData = userMap[lowercasedEmail];
-        if (userData && userData.pass === pass) {
-          const newUser: User = {
-            id: lowercasedEmail,
-            name: userData.name,
-            email: userData.email,
-            avatarUrl: `https://picsum.photos/seed/${lowercasedEmail}/100/100`,
-            pages: userData.pages,
-          };
-          setUser(newUser);
-          resolve(newUser);
-        } else {
-          reject(new Error('Invalid email or password'));
-        }
-        setIsLoading(false);
-      }, 1000);
+        reject(new Error('Manual sign-in is disabled.'));
     });
   };
 
   const signOut = () => {
-    setUser(null);
+    // Sign out is not really possible in this auto-login setup
+    console.log("Sign out clicked, but user is auto-logged in.");
   };
 
   const value = useMemo(
