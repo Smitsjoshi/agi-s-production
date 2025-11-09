@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GitMerge, Cpu, Search, Code, CornerDownLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 type LogEntry = {
   source: string;
@@ -20,6 +21,7 @@ export function NexusInterface() {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const endOfLogRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     endOfLogRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -52,25 +54,27 @@ export function NexusInterface() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-black text-green-400 font-mono crt p-4">
+    <div className="flex flex-col h-full bg-black text-green-400 font-mono crt p-2 sm:p-4">
       {/* Header */}
-      <div className="flex justify-between items-center border-b-2 border-green-400/50 pb-2 mb-4 text-lg">
+      <div className="flex flex-col md:flex-row justify-between md:items-center border-b-2 border-green-400/50 pb-2 mb-4 text-lg">
         <div className="flex items-center gap-2">
           <GitMerge className="w-6 h-6"/>
           <h1>AGENT NEXUS</h1>
         </div>
-        <div className="flex gap-4">
-          <span><Cpu size={18}/> CPU: 12%</span>
-          <span><Search size={18}/> Research: Idle</span>
-          <span><Code size={18}/> Coder: Idle</span>
-        </div>
+        {!isMobile && (
+          <div className="flex gap-4 text-sm md:text-base mt-2 md:mt-0">
+            <span><Cpu size={18}/> CPU: 12%</span>
+            <span><Search size={18}/> Research: Idle</span>
+            <span><Code size={18}/> Coder: Idle</span>
+          </div>
+        )}
       </div>
 
       {/* Log Display */}
-      <div className="flex-1 overflow-y-auto pr-4">
+      <div className="flex-1 overflow-y-auto pr-2 sm:pr-4">
         {log.map((entry, index) => (
-          <div key={index} className="flex gap-4">
-            <span className={cn('w-24 flex-shrink-0', entry.color)}>[{entry.source}]</span>
+          <div key={index} className="flex gap-2 text-sm sm:text-base">
+            <span className={cn('w-20 sm:w-24 flex-shrink-0', entry.color)}>[{entry.source}]</span>
             <p className="flex-1 break-words whitespace-pre-wrap">{entry.message}</p>
           </div>
         ))}
@@ -80,13 +84,13 @@ export function NexusInterface() {
 
       {/* Input Form */}
       <form onSubmit={handleCommand} className="mt-4 flex gap-2 items-center">
-        <CornerDownLeft className="w-6 h-6 text-green-400 flex-shrink-0" />
+        <CornerDownLeft className="w-5 h-5 sm:w-6 sm:h-6 text-green-400 flex-shrink-0" />
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={isProcessing ? '[PROCESSING...]' : 'Enter directive...'}
-          className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-lg"
+          className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-base sm:text-lg"
           disabled={isProcessing}
         />
       </form>
