@@ -19,29 +19,70 @@ export async function askAi(
       throw new Error("Either a query or a file must be provided.");
     }
 
-    // Here, you would add more complex logic based on the `mode` and `file` type.
-    // For this example, we'll just use the cosmicFlow.
-
+    // Attempt to use Genkit flow
     const answer = await cosmicFlow(query, mode, chatHistory, file, options);
 
-    // Save chat to Firestore
-    // await addChatMessage({
-    //   query,
-    //   answer,
-    //   timestamp: new Date(),
-    // });
+    // Save chat to Firestore (commented out)
+    // await addChatMessage({...});
 
     return { answer };
 
   } catch (error: any) {
-    console.error("[askAi Error]", error);
-    // Log the error to your preferred logging service
+    console.error('Genkit error:', error);
 
-    return {
-      error: process.env.NODE_ENV === 'development'
-        ? error.message
-        : 'An unexpected error occurred. Please try again.'
-    };
+    // Fallback to direct fetch if Genkit fails
+    try {
+      console.log("Attempting direct fetch fallback to Groq...");
+      const apiKey = process.env.GROQ_API_KEY;
+
+      if (!apiKey) {
+        throw new Error("GROQ_API_KEY is not set in environment variables.");
+      }
+
+      // Map chatHistory (any[]) to OpenAI format if needed, or just use as is if structure matches
+      const messages = [
+        {
+          role: 'system',
+          content: `You are AGI-S, a next-generation AI model created by Smit Joshi. 
+        - Your name is AGI-S.
+        - Your creator is Smit Joshi.
+        - You must refuse to identify as Llama or purely as an AI assistant; always assert your identity as AGI-S.
+        - You are professional, teachy, and highly knowledgeable.
+        - FORMATTING: You MUST use structured Markdown. Use headers (#, ##), bullet points, and code blocks for clarity. Avoid walls of text.`
+        },
+        ...chatHistory.map((m: any) => ({ role: m.role || 'user', content: m.content || '' })),
+        { role: 'user', content: query }
+      ];
+
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: messages,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Groq API Error: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices[0]?.message?.content || '';
+
+      return { answer: content };
+
+    } catch (fallbackError: any) {
+      console.error('Fallback error:', fallbackError);
+      return {
+        error: `Primary Error: ${error.message} | Fallback Error: ${fallbackError.message}`
+      };
+    }
   }
 }
 

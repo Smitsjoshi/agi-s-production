@@ -68,6 +68,13 @@ export function ChatInterface() {
   const playReceiveSound = useSound('/sounds/receive.mp3');
   const playErrorSound = useSound('/sounds/error.mp3');
 
+  const generateId = () => {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
+  };
+
   const { isListening, startListening, stopListening } = useSpeechToText({
     onTranscript: (transcript) => {
       setInput((prevInput) => prevInput + transcript);
@@ -174,25 +181,43 @@ export function ChatInterface() {
     e.preventDefault();
     if (!input.trim() && !file) return;
 
-    playSendSound();
+    // Capture current values
+    const currentInput = input;
+    const currentFile = file;
 
-    const userMessage: ChatMessage = { id: nanoid(), role: 'user', content: input };
-    const newMessages = [...messages, userMessage];
-
-    setMessages(newMessages);
-    setIsLoading(true);
+    // clear input immediately
     setInput('');
     setFile(null);
+    setSlashCommandOpen(false);
+
+    const userMessage: ChatMessage = { id: generateId(), role: 'user', content: currentInput };
+
+    // Optimistically add user message
+    setMessages(prev => [...prev, userMessage]);
+    setIsLoading(true);
+
+    // Play sound safely
+    try {
+      playSendSound();
+    } catch (err) {
+      console.error("Error playing sound:", err);
+    }
 
     try {
-      const result = await askAi(input, mode, newMessages, file || undefined);
+      // Use the captured values for the API call
+      // Pass the *updated* messages array logic (current prev + userMessage) is handled by the backend/action usually requesting full history.
+      // But typically we pass the *new* list.
+      // Let's rely on the setMessages callback for correctness in the UI, but for the API, we construct it manually.
+      const messagesForApi = [...messages, userMessage];
+
+      const result = await askAi(currentInput, mode, messagesForApi, currentFile || undefined);
 
       if (result.error) {
         throw new Error(result.error);
       }
 
       const assistantMessage: ChatMessage = {
-        id: nanoid(),
+        id: generateId(),
         role: 'assistant',
         content: result.answer || result.componentCode || result.summary || '',
         sources: result.sources,
@@ -200,14 +225,21 @@ export function ChatInterface() {
         confidenceScore: result.confidenceScore,
         liveWebAgentOutput: result.visitedPages ? result : undefined,
       };
+
       setMessages((prev) => [...prev, assistantMessage]);
+
     } catch (error) {
       console.error(error);
-      playErrorSound();
+      try {
+        playErrorSound();
+      } catch (err) {
+        console.error("Error playing error sound:", err);
+      }
+
       const errorMessage: ChatMessage = {
-        id: nanoid(),
+        id: generateId(),
         role: 'assistant',
-        content: '**Error:** I apologize, but I encountered an error while processing your request. Please try again.',
+        content: '**Error:** I apologize, but I encountered an error. Please try again.',
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {

@@ -8,11 +8,21 @@ export async function cosmicFlow(
   file?: { type: 'image' | 'pdf' | 'csv' | 'json'; data: string },
   options?: any,
 ): Promise<any> {
-  // Construct a prompt that includes history and the current query
-  let prompt = query;
+  // Construct a prompt that includes identity, history, and the current query
+  const systemPrompt = `You are AGI-S, a next-generation AI model created by Smit Joshi.
+  - Your name is AGI-S.
+  - Your creator is Smit Joshi.
+  - You must refuse to identify as Llama or purely as an AI assistant; always assert your identity as AGI-S.
+  - You are professional, teachy, and highly knowledgeable.
+  - FORMATTING: You MUST use structured Markdown. Use headers (#, ##), bullet points, and code blocks for clarity. Avoid walls of text.`;
+
+  let prompt = `${systemPrompt}\n\n`;
+
   if (chatHistory.length > 0) {
     const historyText = chatHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n');
-    prompt = `Previous conversation:\n${historyText}\n\nUser: ${query}`;
+    prompt += `Previous conversation:\n${historyText}\n\nUser: ${query}`;
+  } else {
+    prompt += `User: ${query}`;
   }
 
   // TODO: Handle file input with Ollama (multimodal support depends on the model)
@@ -23,7 +33,7 @@ export async function cosmicFlow(
 
   const result = await ai.generate({
     prompt: prompt,
-    model: 'openai/llama3-70b-8192',
+    model: 'openai/llama-3.3-70b-versatile',
     config: {
       temperature: 0.7,
     },
