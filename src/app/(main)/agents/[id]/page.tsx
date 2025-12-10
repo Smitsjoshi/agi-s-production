@@ -4,15 +4,18 @@ import { ChatInterface } from "@/components/chat/chat-interface";
 import type { Agent } from "@/lib/types";
 import { notFound } from "next/navigation";
 import { allAgents } from "@/lib/agents";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { storage, STORAGE_KEYS } from "@/lib/storage";
 
-export default function AgentChatPage({ params }: { params: { id: string } }) {
+export default function AgentChatPage({ params }: { params: Promise<{ id: string }> }) {
+  // Unwrap the params Promise using React.use()
+  const { id } = use(params);
+
   const [agent, setAgent] = useState<Agent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const builtInAgent = allAgents.find(a => a.id === params.id);
+    const builtInAgent = allAgents.find(a => a.id === id);
 
     if (builtInAgent) {
       setAgent(builtInAgent);
@@ -21,14 +24,14 @@ export default function AgentChatPage({ params }: { params: { id: string } }) {
     }
 
     const customAgents = storage.get<Agent[]>(STORAGE_KEYS.CUSTOM_AGENTS, []);
-    const customAgent = customAgents.find(a => a.id === params.id);
+    const customAgent = customAgents.find(a => a.id === id);
 
     if (customAgent) {
       setAgent(customAgent);
     }
 
     setIsLoading(false);
-  }, [params.id]);
+  }, [id]);
 
   if (isLoading) {
     return (
