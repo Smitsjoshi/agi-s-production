@@ -27,11 +27,11 @@ import { Button } from '../ui/button';
 import { useSession } from '@/hooks/use-session';
 
 type NavItem = {
-    href: string;
-    icon: React.ElementType;
-    label: string;
-    description: string;
-    locked?: boolean;
+  href: string;
+  icon: React.ElementType;
+  label: string;
+  description: string;
+  locked?: boolean;
 }
 
 const coreNavItems: NavItem[] = [
@@ -45,16 +45,15 @@ const coreNavItems: NavItem[] = [
 ];
 
 const businessNavItems: NavItem[] = [
-    { href: '/dashboard', icon: Briefcase, label: 'Dashboard', description: 'AI-powered command center for market intelligence.', locked: true },
-    { href: '/workspaces', icon: Users, label: 'Workspaces', description: 'Collaborate with your team and share AI projects.', locked: true },
+  // Removed: dashboard and workspaces pages
 ];
 
 const exploreNavItems: NavItem[] = [
-    { href: '/discover', icon: Compass, label: 'Discover', description: 'Your daily brief of market trends and top headlines.', locked: true },
-    { href: '/notifications', icon: Bell, label: 'Notifications', description: 'Manage your notification settings.', locked: true },
-    { href: '/api', icon: Key, label: 'API', description: 'Integrate your own tools and services with AGI-S.', locked: true },
-    { href: '/support', icon: LifeBuoy, label: 'Support', description: 'Get help and submit feedback.', locked: false },
-    { href: '/faq', icon: HelpCircle, label: 'FAQ', description: 'Find answers to common questions.', locked: false },
+  { href: '/discover', icon: Compass, label: 'Discover', description: 'Your daily brief of market trends and top headlines.', locked: true },
+  { href: '/notifications', icon: Bell, label: 'Notifications', description: 'Manage your notification settings.', locked: true },
+  // Removed: api page
+  { href: '/support', icon: LifeBuoy, label: 'Support', description: 'Get help and submit feedback.', locked: false },
+  { href: '/faq', icon: HelpCircle, label: 'FAQ', description: 'Find answers to common questions.', locked: false },
 ];
 
 const createNavItems: NavItem[] = [
@@ -71,11 +70,11 @@ const productivityNavItems: NavItem[] = [
 ];
 
 const strategyNavItems: NavItem[] = [
-    { href: '/crucible', icon: ShieldHalf, label: 'Crucible', description: 'The AI Red Team & Decision Simulator to pressure-test ideas.', locked: true },
+  { href: '/crucible', icon: ShieldHalf, label: 'Crucible', description: 'The AI Red Team & Decision Simulator to pressure-test ideas.', locked: true },
 ];
 
 const learnNavItems: NavItem[] = [
-    { href: '/catalyst', icon: BookOpen, label: 'Catalyst', description: 'Generates personalized learning paths and curriculums on any topic.', locked: true },
+  { href: '/catalyst', icon: BookOpen, label: 'Catalyst', description: 'Generates personalized learning paths and curriculums on any topic.', locked: true },
 ];
 
 
@@ -104,7 +103,7 @@ const NavGroup = ({ title, items, state, pathname, playNavSound, user }: { title
                 <span className={cn(state === 'collapsed' && 'opacity-0')}>
                   {item.label}
                 </span>
-                 <Lock className="absolute top-1/2 right-3 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute top-1/2 right-3 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </SidebarMenuButton>
             </div>
           </SidebarMenuItem>
@@ -118,8 +117,8 @@ const NavGroup = ({ title, items, state, pathname, playNavSound, user }: { title
               isActive={isActive}
               tooltip={(
                 <div>
-                    <p className="font-bold">{item.label}</p>
-                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                  <p className="font-bold">{item.label}</p>
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
                 </div>
               )}
             >
@@ -135,24 +134,24 @@ const NavGroup = ({ title, items, state, pathname, playNavSound, user }: { title
   }
 
   if (state === 'collapsed') {
-      return (
-          <>
-            <SidebarSeparator />
-            <ul className="flex w-full min-w-0 flex-col gap-1 py-2">{renderNavItems(items)}</ul>
-          </>
-      )
+    return (
+      <>
+        <SidebarSeparator />
+        <ul className="flex w-full min-w-0 flex-col gap-1 py-2">{renderNavItems(items)}</ul>
+      </>
+    )
   }
 
   return (
     <AccordionItem value={title} className="border-none">
-        <AccordionTrigger className="py-2 px-3 text-sm text-muted-foreground font-bold uppercase hover:no-underline hover:text-foreground tracking-wider">
-            {title}
-        </AccordionTrigger>
-        <AccordionContent className="pb-0">
-            <ul className="flex w-full min-w-0 flex-col gap-1 pt-1">
-                {renderNavItems(items)}
-            </ul>
-        </AccordionContent>
+      <AccordionTrigger className="py-2 px-3 text-sm text-muted-foreground font-bold uppercase hover:no-underline hover:text-foreground tracking-wider">
+        {title}
+      </AccordionTrigger>
+      <AccordionContent className="pb-0">
+        <ul className="flex w-full min-w-0 flex-col gap-1 pt-1">
+          {renderNavItems(items)}
+        </ul>
+      </AccordionContent>
     </AccordionItem>
   )
 }
@@ -174,32 +173,32 @@ export function MainSidebar() {
           )}
         >
           {state === 'expanded' ? (
-              <Logo className="h-10" />
+            <Logo className="h-10" />
           ) : (
-             <Cpu/>
+            <Cpu />
           )}
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <Accordion type="multiple" className="w-full" disabled={state === 'collapsed'} defaultValue={['Core', 'Business', 'Productivity', 'Strategy', 'Learn', 'Explore', 'Create']}>
-            <NavGroup title="Core" items={coreNavItems} {...navProps} />
-            <NavGroup title="Business" items={businessNavItems} {...navProps} />
-            <NavGroup title="Productivity" items={productivityNavItems} {...navProps} />
-            <NavGroup title="Strategy" items={strategyNavItems} {...navProps} />
-            <NavGroup title="Learn" items={learnNavItems} {...navProps} />
-            <NavGroup title="Explore" items={exploreNavItems} {...navProps} />
-            <NavGroup title="Create" items={createNavItems} {...navProps} />
+        <Accordion type="multiple" className="w-full" disabled={state === 'collapsed'} defaultValue={['Core', 'Productivity', 'Strategy', 'Learn', 'Explore', 'Create']}>
+          <NavGroup title="Core" items={coreNavItems} {...navProps} />
+          {/* Removed Business section - no pages available */}
+          <NavGroup title="Productivity" items={productivityNavItems} {...navProps} />
+          <NavGroup title="Strategy" items={strategyNavItems} {...navProps} />
+          <NavGroup title="Learn" items={learnNavItems} {...navProps} />
+          <NavGroup title="Explore" items={exploreNavItems} {...navProps} />
+          <NavGroup title="Create" items={createNavItems} {...navProps} />
         </Accordion>
       </SidebarContent>
       <SidebarSeparator />
       <SidebarMenuItem className="overflow-hidden">
         <Link href="/pro">
-            <SidebarMenuButton variant="outline" className="w-full justify-center text-primary hover:text-primary border-primary/50 hover:border-primary hover:bg-primary/10 animate-static-glow">
-                <Sparkles />
-                <span className={cn(state === 'collapsed' && 'opacity-0')}>
-                    Upgrade to Pro
-                </span>
-            </SidebarMenuButton>
+          <SidebarMenuButton variant="outline" className="w-full justify-center text-primary hover:text-primary border-primary/50 hover:border-primary hover:bg-primary/10 animate-static-glow">
+            <Sparkles />
+            <span className={cn(state === 'collapsed' && 'opacity-0')}>
+              Upgrade to Pro
+            </span>
+          </SidebarMenuButton>
         </Link>
       </SidebarMenuItem>
       <SidebarSeparator />
