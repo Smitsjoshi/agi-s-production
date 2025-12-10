@@ -1,48 +1,68 @@
+'use client';
+
 import { ChatInterface } from "@/components/chat/chat-interface";
 import type { Agent } from "@/lib/types";
 import { notFound } from "next/navigation";
-
-// Mock data fetching for an agent
-const getAgentById = (id: string): Agent | null => {
-  const defaultAgents: Agent[] = [
-    { id: 'scholar', name: 'Scholar', description: 'An AI expert in academic research...', avatar: '...' },
-    { id: 'coder', name: 'Coder', description: 'Your personal software engineering assistant...', avatar: '...' },
-    { id: 'analyst', name: 'Analyst', description: 'An AI that provides data analysis...', avatar: '...' },
-  ];
-  
-  const agent = defaultAgents.find(a => a.id === id);
-  if (agent) return agent;
-
-  // For custom agents, we'd fetch from a DB. Here we'll mock one.
-  if (id) {
-    return {
-      id,
-      name: id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-      description: `A custom agent for ${id}.`,
-      avatar: `https://picsum.photos/seed/${id}/200/200`,
-      isCustom: true,
-    }
-  }
-
-  return null;
-}
+import { allAgents } from "@/lib/agents";
+import { useEffect, useState } from "react";
+import { storage, STORAGE_KEYS } from "@/lib/storage";
 
 export default function AgentChatPage({ params }: { params: { id: string } }) {
-  const agent = getAgentById(params.id);
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const builtInAgent = allAgents.find(a => a.id === params.id);
+
+    if (builtInAgent) {
+      setAgent(builtInAgent);
+      setIsLoading(false);
+      return;
+    }
+
+    const customAgents = storage.get<Agent[]>(STORAGE_KEYS.CUSTOM_AGENTS, []);
+    const customAgent = customAgents.find(a => a.id === params.id);
+
+    if (customAgent) {
+      setAgent(customAgent);
+    }
+
+    setIsLoading(false);
+  }, [params.id]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!agent) {
     notFound();
   }
 
-  // The chat interface can be enhanced to use the agent's specific persona
-  // by passing it as a prop and including it in the initial prompt.
   return (
-    <div>
-        <div className="mb-4">
-            <h1 className="font-headline text-2xl font-bold">Chat with {agent.name}</h1>
-            <p className="text-muted-foreground">{agent.description}</p>
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b bg-muted/30 flex-shrink-0">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
+            🤖
+          </div>
+          <div>
+            <h1 className="font-headline text-2xl font-bold">{agent.name}</h1>
+            <p className="text-sm text-muted-foreground">{agent.description}</p>
+          </div>
         </div>
+        {agent.systemPrompt && (
+          <div className="mt-3 text-xs text-muted-foreground bg-background/50 p-2 rounded">
+            <strong>Expertise:</strong> {agent.systemPrompt.substring(0, 150)}...
+          </div>
+        )}
+      </div>
+      <div className="flex-1 overflow-hidden">
         <ChatInterface />
+      </div>
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import useLocalStorage from '@/hooks/use-local-storage';
 import { askAi } from '@/app/actions';
-import type { ChatMessage, AiMode } from '@/lib/types';
+import type { ChatMessage, AiMode, Agent } from '@/lib/types';
 import { ChatMessageDisplay } from '@/components/chat/chat-message';
 import { nanoid } from 'nanoid';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -42,9 +42,14 @@ const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: st
 const MAIN_AI_MODES = ['AI Knowledge', 'CodeX', 'Academic Research', 'Deep Dive', 'Canvas', 'Blueprint'] as AiMode[];
 const PERSONAS = Object.keys(AI_MODE_DETAILS).filter(key => AI_MODE_DETAILS[key as AiMode].isPersona) as AiMode[];
 
+interface ChatInterfaceProps {
+  agentId?: string;
+  agentConfig?: Agent;
+}
 
-export function ChatInterface() {
-  const [messages, setMessages] = useLocalStorage<ChatMessage[]>('chat-history', []);
+export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {}) {
+  const storageKey = agentId ? `chat-history-${agentId}` : 'chat-history';
+  const [messages, setMessages] = useLocalStorage<ChatMessage[]>(storageKey, []);
   const [input, setInput] = useState('');
   const [mode, setMode] = useState<AiMode>('AI Knowledge');
   const [isLoading, setIsLoading] = useState(false);
