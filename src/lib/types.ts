@@ -1,64 +1,71 @@
 import { z } from 'zod';
 import type { LucideIcon } from 'lucide-react';
 
-export type AiMode = 
-  | 'AI Knowledge' 
-  | 'Academic Research' 
-  | 'Deep Dive' 
-  | 'Canvas'
-  | 'Blueprint'
-  | 'CodeX'
-  | 'Synthesis'
-  | 'Crucible'
-  | 'Cosmos'
-  | 'Catalyst'
-  | 'The Strategist'
-  | 'The Globetrotter'
-  | 'The Storyteller'
-  | 'The Game Master'
-  | 'The Designer'
-  | 'The Gourmet'
-  | 'The Forecaster'
-  | 'Comparison Analyst'
-  | 'The Ethicist';
+export type AiMode =
+    | 'AI Knowledge'
+    | 'Academic Research'
+    | 'Deep Dive'
+    | 'Canvas'
+    | 'Blueprint'
+    | 'CodeX'
+    | 'Synthesis'
+    | 'Crucible'
+    | 'Cosmos'
+    | 'Catalyst'
+    | 'The Strategist'
+    | 'The Globetrotter'
+    | 'The Storyteller'
+    | 'The Game Master'
+    | 'The Designer'
+    | 'The Gourmet'
+    | 'The Forecaster'
+    | 'Comparison Analyst'
+    | 'The Ethicist';
 
 export interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatarUrl: string;
+    id: string;
+    email: string;
+    name: string;
+    avatarUrl: string;
 }
 
 export interface Agent {
-  id: string;
-  name: string;
-  description: string;
-  avatar: string;
-  isCustom?: boolean;
+    id: string;
+    name: string;
+    description: string;
+    avatar: string;
+    isCustom?: boolean;
+    systemPrompt?: string;
+    temperature?: number;
+    maxTokens?: number;
+    createdAt?: number;
+    usageCount?: number;
+    lastUsed?: number;
+    isFavorite?: boolean;
 }
 
 // Schema for Blueprint Flow (formerly Canvas)
 export const WebAgentInputSchema = z.object({
-  goal: z.string().describe('The high-level goal for the AI agent to accomplish.'),
+    goal: z.string().describe('The high-level goal for the AI agent to accomplish.'),
 });
 export type WebAgentInput = z.infer<typeof WebAgentInputSchema>;
 
 export const WebAgentOutputSchema = z.object({
-  title: z.string().describe('A concise, descriptive title for the generated content (e.g., "Paris Budget Trip" or "Chill Drive Playlist").'),
-  description: z.string().describe('A 1-2 sentence summary of the content.'),
-  items: z.array(z.object({
-    title: z.string().describe("The main title of the item (e.g., song title, hotel name, activity)."),
-    subtitle: z.string().describe("The secondary detail of the item (e.g., artist, location, category)."),
-    description: z.string().describe("A very short (1-line) descriptive blurb about the item's key feature or mood."),
-    external_links: z.record(z.string().url()).optional().describe("A dictionary of URLs to the item on external services, where the key is the service name (e.g., 'spotify', 'google_maps')."),
-  })).describe('An array of structured items that fulfill the goal.'),
-  integrations: z.array(z.object({
-    name: z.string().describe('The name of the integrated service (e.g., Spotify, Google Maps).'),
-    logo_url: z.string().url().describe("An absolute URL to the service's logo, preferably from a CDN like storage.googleapis.com."),
-    action_type: z.enum(['deep_link', 'search', 'oauth_required']).describe('The type of action available for this integration.'),
-    action_url: z.string().url().optional().nullable().describe('The base URL for the action, if applicable (e.g., a search query URL).'),
-    oauth_required: z.boolean().describe('Whether OAuth is required for deep linking.'),
-  })).describe('An array of supported integrations relevant to the generated content.')
+    title: z.string().describe('A concise, descriptive title for the generated content (e.g., "Paris Budget Trip" or "Chill Drive Playlist").'),
+    description: z.string().describe('A 1-2 sentence summary of the content.'),
+    items: z.array(z.object({
+        title: z.string().describe("The main title of the item (e.g., song title, hotel name, activity)."),
+        subtitle: z.string().describe("The secondary detail of the item (e.g., artist, location, category)."),
+        description: z.string().describe("A very short (1-line) descriptive blurb about the item's key feature or mood."),
+        external_links: z.record(z.string().url()).optional().describe("A dictionary of URLs to the item on external services, where the key is the service name (e.g., 'spotify', 'google_maps')."),
+    })).describe('An array of structured items that fulfill the goal.'),
+    integrations: z.array(z.object({
+        name: z.string().describe('The name of the integrated service (e.g., Spotify, Google Maps).'),
+        logo_url: z.string().url().describe("An absolute URL to the service's logo, preferably from a CDN like storage.googleapis.com."),
+        action_type: z.enum(['deep_link', 'search', 'oauth_required']).describe('The type of action available for this integration.'),
+        action_url: z.string().url().optional().nullable().describe('The base URL for the action, if applicable (e.g., a search query URL).'),
+        oauth_required: z.boolean().describe('Whether OAuth is required for deep linking.'),
+    })).describe('An array of supported integrations relevant to the generated content.')
 });
 export type WebAgentOutput = z.infer<typeof WebAgentOutputSchema>;
 
@@ -84,7 +91,7 @@ export type LiveWebAgentOutput = z.infer<typeof LiveWebAgentOutputSchema>;
 
 // Schemas for Continuum Flow
 export const ContinuumInputSchema = z.object({
-  eventDescription: z.string().describe('A description of the historical or future event to simulate.'),
+    eventDescription: z.string().describe('A description of the historical or future event to simulate.'),
 });
 export type ContinuumInput = z.infer<typeof ContinuumInputSchema>;
 
@@ -111,22 +118,22 @@ export type ContinuumOutput = z.infer<typeof ContinuumOutputSchema>;
 
 // Schemas for Aether Flow
 export const AetherInputSchema = z.object({
-  dream: z.string().describe('A textual description of a dream.'),
+    dream: z.string().describe('A textual description of a dream.'),
 });
 export type AetherInput = z.infer<typeof AetherInputSchema>;
 
 export const AetherOutputSchema = z.object({
-  id: z.string().describe('A unique ID for the dream entry.'),
-  timestamp: z.string().describe('The ISO 8601 timestamp of when the dream was recorded.'),
-  title: z.string().describe('A short, evocative title for the dream.'),
-  interpretation: z.string().describe('A psychoanalytical interpretation of the dream, exploring its themes and symbols.'),
-  mood: z.string().describe('The primary emotional mood of the dream (e.g., "Surreal", "Anxious", "Peaceful", "Nostalgic").'),
-  themes: z.array(z.string()).describe('A list of key themes identified in the dream (e.g., "loss of control", "childhood memories").'),
-  symbols: z.array(z.object({
-    name: z.string().describe('The name of a symbol in the dream (e.g., "Falling", "Water", "A Key").'),
-    meaning: z.string().describe('The potential psychological meaning of the symbol in this context.'),
-  })).describe('An array of significant symbols and their potential meanings.'),
-  imageUrl: z.string().url().describe('URL of an AI-generated image visually representing the dream.'),
+    id: z.string().describe('A unique ID for the dream entry.'),
+    timestamp: z.string().describe('The ISO 8601 timestamp of when the dream was recorded.'),
+    title: z.string().describe('A short, evocative title for the dream.'),
+    interpretation: z.string().describe('A psychoanalytical interpretation of the dream, exploring its themes and symbols.'),
+    mood: z.string().describe('The primary emotional mood of the dream (e.g., "Surreal", "Anxious", "Peaceful", "Nostalgic").'),
+    themes: z.array(z.string()).describe('A list of key themes identified in the dream (e.g., "loss of control", "childhood memories").'),
+    symbols: z.array(z.object({
+        name: z.string().describe('The name of a symbol in the dream (e.g., "Falling", "Water", "A Key").'),
+        meaning: z.string().describe('The potential psychological meaning of the symbol in this context.'),
+    })).describe('An array of significant symbols and their potential meanings.'),
+    imageUrl: z.string().url().describe('URL of an AI-generated image visually representing the dream.'),
 });
 export type AetherOutput = z.infer<typeof AetherOutputSchema>;
 
@@ -148,13 +155,13 @@ const SynthesisContentBlockSchema = z.union([
         type: z.literal('table'),
         title: z.string().describe('A title for the table.'),
         headers: z.array(z.string()).describe('The headers for the table columns.'),
-        rows: z.array(z.array(z.union([z.string(), z.number()]))) .describe('The rows of the table, where each row is an array of values.'),
+        rows: z.array(z.array(z.union([z.string(), z.number()]))).describe('The rows of the table, where each row is an array of values.'),
     }),
     z.object({
         type: z.literal('chart'),
         title: z.string().describe('A title for the chart.'),
         chartType: z.enum(['bar', 'line', 'pie']).describe('The type of chart to render.'),
-        data: z.array(z.record(z.union([z.string(), z.number()]))) .describe('The data for the chart, typically an array of objects.'),
+        data: z.array(z.record(z.union([z.string(), z.number()]))).describe('The data for the chart, typically an array of objects.'),
     }),
 ]);
 export type SynthesisContentBlock = z.infer<typeof SynthesisContentBlockSchema>;
@@ -263,47 +270,47 @@ export type CatalystOutput = z.infer<typeof CatalystOutputSchema>;
 
 // Type for structured Blueprint output
 export type CanvasItem = {
-  title: string;
-  subtitle: string;
-  description: string;
-  external_links?: Record<string, string | null>;
+    title: string;
+    subtitle: string;
+    description: string;
+    external_links?: Record<string, string | null>;
 };
 
 export type CanvasIntegration = {
-  name: string;
-  logo_url: string;
-  action_type: 'deep_link' | 'search' | 'oauth_required';
-  action_url?: string | null;
-  oauth_required: boolean;
+    name: string;
+    logo_url: string;
+    action_type: 'deep_link' | 'search' | 'oauth_required';
+    action_url?: string | null;
+    oauth_required: boolean;
 };
 
 export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  sources?: { url: string; title: string; preview?: string }[];
-  reasoning?: string;
-  confidenceScore?: number;
-  
-  // Fields for structured Blueprint output
-  title?: string;
-  description?: string;
-  items?: CanvasItem[];
-  integrations?: CanvasIntegration[];
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    sources?: { url: string; title: string; preview?: string }[];
+    reasoning?: string;
+    confidenceScore?: number;
 
-  // Fields for structured Synthesis output
-  synthesisBlocks?: SynthesisContentBlock[];
-  
-  // Fields for Live Web Agent (Canvas) output
-  liveWebAgentOutput?: LiveWebAgentOutput;
+    // Fields for structured Blueprint output
+    title?: string;
+    description?: string;
+    items?: CanvasItem[];
+    integrations?: CanvasIntegration[];
+
+    // Fields for structured Synthesis output
+    synthesisBlocks?: SynthesisContentBlock[];
+
+    // Fields for Live Web Agent (Canvas) output
+    liveWebAgentOutput?: LiveWebAgentOutput;
 }
 
 export interface Extension {
-  id: string;
-  name: string;
-  version: string;
-  description: string;
-  icon: LucideIcon;
-  enabled: boolean;
-  connected: boolean;
+    id: string;
+    name: string;
+    version: string;
+    description: string;
+    icon: LucideIcon;
+    enabled: boolean;
+    connected: boolean;
 }
