@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  serverExternalPackages: ['genkit', 'genkitx-openai', '@google/generative-ai', 'grpc', '@grpc/grpc-js', 'protobufjs'],
+  serverExternalPackages: ['genkit', 'genkitx-openai', '@google/generative-ai', 'grpc', '@grpc/grpc-js', 'protobufjs', '@sparticuz/chromium'],
   images: {
     remotePatterns: [
       {
