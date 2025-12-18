@@ -44,25 +44,40 @@ export async function POST(req: NextRequest) {
         const { goal, url } = await req.json();
 
         const prompt = `You are the Universal Action Layer (UAL)™ AI planner. 
-Your job is to convert user goals into precise web automation actions.
+Your job is to convert user goals into precise, complex web automation actions.
 
 User Goal: "${goal}"
-Target URL: "${url}"
+Target URL: "${url || 'Not specified - YOU MUST DECIDE START URL'}"
 
-Generate a JSON array of actions to achieve this goal. Available actions:
+INSTRUCTIONS:
+1. If no Target URL is provided, you MUST start with a "navigate" action to the most appropriate website (e.g., google.com for searches, specific sites if mentioned).
+2. Plan a complete sequence of actions to achieve the goal. Don't just stop at the landing page; try to fulfill the request.
+3. Use specific selectors where possible, or robust generic ones.
+
+Available actions:
 - navigate: { type: "navigate", url: "https://..." }
-- click: { type: "click", selector: "button.submit" }
-- type: { type: "type", selector: "input#email", value: "text" }
+- click: { type: "click", selector: "button.submit" } // CSS selector
+- type: { type: "type", selector: "input#search", value: "text" }
+- submit: { type: "click", selector: "form button[type=submit]" }
 - scroll: { type: "scroll" }
-- wait: { type: "wait", timeout: 1000 }
+- wait: { type: "wait", timeout: 2000 }
 - screenshot: { type: "screenshot" }
 
-Example output:
+Example 1 (Search):
+Goal: "Find AI news"
 [
   { "type": "navigate", "url": "https://google.com" },
-  { "type": "type", "selector": "input[name='q']", "value": "AI news" },
+  { "type": "type", "selector": "textarea[name='q']", "value": "latest AI news" },
   { "type": "click", "selector": "input[type='submit']" },
   { "type": "wait", "timeout": 2000 },
+  { "type": "screenshot" }
+]
+
+Example 2 (Specific):
+Goal: "Check Hacker News"
+[
+  { "type": "navigate", "url": "https://news.ycombinator.com" },
+  { "type": "wait", "timeout": 1000 },
   { "type": "screenshot" }
 ]
 
@@ -79,17 +94,22 @@ Return ONLY the JSON array, no explanation.`;
         // Parse the AI response
         let actions: WebAction[];
         try {
+            const cleanResponse = response.replace(/```json/g, '').replace(/```/g, '').trim();
             // Try to extract JSON from the response
-            const jsonMatch = response.match(/\[[\s\S]*\]/);
+            const jsonMatch = cleanResponse.match(/\[[\s\S]*\]/);
             if (jsonMatch) {
                 actions = JSON.parse(jsonMatch[0]);
             } else {
-                actions = JSON.parse(response);
+                actions = JSON.parse(cleanResponse);
             }
         } catch (parseError) {
-            // Fallback: create basic actions
+            console.error('JSON Parse Error:', parseError);
+            console.error('Raw Response:', response);
+
+            // Intelligent fallback based on goal
+            const fallbackUrl = url || (goal.toLowerCase().includes('news') ? 'https://news.google.com' : 'https://google.com');
             actions = [
-                { type: 'navigate', url: url || 'https://google.com' },
+                { type: 'navigate', url: fallbackUrl },
                 { type: 'wait', timeout: 2000 },
                 { type: 'screenshot' }
             ];

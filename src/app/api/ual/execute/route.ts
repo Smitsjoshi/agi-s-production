@@ -90,20 +90,41 @@ export async function POST(req: NextRequest) {
         const page = await browser.newPage();
         await page.setViewport({ width: 1280, height: 720 });
 
-        // Navigate to URL
-        if (url) {
-            steps.push(`🌐 Navigating to ${url}...`);
-            await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
-            steps.push('✅ Page loaded');
+        // Navigate to URL (either provided or from first action)
+        let initialUrl = url;
+
+        // If no initial URL provided, check if first action is navigation
+        if (!initialUrl && actions && actions.length > 0 && actions[0].type === 'navigate' && actions[0].url) {
+            initialUrl = actions[0].url;
+            // We don't remove the action, as executeAction will handle it safely (idempotent-ish navigation)
+        }
+
+        if (initialUrl) {
+            steps.push(`🌐 Navigating to ${initialUrl}...`);
+            try {
+                await page.goto(initialUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+                steps.push('✅ Page loaded');
+            } catch (navError: any) {
+                steps.push(`⚠️ Navigation warning: ${navError.message}`);
+                // Continue anyway, maybe params loads partial page
+            }
+        } else {
+            steps.push('⚠️ No start URL provided. Attempting to execute actions directly...');
         }
 
         // Execute actions if provided
         if (actions && actions.length > 0) {
-            for (const action of actions) {
+            for (const [index, action] of actions.entries()) {
                 try {
+                    // Skip first navigation if we already did it via initialUrl to save time/reload
+                    if (index === 0 && action.type === 'navigate' && action.url === initialUrl) {
+                        steps.push('⏩ Skipping redundant initial navigation');
+                        continue;
+                    }
                     await executeAction(page, action, steps);
                 } catch (error: any) {
-                    steps.push(`⚠️ Action failed: ${error.message}`);
+                    steps.push(`⚠️ Action ${index + 1} (${action.type}) failed: ${error.message}`);
+                    // Consider breaking if critical? For now continue
                 }
             }
         } else {
