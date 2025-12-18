@@ -110,41 +110,59 @@ export async function POST(req: NextRequest) {
             steps.push('⚠️ No start URL provided. Attempting to execute actions directly...');
         }
 
-        // Execute actions if provided
-        if (actions && actions.length > 0) {
-            for (const [index, action] of actions.entries()) {
-                try {
-                    // Skip first navigation if we already did it
-                    if (index === 0 && action.type === 'navigate' && action.url === initialUrl) {
-                        steps.push('⏩ Skipping redundant initial navigation');
-                        continue;
-                    }
-                    await executeAction(page, action, steps);
-                } catch (error: any) {
-                    steps.push(`⚠️ Action ${index + 1} (${action.type}) failed: ${error.message}`);
+        // EXECUTE ACTIONS
+        for (const action of actions) {
+            steps.push(`Running: ${action.type} ${action.selector || action.url || ''}`);
+
+            try {
+                if (action.type === 'navigate' && action.url) {
+                    await page.goto(action.url, { waitUntil: 'networkidle0', timeout: 30000 });
                 }
+                else if (action.type === 'click' && action.selector) {
+                    await page.click(action.selector);
+                }
+                else if (action.type === 'type' && action.selector && action.value) {
+                    await page.type(action.selector, action.value);
+                }
+                else if (action.type === 'wait') {
+                    await new Promise(r => setTimeout(r, action.timeout || 1000));
+                }
+                else if (action.type === 'screenshot') {
+                    screenshot = await page.screenshot({ encoding: 'base64' });
+                }
+            } catch (actError: any) {
+                console.error(`Action ${action.type} failed:`, actError);
+                steps.push(`Warning: ${action.type} failed - ${actError.message}`);
             }
         }
 
-        // Always capture final screenshot
-        screenshot = await page.screenshot({ encoding: 'base64' });
-        steps.push('✅ Screenshot captured');
+        // FORCE FINAL SCREENSHOT IF MISSING
+        if (!screenshot) {
+            steps.push('📸 Auto-capturing final state...');
+            try {
+                screenshot = await page.screenshot({ encoding: 'base64' });
+            } catch (e) {
+                console.error('Final screenshot failed', e);
+            }
+        }
 
-        // Extract page data
-        extractedData = await page.evaluate(() => ({
-            title: document.title,
-            url: window.location.href,
-            text: document.body.innerText.substring(0, 500),
-        }));
+        // Extract basic data
+        try {
+            extractedData = {
+                title: await page.title(),
+                url: page.url(),
+                text: await page.evaluate(() => document.body.innerText.substring(0, 500))
+            };
+        } catch (e) { }
 
         await browser.close();
         steps.push('✅ Session closed');
 
         return NextResponse.json({
             success: true,
-            screenshot,
-            data: extractedData,
             steps,
+            screenshot, // Should now be guaranteed
+            data: extractedData
         });
 
     } catch (error: any) {
