@@ -9,17 +9,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Play, Sparkles, Globe, Zap, ChevronRight, ChevronDown, Terminal, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, Play, Sparkles, Globe, Zap, ArrowRight, Command } from 'lucide-react';
 import { UALClient } from '@/lib/universal-action-layer';
 import type { UALResult, WebAction } from '@/lib/universal-action-layer';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 export default function CanvasPage() {
     const [goal, setGoal] = useState('');
-    const [url, setUrl] = useState(''); // Optional now
-    const [showAdvanced, setShowAdvanced] = useState(false);
     const [isExecuting, setIsExecuting] = useState(false);
     const [result, setResult] = useState<UALResult | null>(null);
     const [logs, setLogs] = useState<string[]>([]);
@@ -39,33 +38,28 @@ export default function CanvasPage() {
     };
 
     const executeTask = async () => {
-        if (!goal.trim()) {
-            return;
-        }
+        if (!goal.trim()) return;
 
         setIsExecuting(true);
         setResult(null);
         setLogs([]);
         setPlannedActions([]);
 
-        addLog('🚀 Initializing Universal Action Layer™...');
+        addLog('🚀 Activating Universal Action Layer™...');
 
         try {
-            // Step 1: Plan actions using AI
-            addLog('🧠 Liquid Intelligence™ analyzing goal...');
-            const actions = await ualClient.planActions(goal, url);
+            addLog('🧠 Liquid Intelligence™ formulating strategy...');
+            const actions = await ualClient.planActions(goal, '');
 
             setPlannedActions(actions);
-            addLog(`✨ Strategies generated: ${actions.length} steps planned`);
+            addLog(`✨ Strategy Plan: ${actions.length} autonomous steps generated`);
 
-            // Artificial delay for UX perception of "thinking"
             await new Promise(resolve => setTimeout(resolve, 800));
 
-            // Step 2: Execute the task
             addLog('🌐 Engaging Browser Automation Engine...');
             const taskResult = await ualClient.executeTask({
                 goal,
-                url, // Can be empty, planner handles it
+                url: '',
                 actions,
             });
 
@@ -88,238 +82,181 @@ export default function CanvasPage() {
         }
     };
 
-    const exampleTasks = [
-        { goal: 'Find the latest AI news on TechCrunch', url: '' },
-        { goal: 'Check the price of Bitcoin on CoinMarketCap', url: '' },
-        { goal: 'Go to GitHub and find trending repositories', url: '' },
+    const suggestions = [
+        'Search for "Latest AI breakthroughs" on Google',
+        'Go to GitHub and find trending repositories',
+        'Check the price of Ethereum on CoinMarketCap',
     ];
 
     return (
-        <div className="container mx-auto p-6 max-w-6xl min-h-[calc(100vh-100px)] flex flex-col">
-            {/* Header */}
-            <div className="mb-8 text-center">
-                <div className="inline-flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20">
-                    <Sparkles className="h-3 w-3" />
-                    <span>Patent Pending Technology</span>
+        <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20">
+            <div className="max-w-4xl mx-auto px-4 py-12 flex flex-col min-h-[90vh]">
+
+                {/* Minimal Hero Header */}
+                <div className="text-center mb-12 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 text-xs font-medium text-muted-foreground border border-border/40 backdrop-blur-sm">
+                        <Sparkles className="h-3 w-3 text-primary" />
+                        <span>Universal Action Layer™</span>
+                    </div>
+                    <h1 className="text-5xl md:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70">
+                        Canvas
+                    </h1>
+                    <p className="text-xl text-muted-foreground font-light max-w-lg mx-auto">
+                        Your autonomous agent for the web. <br /> Just describe the mission.
+                    </p>
                 </div>
-                <h1 className="font-headline text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-500 to-blue-600 pb-2">
-                    Canvas
-                </h1>
-                <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                    Autonomous web agent powered by <span className="font-semibold text-foreground">Universal Action Layer (UAL)™</span>.
-                    <br />Just describe your mission, and Liquid Intelligence™ handles the rest.
-                </p>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
-                {/* Left: Command Center */}
-                <div className="lg:col-span-5 space-y-6">
-                    <Card className="border-primary/20 shadow-lg bg-card/50 backdrop-blur-sm">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-xl">
-                                <Zap className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                                Command Center
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            {/* Main Goal Input */}
-                            <div className="space-y-3">
-                                <label className="text-sm font-medium text-muted-foreground ml-1">
-                                    What is your objective?
-                                </label>
-                                <div className="relative">
-                                    <Input
-                                        value={goal}
-                                        onChange={(e) => setGoal(e.target.value)}
-                                        placeholder="e.g., Search for AI news and summarize the top result..."
-                                        disabled={isExecuting}
-                                        className="h-14 pl-4 pr-12 text-lg shadow-inner bg-background/80 focus-visible:ring-primary/50"
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && !isExecuting) {
-                                                executeTask();
-                                            }
-                                        }}
-                                    />
-                                    <div className="absolute right-3 top-3">
-                                        {isExecuting ? <Loader2 className="h-8 w-8 text-primary animate-spin opacity-50" /> : <Sparkles className="h-8 w-8 text-primary opacity-20" />}
-                                    </div>
-                                </div>
-                            </div>
+                {/* Central Command Input */}
+                <div className="relative group max-w-2xl mx-auto w-full mb-12 z-20">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-blue-500/20 to-purple-500/20 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                    <div className="relative flex items-center bg-card border border-border/50 shadow-2xl rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+                        <div className="pl-4 text-muted-foreground">
+                            {isExecuting ? <Loader2 className="h-6 w-6 animate-spin text-primary" /> : <Command className="h-6 w-6" />}
+                        </div>
+                        <Input
+                            value={goal}
+                            onChange={(e) => setGoal(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && !isExecuting && executeTask()}
+                            placeholder="What do you want to achieve?"
+                            className="h-16 border-0 bg-transparent text-lg px-4 focus-visible:ring-0 placeholder:text-muted-foreground/50 shadow-none"
+                            disabled={isExecuting}
+                            autoFocus
+                        />
+                        <Button
+                            onClick={executeTask}
+                            disabled={isExecuting || !goal.trim()}
+                            size="icon"
+                            className="mr-2 h-10 w-10 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
+                        >
+                            <ArrowRight className="h-5 w-5" />
+                        </Button>
+                    </div>
 
-                            {/* Advanced Options Toggle */}
-                            <div>
-                                <button
-                                    onClick={() => setShowAdvanced(!showAdvanced)}
-                                    className="flex items-center text-xs text-muted-foreground hover:text-primary transition-colors mb-2"
-                                >
-                                    {showAdvanced ? <ChevronDown className="h-3 w-3 mr-1" /> : <ChevronRight className="h-3 w-3 mr-1" />}
-                                    Advanced Configuration
-                                </button>
-
-                                {showAdvanced && (
-                                    <div className="p-3 bg-muted/50 rounded-lg animate-in fade-in slide-in-from-top-2">
-                                        <label className="text-xs font-medium mb-1.5 block">
-                                            Start URL (Optional - AI will decide if empty)
-                                        </label>
-                                        <Input
-                                            type="url"
-                                            value={url}
-                                            onChange={(e) => setUrl(e.target.value)}
-                                            placeholder="https://..."
-                                            disabled={isExecuting}
-                                            className="h-8 text-sm"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Execute Button */}
-                            <Button
-                                onClick={executeTask}
-                                disabled={isExecuting || !goal.trim()}
-                                className="w-full h-12 text-lg font-semibold shadow-primary/25 shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
-                                size="lg"
-                            >
-                                {isExecuting ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                        Autonomous Mode Active...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Play className="mr-2 h-5 w-5 fill-current" />
-                                        Initialize Agent
-                                    </>
-                                )}
-                            </Button>
-                        </CardContent>
-                    </Card>
-
-                    {/* Planned Actions Preview */}
-                    {plannedActions.length > 0 && (
-                        <Card className="border-primary/10">
-                            <CardHeader className="py-3">
-                                <CardTitle className="text-sm font-medium flex items-center">
-                                    <Terminal className="h-4 w-4 mr-2 text-muted-foreground" />
-                                    Strategy Plan
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="py-0 pb-3">
-                                <ul className="space-y-2">
-                                    {plannedActions.map((action, i) => (
-                                        <li key={i} className="text-xs flex items-start gap-2 text-muted-foreground">
-                                            <Badge variant="outline" className="text-[10px] h-5 px-1 uppercase shrink-0 min-w-[60px] justify-center">
-                                                {action.type}
-                                            </Badge>
-                                            <span className="font-mono truncate">{action.selector || action.url || 'Checking page...'}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {/* Example Tasks */}
+                    {/* Suggestions */}
                     {!isExecuting && !result && (
-                        <div className="space-y-2">
-                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">Suggested Missions</p>
-                            {exampleTasks.map((task, index) => (
+                        <div className="mt-4 flex flex-wrap justify-center gap-2 opacity-0 animate-in fade-in slide-in-from-top-2 duration-700 fill-mode-forwards" style={{ animationDelay: '200ms' }}>
+                            {suggestions.map((s, i) => (
                                 <button
-                                    key={index}
-                                    className="w-full text-left p-3 rounded-lg border bg-background hover:bg-muted/50 transition-colors text-sm flex items-center group"
-                                    onClick={() => {
-                                        setGoal(task.goal);
-                                        setUrl(task.url);
-                                    }}
+                                    key={i}
+                                    onClick={() => setGoal(s)}
+                                    className="px-3 py-1.5 text-xs rounded-full bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground border border-transparent hover:border-border transition-colors cursor-pointer"
                                 >
-                                    <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center mr-3 group-hover:bg-primary/20 transition-colors">
-                                        <Zap className="h-3 w-3 text-primary" />
-                                    </div>
-                                    {task.goal}
+                                    {s}
                                 </button>
                             ))}
                         </div>
                     )}
                 </div>
 
-                {/* Right: Mission Control / Results */}
-                <div className="lg:col-span-7 space-y-6">
+                {/* Execution Interface */}
+                {(isExecuting || result) && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-500">
 
-                    {/* Live Feed / Terminal */}
-                    <Card className={cn("h-full min-h-[400px] flex flex-col overflow-hidden transition-colors border-2", isExecuting ? "border-primary/50 shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)]" : "border-border")}>
-                        <CardHeader className="bg-muted/30 border-b py-3">
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="text-sm font-mono flex items-center gap-2">
-                                    <span className="relative flex h-2 w-2">
-                                        <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", isExecuting ? "bg-green-400" : "bg-gray-400")}></span>
-                                        <span className={cn("relative inline-flex rounded-full h-2 w-2", isExecuting ? "bg-green-500" : "bg-gray-500")}></span>
-                                    </span>
-                                    UAL™ Live Feed
-                                </CardTitle>
+                        {/* Terminal / Live Logs */}
+                        <Card className="bg-black/95 border-border/20 shadow-xl overflow-hidden flex flex-col h-[400px]">
+                            <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/10">
+                                <div className="flex items-center gap-2">
+                                    <div className="flex gap-1.5">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-red-500/20"></div>
+                                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20"></div>
+                                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/20"></div>
+                                    </div>
+                                    <span className="text-[10px] font-mono text-muted-foreground ml-2">UAL_ENGINE_V1</span>
+                                </div>
                                 {result && (
-                                    <Badge variant={result.success ? "default" : "destructive"} className="text-xs">
-                                        {result.success ? "SUCCESS" : "FAILED"}
+                                    <Badge variant="outline" className={cn("text-[10px] h-5 border-none", result.success ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500")}>
+                                        {result.success ? "COMPLETE" : "ERROR"}
                                     </Badge>
                                 )}
                             </div>
-                        </CardHeader>
+                            <div className="flex-1 p-4 font-mono text-xs overflow-y-auto space-y-2 scrollbar-hide text-gray-300" ref={scrollRef}>
+                                {logs.map((log, i) => (
+                                    <div key={i} className="flex gap-3">
+                                        <span className="text-white/20 select-none">{`>`}</span>
+                                        <span className={cn(
+                                            "break-words",
+                                            log.includes('❌') ? "text-red-400" :
+                                                log.includes('✅') ? "text-green-400" :
+                                                    log.includes('🧠') ? "text-purple-400 font-semibold" :
+                                                        "text-gray-300"
+                                        )}>
+                                            {log}
+                                        </span>
+                                    </div>
+                                ))}
+                                {isExecuting && (
+                                    <div className="animate-pulse flex gap-2">
+                                        <span className="text-white/20 select-none">{`>`}</span>
+                                        <span className="w-2 h-4 bg-primary/50 block"></span>
+                                    </div>
+                                )}
+                            </div>
+                        </Card>
 
-                        <div className="flex-1 bg-black/95 p-4 font-mono text-xs md:text-sm overflow-y-auto font-medium" ref={scrollRef}>
-                            {logs.length === 0 && !result ? (
-                                <div className="h-full flex flex-col items-center justify-center text-muted-foreground opacity-50">
-                                    <Globe className="h-16 w-16 mb-4 stroke-[1.5]" />
-                                    <p>Awaiting Mission Parameters...</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-2">
-                                    {logs.map((log, i) => (
-                                        <div key={i} className="flex gap-3 animate-in fade-in slide-in-from-left-1 duration-300">
-                                            <span className="text-muted-foreground select-none">[{new Date().toLocaleTimeString()}]</span>
-                                            <span className={cn(
-                                                log.includes('❌') ? "text-red-400" :
-                                                    log.includes('✅') ? "text-green-400" :
-                                                        log.includes('✨') ? "text-yellow-400" :
-                                                            log.includes('🧠') ? "text-purple-400" :
-                                                                "text-gray-300"
-                                            )}>
-                                                {log}
-                                            </span>
+                        {/* Visual Result */}
+                        <div className="space-y-4">
+                            {/* Browser View */}
+                            <div className="relative aspect-video rounded-xl bg-muted/20 border border-border/40 overflow-hidden shadow-2xl group flex items-center justify-center">
+                                {result?.screenshot ? (
+                                    <>
+                                        <img
+                                            src={`data:image/png;base64,${result.screenshot}`}
+                                            alt="Browser View"
+                                            className="w-full h-full object-cover transition duration-700 group-hover:scale-105"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                                            <div className="text-white w-full">
+                                                <h3 className="font-medium text-sm mb-1 line-clamp-1">{result.data?.title}</h3>
+                                                <div className="text-xs text-white/60 font-mono truncate bg-white/10 px-2 py-1 rounded inline-block">
+                                                    {result.data?.url}
+                                                </div>
+                                            </div>
                                         </div>
-                                    ))}
+                                        <Badge className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 backdrop-blur border-none text-white text-[10px]">
+                                            1280x720
+                                        </Badge>
+                                    </>
+                                ) : (
+                                    <div className="text-center p-6 space-y-4">
+                                        {isExecuting ? (
+                                            <div className="relative">
+                                                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse"></div>
+                                                <Globe className="relative h-16 w-16 text-primary animate-spin-slow duration-[3s]" />
+                                            </div>
+                                        ) : (
+                                            <Globe className="h-16 w-16 text-muted-foreground/20" />
+                                        )}
+                                        <p className="text-sm text-muted-foreground font-medium animate-pulse">
+                                            {isExecuting ? "Browser session actived..." : "Waiting for visual feed"}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
 
-                                    {result?.steps?.map((step, i) => (
-                                        <div key={`step-${i}`} className="flex gap-3 text-gray-400 pl-4 border-l-2 border-gray-800 ml-2">
-                                            <span>{step}</span>
-                                        </div>
-                                    ))}
+                            {/* Plan Summary */}
+                            {plannedActions.length > 0 && (
+                                <div className="bg-card/50 border border-border/40 rounded-xl p-4 backdrop-blur-sm">
+                                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Action Strategy</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {plannedActions.map((action, i) => (
+                                            <Badge key={i} variant="secondary" className="text-[10px] font-mono border-border/50">
+                                                {i + 1}. {action.type}
+                                            </Badge>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
+                    </div>
+                )}
 
-                        {/* Result Preview Area */}
-                        {result?.screenshot && (
-                            <div className="border-t border-border bg-muted/20 p-4">
-                                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center">
-                                    <CheckCircle2 className="h-3 w-3 mr-1.5" />
-                                    Visual Confirmation
-                                </h3>
-                                <div className="relative aspect-video w-full rounded-lg overflow-hidden border shadow-lg group">
-                                    <img
-                                        src={`data:image/png;base64,${result.screenshot}`}
-                                        alt="Mission Result"
-                                        className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                                        <div className="text-white text-xs">
-                                            <p className="font-semibold">{result.data?.title || 'Unknown Page'}</p>
-                                            <p className="opacity-80 truncate max-w-md">{result.data?.url}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </Card>
+                {/* Footer Brand */}
+                <div className="mt-auto pt-12 text-center">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest opacity-40">
+                        Powered by Liquid Intelligence™
+                    </p>
                 </div>
+
             </div>
         </div>
     );
