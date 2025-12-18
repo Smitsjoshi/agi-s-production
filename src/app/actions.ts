@@ -7,6 +7,17 @@ import type {
 import { ADVERSARY_PERSONAS } from '@/lib/personas';
 import { REALITY_SHARDS, FALLBACK_REALITY_SHARD } from '@/ai/reality-shards';
 import { nanoid } from 'nanoid';
+import path from 'path';
+import dotenv from 'dotenv';
+
+// PATCH: Manually load .env.local to ensure API keys are available in Server Actions
+try {
+  const envPath = path.resolve(process.cwd(), '.env.local');
+  dotenv.config({ path: envPath });
+  console.log('[AGI-S] .env.local loaded manually in actions.ts');
+} catch (error) {
+  console.warn('[AGI-S] Failed to load .env.local manually:', error);
+}
 
 // Helper function for Groq API calls with JSON mode
 async function callGroqWithJSON<T>(prompt: string, systemPrompt?: string): Promise<T> {
