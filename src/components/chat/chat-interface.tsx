@@ -259,164 +259,196 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
   }
 
   return (
-    <div className="flex h-full flex-col relative bg-[#050505] text-white overflow-hidden font-sans selection:bg-indigo-500/30">
-
-      {/* Nebula Ambient Background */}
-      <div className="absolute top-[-20%] left-[20%] w-[500px] h-[500px] bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] pointer-events-none"></div>
-
-      <div className="flex-1 overflow-y-auto relative z-10">
+    <div className="flex h-full flex-col tour-chat-interface">
+      <div className="flex-1 overflow-y-auto">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="p-4 md:p-8 space-y-8 max-w-4xl mx-auto">
+          <div className="p-4 md:p-6 space-y-6">
             {messages.length === 0 && !isLoading && (
-              <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 animate-in fade-in zoom-in-95 duration-700">
-                <div className="relative group cursor-default">
-                  <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                  <div className="relative bg-[#0F1115] p-6 rounded-3xl border border-white/5 shadow-2xl">
-                    <Bot className="h-12 w-12 text-indigo-400" />
-                  </div>
+              <div className="flex flex-col items-center justify-center h-full text-center relative">
+                <div className="liquid-glow"></div>
+                <div className="relative z-10 p-4 bg-primary/10 rounded-full border-4 border-primary/20 mb-4">
+                  <Cpu size={40} className="text-primary" />
                 </div>
-
-                <div className="space-y-2">
-                  <h2 className="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/50">
-                    Liquid Intelligence
-                  </h2>
-                  <p className="text-white/40 text-sm font-light max-w-md mx-auto leading-relaxed">
-                    Fluid, adaptive, and infinite. Select a mode or just start typing to activate the neural engine.
-                  </p>
+                <div className="flex items-center justify-center gap-2 z-10">
+                  <h2 className="font-headline text-2xl font-semibold">Welcome to</h2>
+                  <Logo className="h-10 text-2xl" />
                 </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-2xl mt-8">
-                  {/* Quick Start Chips */}
-                  {['Draft an email', 'Analyze code', 'Research topic', 'Plan a trip'].map((label, i) => (
-                    <button key={i} onClick={() => setInput(label)} className="px-4 py-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all text-xs text-white/60 font-medium">
-                      {label}
-                    </button>
-                  ))}
-                </div>
+                <p className="text-muted-foreground z-10 font-medium text-lg mt-2">One Interface. Infinite Capabilities.</p>
+                <p className="text-muted-foreground z-10 max-w-2xl mx-auto mt-4">
+                  AGI-S is built to be the one-stop solution for all your AI needs. This may result in a comprehensive application with many pages and powerful offerings, but our core goal is to fulfill all your requirements in one place, providing a truly integrated and seamless experience.
+                </p>
               </div>
             )}
-
             {messages.map((msg) => (
               <ChatMessageDisplay key={msg.id} message={msg} />
             ))}
-
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
               <ChatMessageDisplay message={{ id: 'loading', role: 'assistant', content: '' }} isLoading={true} />
             )}
-
-            {/* Spacer for floating input */}
-            <div className="h-32"></div>
           </div>
         </ScrollArea>
       </div>
 
-      {/* Floating Nebula Input Bar */}
-      <div className="absolute bottom-6 left-0 right-0 z-20 px-4 pointer-events-none">
-        <div className="max-w-3xl mx-auto pointer-events-auto">
-
-          {slashCommandOpen && (
-            <div className="mb-2 bg-[#0F1115]/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2">
-              <div className="p-2 border-b border-white/5 text-[10px] font-medium text-white/40 uppercase tracking-widest pl-3">
-                Select Neural Mode
-              </div>
-              <ScrollArea className="h-48">
-                <div className="p-1">
-                  {filteredModes.map((m, index) => {
+      <div className="border-t bg-background/95 p-2 backdrop-blur-sm sticky bottom-0 z-20">
+        {slashCommandOpen && (
+          <div className="absolute bottom-full left-2 mb-2 w-64 bg-popover border rounded-md shadow-lg overflow-hidden z-50 animate-in fade-in slide-in-from-bottom-2">
+            <div className="p-2 border-b text-xs font-medium text-muted-foreground">
+              Select Mode
+            </div>
+            <ScrollArea className="h-48">
+              <div className="p-1">
+                {filteredModes.length === 0 ? (
+                  <div className="p-2 text-sm text-muted-foreground text-center">No modes found</div>
+                ) : (
+                  filteredModes.map((m, index) => {
                     const { icon: Icon } = AI_MODE_DETAILS[m];
                     return (
                       <div
                         key={m}
                         className={cn(
-                          "flex items-center gap-3 p-2.5 rounded-lg cursor-pointer text-sm transition-all",
-                          index === selectedIndex ? "bg-indigo-500/20 text-indigo-300" : "text-white/60 hover:bg-white/5"
+                          "flex items-center gap-2 p-2 rounded-sm cursor-pointer text-sm",
+                          index === selectedIndex ? "bg-accent text-accent-foreground" : "hover:bg-muted"
                         )}
                         onClick={() => selectMode(m)}
                         onMouseEnter={() => setSelectedIndex(index)}
                       >
-                        <Icon className="h-4 w-4 opacity-70" />
+                        <Icon className="h-4 w-4" />
                         <span>{m}</span>
                       </div>
                     );
-                  })}
-                </div>
-              </ScrollArea>
-            </div>
-          )}
-
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/30 via-purple-500/30 to-blue-500/30 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-700"></div>
-            <div className="relative bg-[#0F1115]/80 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl flex flex-col transition-all active:scale-[0.995]">
-
-              {/* Input Area */}
-              <form onSubmit={handleSubmit} className="flex items-end gap-2 p-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" className="h-10 w-10 p-0 rounded-lg hover:bg-white/5 text-indigo-400 shrink-0">
-                      <ModeIcon className="h-5 w-5" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[22rem] p-0 mb-2 bg-[#0F1115] border-white/10 text-white">
-                    {/* ... (Keeping existing popover content logic but styling needs update if displayed, proceeding with minimal changes for safety) ... */}
-                  </PopoverContent>
-                </Popover>
-
-                <Textarea
-                  value={input}
-                  onChange={handleInputChange}
-                  placeholder={`Ask ${mode}...`}
-                  className="flex-1 min-h-[44px] max-h-[200px] bg-transparent border-0 resize-none focus-visible:ring-0 text-base text-white placeholder:text-white/20 py-2.5"
-                  onKeyDown={handleKeyDown}
-                  disabled={isLoading}
-                  rows={1}
-                />
-
-                <div className="flex items-center gap-1 pb-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-lg hover:bg-white/5 text-white/40 hover:text-white"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
-
-                  <Button
-                    type="submit"
-                    size="icon"
-                    disabled={isLoading || (!input.trim() && !file)}
-                    className={cn(
-                      "h-8 w-8 rounded-lg transition-all duration-300",
-                      (input.trim() || file) ? "bg-indigo-500 text-white hover:bg-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.5)]" : "bg-white/5 text-white/20"
-                    )}
-                  >
-                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </form>
-
-              {/* Attachment Preview */}
-              {file && (
-                <div className="mx-2 mb-2 px-3 py-2 bg-white/5 rounded-lg border border-white/5 flex items-center gap-2">
-                  <div className="bg-indigo-500/20 p-1.5 rounded text-indigo-400">
-                    {file.type === 'image' ? <Image className="h-3 w-3" /> : <Paperclip className="h-3 w-3" />}
-                  </div>
-                  <span className="text-xs text-white/80 truncate max-w-[200px]">{file.name}</span>
-                  <button onClick={() => setFile(null)} className="ml-auto text-white/40 hover:text-white">×</button>
-                </div>
-              )}
-            </div>
+                  })
+                )}
+              </div>
+            </ScrollArea>
           </div>
+        )}
+        <div className="relative rounded-lg border bg-background">
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-center gap-2 p-1"
+          >
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="shrink-0 w-44 justify-start font-medium tour-mode-selector" disabled={isLoading}>
+                  <ModeIcon className="h-4 w-4 mr-2 text-primary" />
+                  <span className="flex-1 text-left truncate text-sm">{mode}</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[26rem] p-0 mb-2">
+                <ScrollArea className="h-[32rem]">
+                  <div className="p-4 grid gap-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium leading-none">AI Modes</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Select a specialized AI agent for your task.
+                      </p>
+                    </div>
+                    <div className="grid gap-2">
+                      {MAIN_AI_MODES.map((m) => {
+                        const { icon: Icon, description } = AI_MODE_DETAILS[m];
+                        return (
+                          <div
+                            key={m}
+                            onClick={() => setMode(m)}
+                            className={cn(
+                              'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
+                              mode === m ? 'bg-secondary' : 'hover:bg-muted/50'
+                            )}
+                          >
+                            <Icon className="h-5 w-5 mt-0.5 text-primary" />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium text-sm">{m}</p>
+                              </div>
+                              <p className="text-xs text-muted-foreground">{description}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <Separator />
+                    <div className="space-y-2">
+                      <h4 className="font-medium leading-none">Personas</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Chat with a specialized persona.
+                      </p>
+                    </div>
+                    <div className="grid gap-2">
+                      {PERSONAS.map((m) => {
+                        const { icon: Icon, description } = AI_MODE_DETAILS[m];
+                        return (
+                          <div
+                            key={m}
+                            onClick={() => setMode(m)}
+                            className={cn(
+                              'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
+                              mode === m ? 'bg-secondary' : 'hover:bg-muted/50'
+                            )}
+                          >
+                            <Icon className="h-5 w-5 mt-0.5 text-primary" />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium text-sm">{m}</p>
+                              </div>
+                              <p className="text-xs text-muted-foreground">{description}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </ScrollArea>
+              </PopoverContent>
+            </Popover>
+            <Textarea
+              value={input}
+              onChange={handleInputChange}
+              placeholder={`Ask ${mode}... (Type / to switch mode)`}
+              className="chat-input flex-1 resize-none border-0 shadow-none focus-visible:ring-0 text-base py-3"
+              onKeyDown={handleKeyDown}
+              disabled={isLoading}
+              rows={1}
+            />
+            <Button
+              type="button"
+              variant={isListening ? "destructive" : "ghost"}
+              size="icon"
+              className="shrink-0 h-8 w-8 tour-microphone-button"
+              onClick={() => {
+                if (isListening) {
+                  stopListening();
+                } else {
+                  startListening();
+                }
+              }}
+              disabled={isLoading}
+            >
+              <Mic className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="shrink-0 h-8 w-8 tour-attachment-button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading}
+            >
+              <Image className="h-4 w-4" />
+            </Button>
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf" />
 
-          <p className="text-[10px] text-center text-white/20 mt-3 font-light tracking-wide">
-            Liquid Intelligence™ v2.0 • {mode} Active
-          </p>
+            <Button type="submit" size="icon" className="shrink-0 h-8 w-8" disabled={isLoading || (!input.trim() && !file)}>
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            </Button>
+          </form>
+          {file && (
+            <div className="p-2 pt-0 text-xs text-muted-foreground">Attached: {file.name}</div>
+          )}
         </div>
+        <p className="text-xs text-center text-muted-foreground mt-2 px-4">
+          AGI-S can make mistakes. Consider checking important information.
+        </p>
       </div>
-
-      <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf" />
     </div>
   );
 }
