@@ -7,13 +7,33 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import type { WebAction } from '@/lib/universal-action-layer';
+import path from 'path';
+import fs from 'fs';
+import dotenv from 'dotenv';
+
+// MANUAL ENV LOADING FIX
+// If process.env.GROQ_API_KEY is missing, try to load it directly from .env.local
+if (!process.env.GROQ_API_KEY) {
+    try {
+        const envPath = path.resolve(process.cwd(), '.env.local');
+        if (fs.existsSync(envPath)) {
+            const envConfig = dotenv.parse(fs.readFileSync(envPath));
+            if (envConfig.GROQ_API_KEY) {
+                process.env.GROQ_API_KEY = envConfig.GROQ_API_KEY;
+                console.log('[UAL Repair] Manually loaded GROQ_API_KEY from .env.local');
+            }
+        }
+    } catch (e) {
+        console.error('[UAL Repair] Failed to load .env.local:', e);
+    }
+}
 
 // Groq API helper (copied from actions.ts to avoid import issues)
 async function callGroqForPlanning(messages: Array<{ role: string; content: string }>): Promise<string> {
     const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
-        throw new Error("GROQ_API_KEY is not set");
+        throw new Error("GROQ_API_KEY is missing. Please create .env.local with GROQ_API_KEY=YOUR_KEY");
     }
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -49,77 +69,68 @@ export async function POST(req: NextRequest) {
         console.log(`[UAL Planning] API Key Status: ${hasKey ? 'Present' : 'MISSING'} (Prefix: ${keyPrefix})`);
 
         if (!hasKey) {
-            throw new Error("Missing GROQ_API_KEY environment variable. Please check .env.local file.");
+            throw new Error("Missing GROQ_API_KEY environment variable. We tried to load it but failed.");
         }
 
-        const prompt = `You are the Universal Action Layer (UAL)™ AI planner. 
-Your job is to convert user goals into precise, complex web automation actions.
+        const prompt = `You are a "Heavy Scale" Autonomous Agent Planner (Level 5 Intelligence).
+Your goal is to understand ANY user request and convert it into a robust, fault-tolerant sequence of web actions.
 
 User Goal: "${goal}"
-Target URL: "${context?.url || 'Not specified - YOU MUST DECIDE START URL'}"
+Context URL: "${context?.url || 'NONE'}"
 
-INSTRUCTIONS:
-1. If no Target URL is provided, you MUST start with a "navigate" action to the most appropriate website (e.g., google.com for searches, specific sites if mentioned).
-2. Plan a complete sequence of actions to achieve the goal. Don't just stop at the landing page; try to fulfill the request.
-3. Use specific selectors where possible, or robust generic ones.
+CORE PHILOSOPHY:
+- THINK LIKE A HUMAN: How would a human solve this?
+- ROBUSTNESS: Websites are slow. Add 'wait' steps. Use specific selectors.
+- ADAPTABILITY: If a specific URL isn't given, INFER it (e.g., "Check crypto" -> "https://coinmarketcap.com").
 
-Available actions:
-- navigate: { type: "navigate", url: "https://..." }
-- click: { type: "click", selector: "button.submit" } // CSS selector
-- type: { type: "type", selector: "input#search", value: "text" }
-- submit: { type: "click", selector: "form button[type=submit]" }
-- scroll: { type: "scroll" }
-- wait: { type: "wait", timeout: 2000 }
-- screenshot: { type: "screenshot" }
-
-Example 1 (Search):
-Goal: "Find AI news"
+REQUIRED OUTPUT FORMAT (JSON ARRAY ONLY):
 [
-  { "type": "navigate", "url": "https://google.com" },
-  { "type": "type", "selector": "textarea[name='q']", "value": "latest AI news" },
-  { "type": "click", "selector": "input[type='submit']" },
-  { "type": "wait", "timeout": 2000 },
+  { "type": "navigate", "url": "..." },
+  { "type": "wait", "timeout": 3000 },
+  { "type": "type", "selector": "input[name='q']", "value": "..." },
+  { "type": "click", "selector": "..." },
   { "type": "screenshot" }
 ]
 
-Example 2 (Specific):
-Goal: "Check Hacker News"
-[
-  { "type": "navigate", "url": "https://news.ycombinator.com" },
-  { "type": "wait", "timeout": 1000 },
-  { "type": "screenshot" }
-]
+SCENARIOS:
+1. SEARCH: Navigate to Google/Bing -> Type Query -> Click Search -> Wait -> Screenshot.
+2. DIRECT: Navigate to URL -> Wait -> Screenshot.
+3. COMPLEX: Navigate -> Wait -> Click specific element -> Type -> Submit -> Wait -> Screenshot.
 
-Return ONLY the JSON array, no explanation.`;
+CRITICAL: Return ONLY the JSON Array. No markdown formatting. No text.`;
+
+        console.log(`[UAL Planner] Sending Heavy Prompt to Groq...`);
 
         const response = await callGroqForPlanning([
             {
                 role: 'system',
-                content: 'You are UAL™ AI Planner. You convert goals into precise web automation actions. Always return valid JSON arrays.'
+                content: 'You are an advanced Autonomous Web Agent. You output ONLY valid JSON action sequences.'
             },
             { role: 'user', content: prompt }
         ]);
 
-        // Parse the AI response
+        console.log(`[UAL Planner] Groq Response: ${response.substring(0, 100)}...`);
+
+        // Parse the AI response with cleaning
         let actions: WebAction[];
         try {
             const cleanResponse = response.replace(/```json/g, '').replace(/```/g, '').trim();
-            // Try to extract JSON from the response
             const jsonMatch = cleanResponse.match(/\[[\s\S]*\]/);
+
             if (jsonMatch) {
                 actions = JSON.parse(jsonMatch[0]);
             } else {
                 actions = JSON.parse(cleanResponse);
             }
         } catch (parseError) {
-            console.error('JSON Parse Error:', parseError);
-            console.error('Raw Response:', response);
+            console.error('[UAL Planner] JSON Parse Error:', parseError);
+            console.error('[UAL Planner] Raw Response:', response);
 
-            // Intelligent fallback based on goal
+            // FALLBACK TO INTELLIGENT DEFAULT INSTEAD OF CRASHING
             const fallbackUrl = context?.url || (goal.toLowerCase().includes('news') ? 'https://news.google.com' : 'https://google.com');
             actions = [
                 { type: 'navigate', url: fallbackUrl },
-                { type: 'wait', timeout: 2000 },
+                { type: 'wait', timeout: 3000 },
                 { type: 'screenshot' }
             ];
         }
@@ -127,10 +138,13 @@ Return ONLY the JSON array, no explanation.`;
         return NextResponse.json({ actions, raw: response });
 
     } catch (error: any) {
-        console.error('UAL Planning Error:', error);
-        return NextResponse.json(
-            { error: error.message },
-            { status: 500 }
-        );
+        console.error('[UAL Planner] CRITICAL FAILURE:', error);
+
+        // Return a valid JSON error response instead of 500 to keep UI alive
+        return NextResponse.json({
+            actions: [],
+            error: error.message || "Unknown Planning Error",
+            debug_info: "Check server logs for stack trace"
+        }, { status: 200 }); // Return 200 so UI can handle the error gracefully
     }
 }
