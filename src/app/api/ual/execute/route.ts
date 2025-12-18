@@ -48,16 +48,13 @@ export async function POST(req: NextRequest) {
 
         try {
             if (chr && process.env.VERCEL) {
-                steps.push('🌐 Launching browser (Vercel/CDN Mode)...');
+                steps.push('🌐 Launching browser (Vercel Production Mode)...');
 
-                // USE REMOTE BINARY to avoid 50MB limit and path issues
-                // Using a specific compatible version pack
-                const remotePack = "https://github.com/Sparticuz/chromium/releases/download/v123.0.1/chromium-v123.0.1-pack.tar";
-
+                // Standard Vercel Launch with @sparticuz/chromium v123
                 browser = await pup.default.launch({
                     args: chr.default.args,
                     defaultViewport: chr.default.defaultViewport,
-                    executablePath: await chr.default.executablePath(remotePack),
+                    executablePath: await chr.default.executablePath(),
                     headless: chr.default.headless,
                     ignoreHTTPSErrors: true,
                 });
