@@ -60,8 +60,13 @@ async function callGroqForPlanning(messages: Array<{ role: string; content: stri
 }
 
 export async function POST(req: NextRequest) {
+    let goal = '';
+    let context: any = {};
+
     try {
-        const { goal, context } = await req.json();
+        const body = await req.json();
+        goal = body.goal;
+        context = body.context;
 
         // DEBUG: Check for API Key (Masked)
         const hasKey = !!process.env.GROQ_API_KEY;
