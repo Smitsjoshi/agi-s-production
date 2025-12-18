@@ -41,13 +41,22 @@ async function callGroqForPlanning(messages: Array<{ role: string; content: stri
 
 export async function POST(req: NextRequest) {
     try {
-        const { goal, url } = await req.json();
+        const { goal, context } = await req.json();
+
+        // DEBUG: Check for API Key (Masked)
+        const hasKey = !!process.env.GROQ_API_KEY;
+        const keyPrefix = hasKey ? process.env.GROQ_API_KEY?.substring(0, 4) : 'NONE';
+        console.log(`[UAL Planning] API Key Status: ${hasKey ? 'Present' : 'MISSING'} (Prefix: ${keyPrefix})`);
+
+        if (!hasKey) {
+            throw new Error("Missing GROQ_API_KEY environment variable. Please check .env.local file.");
+        }
 
         const prompt = `You are the Universal Action Layer (UAL)™ AI planner. 
 Your job is to convert user goals into precise, complex web automation actions.
 
 User Goal: "${goal}"
-Target URL: "${url || 'Not specified - YOU MUST DECIDE START URL'}"
+Target URL: "${context?.url || 'Not specified - YOU MUST DECIDE START URL'}"
 
 INSTRUCTIONS:
 1. If no Target URL is provided, you MUST start with a "navigate" action to the most appropriate website (e.g., google.com for searches, specific sites if mentioned).

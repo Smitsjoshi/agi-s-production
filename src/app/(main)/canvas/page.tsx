@@ -1,14 +1,15 @@
 'use client';
 
 /**
- * AGI-S Canvas - Professional Interface
- * Desgined for clarity and focused execution.
+ * AGI-S Canvas - Cyber Interface
+ * "Techy" design for power users.
  */
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, ArrowRight, CornerDownLeft, Sparkles, Globe, Terminal, Activity, CheckCircle2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Terminal, Cpu, Shield, Wifi, Zap, Hexagon, Command } from 'lucide-react';
 import { UALClient } from '@/lib/universal-action-layer';
 import type { UALResult, WebAction } from '@/lib/universal-action-layer';
 import { cn } from '@/lib/utils';
@@ -30,7 +31,8 @@ export default function CanvasPage() {
     }, [logs]);
 
     const addLog = (message: string) => {
-        setLogs(prev => [...prev, message]);
+        const timestamp = new Date().toISOString().split('T')[1].slice(0, 8);
+        setLogs(prev => [...prev, `[${timestamp}] ${message}`]);
     };
 
     const executeTask = async () => {
@@ -41,18 +43,18 @@ export default function CanvasPage() {
         setLogs([]);
         setPlannedActions([]);
 
-        addLog('Initializing Agent...');
+        addLog('SYSTEM_INIT: Universal Action Layer v2.4');
 
         try {
-            addLog('Planning actions...');
+            addLog('PROCESS: Initializing Liquid Intelligence Protocol...');
             const actions = await ualClient.planActions(goal, '');
 
             setPlannedActions(actions);
-            addLog(`Plan created: ${actions.length} steps.`);
+            addLog(`PLAN_GENERATED: ${actions.length} operational steps.`);
 
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 600));
 
-            addLog('Executing task...');
+            addLog('EXECUTION: Engaging Browser Automation Engine...');
             const taskResult = await ualClient.executeTask({
                 goal,
                 url: '',
@@ -61,152 +63,174 @@ export default function CanvasPage() {
 
             setResult(taskResult);
             if (taskResult.success) {
-                addLog('Completed successfully.');
+                addLog('STATUS: MISSION_COMPLETE');
             } else {
-                addLog(`Failed: ${taskResult.error}`);
+                addLog(`STATUS: CRITICAL_FAILURE - ${taskResult.error}`);
             }
 
         } catch (error: any) {
             setResult({
                 success: false,
                 error: error.message,
-                steps: [`Error: ${error.message}`],
+                steps: [`FATAL: ${error.message}`],
             });
-            addLog(`System Error: ${error.message}`);
+            addLog(`SYSTEM_ERROR: ${error.message}`);
         } finally {
             setIsExecuting(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-[#F9FAFB] dark:bg-[#09090b] text-foreground font-sans flex flex-col items-center pt-24 px-4 transition-colors">
+        <div className="min-h-screen bg-[#050505] text-[#00ff9d] font-mono flex flex-col relative overflow-hidden selection:bg-[#00ff9d] selection:text-black">
 
-            {/* Centered Input Area (Perplexity Style) */}
-            <div className="w-full max-w-2xl space-y-8">
-                <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-semibold tracking-tight">Where to?</h1>
-                    <p className="text-muted-foreground text-sm">Universal Action Layer™ is ready.</p>
-                </div>
+            {/* Cyber Grid Background */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,157,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,157,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
 
-                <div className="relative group">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-700 rounded-2xl blur opacity-20 transition duration-500 group-hover:opacity-40"></div>
-                    <div className="relative bg-white dark:bg-[#18181b] rounded-xl shadow-sm border border-border/40 flex items-center p-2 focus-within:ring-2 focus-within:ring-primary/10 transition-shadow">
-                        <Input
-                            value={goal}
-                            onChange={(e) => setGoal(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && !isExecuting && executeTask()}
-                            placeholder="Ask UAL to browse the web..."
-                            className="border-0 shadow-none text-lg h-14 bg-transparent px-4 placeholder:text-muted-foreground/40 focus-visible:ring-0"
-                            disabled={isExecuting}
-                            autoFocus
-                        />
-                        <Button
-                            onClick={executeTask}
-                            disabled={isExecuting || !goal.trim()}
-                            size="icon"
-                            className={cn("h-10 w-10 rounded-lg transition-all", goal.trim() ? "bg-black dark:bg-white text-white dark:text-black" : "bg-muted text-muted-foreground")}
-                        >
-                            {isExecuting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                        </Button>
+            {/* Header Status Bar */}
+            <div className="w-full border-b border-[#00ff9d]/20 bg-black/80 backdrop-blur-sm p-2 flex justify-between items-center z-10 sticky top-0">
+                <div className="flex items-center gap-4 text-xs">
+                    <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-[#00ff9d] rounded-full animate-pulse"></div>
+                        <span className="opacity-80">ONLINE</span>
                     </div>
+                    <span className="opacity-40">|</span>
+                    <span className="opacity-60">MEM: 32TB</span>
+                    <span className="opacity-40">|</span>
+                    <span className="opacity-60">CPU: QUANTUM-8</span>
                 </div>
-
-                {!isExecuting && !result && (
-                    <div className="flex justify-center gap-4 text-xs text-muted-foreground/60">
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/30 bg-white/50 dark:bg-white/5">
-                            <Globe className="h-3 w-3" />
-                            <span>Browsing</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/30 bg-white/50 dark:bg-white/5">
-                            <Terminal className="h-3 w-3" />
-                            <span>Planning</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/30 bg-white/50 dark:bg-white/5">
-                            <Sparkles className="h-3 w-3" />
-                            <span>Intelligence</span>
-                        </div>
-                    </div>
-                )}
+                <div className="text-xs font-bold tracking-[0.2em] opacity-50">AGI-S // CANVAS</div>
             </div>
 
-            {/* Results Area */}
-            {(isExecuting || result) && (
-                <div className="w-full max-w-5xl mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex-1 flex flex-col p-6 max-w-7xl mx-auto w-full z-10">
 
-                    {/* Left: Process */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">
-                            <span>Activity Log</span>
-                            {isExecuting && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+                {/* Main Interface Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+
+                    {/* Left Column: Command & Logs */}
+                    <div className="lg:col-span-5 flex flex-col gap-6">
+
+                        {/* Command Module */}
+                        <div className="bg-black/50 border border-[#00ff9d]/30 p-1 relative group">
+                            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#00ff9d]"></div>
+                            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#00ff9d]"></div>
+                            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#00ff9d]"></div>
+                            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#00ff9d]"></div>
+
+                            <div className="p-4 space-y-4">
+                                <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#00ff9d]/60 mb-2">
+                                    <Command className="h-4 w-4" />
+                                    Command Input
+                                </div>
+                                <div className="relative">
+                                    <Input
+                                        value={goal}
+                                        onChange={(e) => setGoal(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && !isExecuting && executeTask()}
+                                        placeholder="ENTER_OBJECTIVE..."
+                                        className="bg-[#0a0a0a] border border-[#00ff9d]/20 text-[#00ff9d] placeholder:text-[#00ff9d]/20 h-14 font-mono text-sm focus-visible:ring-1 focus-visible:ring-[#00ff9d]/50"
+                                        disabled={isExecuting}
+                                        autoFocus
+                                    />
+                                    <Button
+                                        onClick={executeTask}
+                                        disabled={isExecuting || !goal.trim()}
+                                        className="absolute right-1 top-1 h-12 w-12 bg-[#00ff9d]/10 hover:bg-[#00ff9d]/20 text-[#00ff9d] border border-[#00ff9d]/20 rounded-none"
+                                    >
+                                        {isExecuting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
-                        <div className="bg-white dark:bg-[#18181b] border border-border/40 rounded-xl p-6 min-h-[300px] shadow-sm relative overflow-hidden">
-                            <div className="space-y-4 font-mono text-xs text-muted-foreground" ref={scrollRef}>
+
+                        {/* Terminal Output */}
+                        <div className="flex-1 bg-black/80 border border-[#00ff9d]/20 p-4 font-mono text-xs overflow-hidden flex flex-col min-h-[400px]">
+                            <div className="flex items-center justify-between border-b border-[#00ff9d]/10 pb-2 mb-2">
+                                <span className="text-[#00ff9d]/50 uppercase tracking-widest">System Log</span>
+                                <Wifi className="h-3 w-3 text-[#00ff9d]/30" />
+                            </div>
+                            <div className="flex-1 overflow-y-auto scrollbar-none space-y-1" ref={scrollRef}>
+                                {logs.length === 0 && (
+                                    <div className="text-[#00ff9d]/20 italic">
+                                        {`> SYSTEM READY`} <br />
+                                        {`> WAITING FOR INPUT...`}
+                                    </div>
+                                )}
                                 {logs.map((log, i) => (
-                                    <div key={i} className="flex gap-3 items-start">
-                                        <div className="mt-0.5 w-1.5 h-1.5 rounded-full bg-border shrink-0"></div>
+                                    <div key={i} className="break-words">
+                                        <span className="text-[#00ff9d]/40 mr-2">{`>`}</span>
                                         <span className={cn(
-                                            log.includes('Failed') || log.includes('Error') ? "text-red-500" :
-                                                log.includes('Completed') ? "text-green-500" :
-                                                    "text-foreground/80"
+                                            log.includes('FAILURE') || log.includes('FATAL') ? "text-red-500" :
+                                                log.includes('COMPLETE') ? "text-[#00ff9d] font-bold" :
+                                                    "text-[#00ff9d]/80"
                                         )}>{log}</span>
                                     </div>
                                 ))}
+                                {isExecuting && (
+                                    <div className="animate-pulse text-[#00ff9d]/60">{`> PROCESSING..._`}</div>
+                                )}
                             </div>
-                            {/* Plan Visualization */}
-                            {plannedActions.length > 0 && (
-                                <div className="mt-8 pt-6 border-t border-border/40">
-                                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">Strategy</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {plannedActions.slice(0, 5).map((action, i) => (
-                                            <div key={i} className="px-2 py-1 rounded bg-muted/50 border border-border/50 text-[10px] font-medium text-foreground/70">
-                                                {action.type}
-                                            </div>
-                                        ))}
-                                        {plannedActions.length > 5 && (
-                                            <div className="px-2 py-1 rounded bg-muted/50 text-[10px] text-muted-foreground">+{plannedActions.length - 5}</div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
 
-                    {/* Right: Output */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">
-                            <span>Browser View</span>
-                            {result?.success && <span className="text-green-500 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Ready</span>}
-                        </div>
-                        <div className="aspect-video bg-white dark:bg-[#18181b] border border-border/40 rounded-xl overflow-hidden shadow-sm flex items-center justify-center relative group">
-                            {result?.screenshot ? (
-                                <>
-                                    <img src={`data:image/png;base64,${result.screenshot}`} alt="Result" className="w-full h-full object-cover" />
-                                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <p className="text-xs font-medium truncate">{result.data?.title}</p>
-                                        <p className="text-[10px] opacity-70 truncate">{result.data?.url}</p>
+                    {/* Right Column: Visualization */}
+                    <div className="lg:col-span-7 flex flex-col gap-6">
+
+                        {/* Browser Viewport */}
+                        <div className="flex-1 bg-[#0a0a0a] border border-[#00ff9d]/30 relative flex flex-col relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-2 z-20 flex gap-2">
+                                <div className="px-2 py-0.5 border border-[#00ff9d]/30 bg-black/50 text-[10px] text-[#00ff9d]">LIVE_FEED</div>
+                                {result?.success && <div className="px-2 py-0.5 border border-[#00ff9d]/30 bg-[#00ff9d]/10 text-[10px] text-[#00ff9d]">SUCCESS</div>}
+                            </div>
+
+                            {/* Grid Lines Overlay */}
+                            <div className="absolute inset-0 pointer-events-none z-10 bg-[linear-gradient(rgba(0,255,157,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,157,0.05)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+
+                            <div className="flex-1 flex items-center justify-center min-h-[400px]">
+                                {result?.screenshot ? (
+                                    <div className="relative w-full h-full">
+                                        <img src={`data:image/png;base64,${result.screenshot}`} alt="Viewport" className="w-full h-full object-contain opacity-80" />
+                                        <div className="absolute bottom-0 left-0 right-0 bg-black/80 border-t border-[#00ff9d]/30 p-2 text-xs font-mono">
+                                            <div className="truncate text-[#00ff9d]">{result.data?.title || 'Unknown Page'}</div>
+                                            <div className="truncate text-[#00ff9d]/50 text-[10px]">{result.data?.url}</div>
+                                        </div>
                                     </div>
-                                </>
-                            ) : (
-                                <div className="text-center space-y-3">
-                                    <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center mx-auto">
-                                        {isExecuting ? <Activity className="h-5 w-5 text-primary animate-pulse" /> : <Globe className="h-5 w-5 text-muted-foreground/30" />}
+                                ) : (
+                                    <div className="text-center">
+                                        {isExecuting ? (
+                                            <div className="relative">
+                                                <div className="w-20 h-20 border-2 border-[#00ff9d]/30 border-t-[#00ff9d] rounded-full animate-spin"></div>
+                                                <div className="absolute inset-0 flex items-center justify-center text-[#00ff9d] animate-pulse">
+                                                    <Wifi className="h-8 w-8" />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <Hexagon className="h-24 w-24 text-[#00ff9d]/10 animate-pulse" />
+                                        )}
                                     </div>
-                                    <p className="text-xs text-muted-foreground">
-                                        {isExecuting ? "Connecting to visual feed..." : "No active session"}
-                                    </p>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
+
+                        {/* Action Register */}
+                        <div className="h-40 bg-black/50 border border-[#00ff9d]/20 p-4 font-mono overflow-y-auto">
+                            <div className="text-[10px] uppercase tracking-widest text-[#00ff9d]/40 mb-2 border-b border-[#00ff9d]/10 pb-1">
+                                Operation Register
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {plannedActions.length === 0 && <span className="text-[#00ff9d]/20 text-xs">NO_OPERATIONS_QUEUED</span>}
+                                {plannedActions.map((action, i) => (
+                                    <div key={i} className="px-2 py-1 bg-[#00ff9d]/5 border border-[#00ff9d]/20 text-[10px] text-[#00ff9d]/80">
+                                        <span className="text-[#00ff9d] font-bold mr-2">[{String(i).padStart(2, '0')}]</span>
+                                        {action.type.toUpperCase()}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>
-            )}
 
-            {/* Footer */}
-            <div className="fixed bottom-6 text-center">
-                <p className="text-[10px] text-muted-foreground/40 font-medium tracking-widest uppercase">
-                    Designed by AGI-S
-                </p>
             </div>
 
         </div>
