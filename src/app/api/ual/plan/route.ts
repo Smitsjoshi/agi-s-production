@@ -146,11 +146,19 @@ CRITICAL: Return ONLY the JSON Array. No markdown formatting. No text.`;
     } catch (error: any) {
         console.error('[UAL Planner] CRITICAL FAILURE:', error);
 
-        // Return a valid JSON error response instead of 500 to keep UI alive
+        // UNIVERSAL FALLBACK - If the Brain fails, use the Reflex.
+        // This ensures the user ALWAYS gets a result (e.g. a Google Search).
+        const fallbackUrl = `https://www.google.com/search?q=${encodeURIComponent(goal)}`;
+        const fallbackActions = [
+            { type: 'navigate', url: fallbackUrl },
+            { type: 'wait', timeout: 5000 },
+            { type: 'screenshot' }
+        ];
+
         return NextResponse.json({
-            actions: [],
-            error: error.message || "Unknown Planning Error",
-            debug_info: "Check server logs for stack trace"
-        }, { status: 200 }); // Return 200 so UI can handle the error gracefully
+            actions: fallbackActions,
+            error: error.message || "Planner Brain Offline - Using Reflex",
+            debug_info: "Switched to fallback search due to API error"
+        }, { status: 200 });
     }
 }
