@@ -95,7 +95,8 @@ REQUIRED OUTPUT FORMAT (JSON ARRAY ONLY):
 SCENARIOS:
 1. SEARCH: Navigate to Google/Bing -> Type Query -> Click Search -> Wait -> Screenshot.
 2. DIRECT: Navigate to URL -> Wait -> Screenshot.
-3. COMPLEX: Navigate -> Wait -> Click specific element -> Type -> Submit -> Wait -> Screenshot.
+3. SHOPPING: Navigate Amazon -> Type Item -> Click Search -> Click Product -> Wait -> Click "Add to Cart" -> Screenshot.
+4. COMPLEX: Navigate -> Wait -> Click specific element -> Type -> Submit -> Wait -> Screenshot.
 
 CRITICAL: Return ONLY the JSON Array. No markdown formatting. No text.`;
 
@@ -109,7 +110,7 @@ CRITICAL: Return ONLY the JSON Array. No markdown formatting. No text.`;
             { role: 'user', content: prompt }
         ]);
 
-        console.log(`[UAL Planner] Groq Response: ${response.substring(0, 100)}...`);
+        console.log(`[UAL Planner] Groq Response: ${response.substring(0, 200)}...`);
 
         // Parse the AI response with cleaning
         let actions: WebAction[];
@@ -124,10 +125,15 @@ CRITICAL: Return ONLY the JSON Array. No markdown formatting. No text.`;
             }
         } catch (parseError) {
             console.error('[UAL Planner] JSON Parse Error:', parseError);
-            console.error('[UAL Planner] Raw Response:', response);
+            actions = []; // Force empty to trigger fallback
+        }
 
-            // FALLBACK TO INTELLIGENT DEFAULT INSTEAD OF CRASHING
-            const fallbackUrl = context?.url || (goal.toLowerCase().includes('news') ? 'https://news.google.com' : 'https://google.com');
+        // INTELLIGENT FALLBACK FOR EMPTY PLANS
+        if (!actions || actions.length === 0) {
+            console.warn('[UAL Planner] Empty plan generated. Triggering intelligent fallback.');
+
+            // Construct a search query fallback
+            const fallbackUrl = context?.url || `https://www.google.com/search?q=${encodeURIComponent(goal)}`;
             actions = [
                 { type: 'navigate', url: fallbackUrl },
                 { type: 'wait', timeout: 3000 },
