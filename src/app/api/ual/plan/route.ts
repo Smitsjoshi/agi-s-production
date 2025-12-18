@@ -116,7 +116,7 @@ Return ONLY the JSON array, no explanation.`;
             console.error('Raw Response:', response);
 
             // Intelligent fallback based on goal
-            const fallbackUrl = url || (goal.toLowerCase().includes('news') ? 'https://news.google.com' : 'https://google.com');
+            const fallbackUrl = context?.url || (goal.toLowerCase().includes('news') ? 'https://news.google.com' : 'https://google.com');
             actions = [
                 { type: 'navigate', url: fallbackUrl },
                 { type: 'wait', timeout: 2000 },
