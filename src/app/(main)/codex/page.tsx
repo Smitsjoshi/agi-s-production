@@ -6,8 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
     Loader2, Wand2, FileDown, Clipboard, Code, Play,
     RotateCcw, Save, History, Smartphone, Tablet, Monitor,
-    Maximize2, Copy, Check, Sparkles, MessageSquare, Settings2,
-    Terminal, Database, Braces, Layers, ChevronRight
+    Maximize2, Copy, Check, Sparkles, MessageSquare, Settings2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { askAi } from '@/app/actions';
@@ -35,7 +34,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
 
 // Language configurations
 const LANGUAGES = [
