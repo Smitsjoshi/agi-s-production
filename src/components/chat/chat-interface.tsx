@@ -265,6 +265,9 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
           <div className="p-4 md:p-6 space-y-6">
             {messages.length === 0 && !isLoading && (
               <div className="flex flex-col items-center justify-center h-full text-center relative">
+                <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded-full mb-4 font-bold animate-pulse">
+                  SYSTEM UPDATED v3.2 (TIMESTAMP: 3:30 PM)
+                </div>
                 <div className="liquid-glow"></div>
                 <div className="relative z-10 p-4 bg-primary/10 rounded-full border-4 border-primary/20 mb-4">
                   <Cpu size={40} className="text-primary" />
