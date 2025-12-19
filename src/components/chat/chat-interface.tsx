@@ -445,10 +445,8 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
             <div className="p-2 pt-0 text-xs text-muted-foreground">Attached: {file.name}</div>
           )}
         </div>
-        <p className="text-xs text-center text-muted-foreground mt-2 px-4 flex items-center justify-center gap-2">
-          <span>AGI-S can make mistakes. Consider checking important information.</span>
-          <span className="opacity-50">•</span>
-          <span className="font-mono text-[10px] opacity-70">v2.1 (GPT-OSS 120B)</span>
+        <p className="text-xs text-center text-muted-foreground mt-2 px-4">
+          AGI-S can make mistakes. Consider checking important information.
         </p>
       </div>
     </div>
