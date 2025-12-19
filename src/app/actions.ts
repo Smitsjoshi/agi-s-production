@@ -39,7 +39,7 @@ async function callGroqWithJSON<T>(prompt: string, systemPrompt?: string): Promi
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       messages: messages,
       temperature: 0.7,
       response_format: { type: 'json_object' }
@@ -77,7 +77,7 @@ async function callGroqText(messages: Array<{ role: string; content: string }>):
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       messages: messages,
       temperature: 0.7
     })
