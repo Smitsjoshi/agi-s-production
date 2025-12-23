@@ -159,7 +159,8 @@ const NavGroup = ({ title, items, state, pathname, playNavSound, user }: { title
 export function MainSidebar() {
   const pathname = usePathname();
   const { state } = useSidebar();
-  const playNavSound = useSound('/sounds/navigate.mp3');
+  // const playNavSound = useSound('/sounds/navigate.mp3'); // Sound file missing in project
+  const playNavSound = () => { };
   const { user } = useSession();
 
   const navProps = { state, pathname, playNavSound, user };
