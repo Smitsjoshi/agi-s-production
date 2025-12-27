@@ -92,6 +92,7 @@ STRICT OUTPUT FORMAT (JSON OBJECT ONLY):
 {
   "status": "CONTINUE" | "COMPLETED",
   "reasoning": "Brief explanation of why the goal is or isn't met",
+  "answer": "The final extracted answer (ONLY if status is COMPLETED. e.g. 'The price of BTC is $65,432')",
   "actions": [
     { "type": "navigate", "url": "..." },
     { "type": "type", "selector": "input[name='q']", "value": "..." },
@@ -102,9 +103,9 @@ STRICT OUTPUT FORMAT (JSON OBJECT ONLY):
 
 CORE PHILOSOPHY:
 1. BYPASS BLOCKS: If Bot Status is "BLOCK_DETECTED", DO NOT try the same site again. Switch to an alternative immediately (e.g. if Google is blocked, try Bing or DuckDuckGo).
-2. FLEXIBILITY: If the goal specifies "on Google" but Google is blocking us, prioritize finding the information on ANY reliable site (e.g. Yahoo Finance for stocks) to satisfy the CORE objective.
-3. SEARCH PATTERNS: Prefer 'type' then 'press' Enter for search.
-4. NO REPETITION: If the previous step's reasoning shows a failure, try a different approach.
+2. EXTRACT ANSWER: When status is "COMPLETED", the "answer" field MUST contain the specific data the user asked for (price, news, etc.) extracted from the text snippet.
+3. FLEXIBILITY: If the goal specifies a site but it blocks us, find the data anywhere.
+4. SEARCH PATTERNS: Prefer 'type' then 'press' Enter for search.
 
 CRITICAL: Return ONLY the JSON Object. No markdown. No text outside JSON.`;
 
@@ -121,7 +122,7 @@ CRITICAL: Return ONLY the JSON Object. No markdown. No text outside JSON.`;
         console.log(`[UAL Planner] Groq Response: ${response.substring(0, 200)}...`);
 
         // Parse the AI response with cleaning
-        let plan: { status: string; actions: WebAction[]; reasoning?: string };
+        let plan: { status: string; actions: WebAction[]; reasoning?: string; answer?: string };
         try {
             const cleanResponse = response.replace(/```json/g, '').replace(/```/g, '').trim();
             const jsonMatch = cleanResponse.match(/\{[\s\S]*\}/);
@@ -156,6 +157,7 @@ CRITICAL: Return ONLY the JSON Object. No markdown. No text outside JSON.`;
             actions,
             status: plan.status,
             reasoning: plan.reasoning,
+            answer: plan.answer,
             raw: response
         });
 

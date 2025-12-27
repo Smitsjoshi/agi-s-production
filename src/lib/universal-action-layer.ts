@@ -94,7 +94,7 @@ export class UALClient {
     /**
      * Plan actions using AI
      */
-    async planActions(goal: string, url?: string, state?: any): Promise<{ actions: WebAction[], status?: string, reasoning?: string }> {
+    async planActions(goal: string, url?: string, state?: any): Promise<{ actions: WebAction[], status?: string, reasoning?: string, answer?: string }> {
         const response = await fetch('/api/ual/plan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

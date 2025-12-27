@@ -46,7 +46,7 @@ export class UALAgentLoop {
                 if (status === 'COMPLETED') {
                     onStep({
                         type: 'completed',
-                        message: reasoning || 'Goal achieved successfully.',
+                        message: plan.answer || reasoning || 'Goal achieved successfully.',
                         timestamp: Date.now()
                     });
                     break;
