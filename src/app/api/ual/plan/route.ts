@@ -78,32 +78,35 @@ export async function POST(req: NextRequest) {
         }
 
         const prompt = `You are a "Heavy Scale" Autonomous Agent Planner (Level 5 Intelligence).
-Your goal is to understand ANY user request and convert it into a robust, fault-tolerant sequence of web actions.
+Your goal is to convert a user objective into a robust sequence of web actions based on the current page state.
 
-User Goal: "${goal}"
-Context URL: "${context?.url || 'NONE'}"
+User Objective: "${goal}"
+
+CURRENT PAGE STATE:
+- URL: "${context?.url || 'about:blank'}"
+- Title: "${context?.title || 'Unknown'}"
+- Text Snippet: "${context?.text || 'No content visible'}"
+- Bot Status: "${context?.botStatus || 'CLEAN'}"
+
+STRICT OUTPUT FORMAT (JSON OBJECT ONLY):
+{
+  "status": "CONTINUE" | "COMPLETED",
+  "reasoning": "Brief explanation of why the goal is or isn't met",
+  "actions": [
+    { "type": "navigate", "url": "..." },
+    { "type": "type", "selector": "input[name='q']", "value": "..." },
+    { "type": "press", "key": "Enter" },
+    { "type": "screenshot" }
+  ]
+}
 
 CORE PHILOSOPHY:
-- THINK LIKE A HUMAN: How would a human solve this?
-- ROBUSTNESS: Websites are slow. Add 'wait' steps. Use specific selectors.
-- ADAPTABILITY: If a specific URL isn't given, INFER it (e.g., "Check crypto" -> "https://coinmarketcap.com").
+1. BYPASS BLOCKS: If Bot Status is "BLOCK_DETECTED", DO NOT try the same site again. Switch to an alternative immediately (e.g. if Google is blocked, try Bing or DuckDuckGo).
+2. FLEXIBILITY: If the goal specifies "on Google" but Google is blocking us, prioritize finding the information on ANY reliable site (e.g. Yahoo Finance for stocks) to satisfy the CORE objective.
+3. SEARCH PATTERNS: Prefer 'type' then 'press' Enter for search.
+4. NO REPETITION: If the previous step's reasoning shows a failure, try a different approach.
 
-REQUIRED OUTPUT FORMAT (JSON ARRAY ONLY):
-[
-  { "type": "navigate", "url": "..." },
-  { "type": "wait", "timeout": 3000 },
-  { "type": "type", "selector": "input[name='q']", "value": "..." },
-  { "type": "click", "selector": "..." },
-  { "type": "screenshot" }
-]
-
-SCENARIOS:
-1. SEARCH: Navigate to Google/Bing -> Type Query -> Click Search -> Wait -> Screenshot.
-2. DIRECT: Navigate to URL -> Wait -> Screenshot.
-3. SHOPPING: Navigate Amazon -> Type Item -> Click Search -> Click Product -> Wait -> Click "Add to Cart" -> Screenshot.
-4. COMPLEX: Navigate -> Wait -> Click specific element -> Type -> Submit -> Wait -> Screenshot.
-
-CRITICAL: Return ONLY the JSON Array. No markdown formatting. No text.`;
+CRITICAL: Return ONLY the JSON Object. No markdown. No text outside JSON.`;
 
         console.log(`[UAL Planner] Sending Heavy Prompt to Groq...`);
 
@@ -118,23 +121,25 @@ CRITICAL: Return ONLY the JSON Array. No markdown formatting. No text.`;
         console.log(`[UAL Planner] Groq Response: ${response.substring(0, 200)}...`);
 
         // Parse the AI response with cleaning
-        let actions: WebAction[];
+        let plan: { status: string; actions: WebAction[]; reasoning?: string };
         try {
             const cleanResponse = response.replace(/```json/g, '').replace(/```/g, '').trim();
-            const jsonMatch = cleanResponse.match(/\[[\s\S]*\]/);
+            const jsonMatch = cleanResponse.match(/\{[\s\S]*\}/);
 
             if (jsonMatch) {
-                actions = JSON.parse(jsonMatch[0]);
+                plan = JSON.parse(jsonMatch[0]);
             } else {
-                actions = JSON.parse(cleanResponse);
+                plan = JSON.parse(cleanResponse);
             }
         } catch (parseError) {
             console.error('[UAL Planner] JSON Parse Error:', parseError);
-            actions = []; // Force empty to trigger fallback
+            plan = { status: 'CONTINUE', actions: [] }; // Force empty to trigger fallback
         }
 
+        let actions = plan.actions || [];
+
         // INTELLIGENT FALLBACK FOR EMPTY PLANS
-        if (!actions || actions.length === 0) {
+        if (actions.length === 0 && plan.status !== 'COMPLETED') {
             console.warn('[UAL Planner] Empty plan generated. Triggering intelligent fallback.');
 
             // Construct a search query fallback
@@ -144,9 +149,15 @@ CRITICAL: Return ONLY the JSON Array. No markdown formatting. No text.`;
                 { type: 'wait', timeout: 3000 },
                 { type: 'screenshot' }
             ];
+            plan.status = 'CONTINUE';
         }
 
-        return NextResponse.json({ actions, raw: response });
+        return NextResponse.json({
+            actions,
+            status: plan.status,
+            reasoning: plan.reasoning,
+            raw: response
+        });
 
     } catch (error: any) {
         console.error('[UAL Planner] CRITICAL FAILURE:', error);

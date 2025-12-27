@@ -10,7 +10,7 @@ export interface AgentStep {
 
 export class UALAgentLoop {
     private client: UALClient;
-    private maxSteps: number = 10;
+    private maxSteps: number = 15;
     private isRunning: boolean = false;
 
     constructor() {
@@ -24,8 +24,9 @@ export class UALAgentLoop {
         if (this.isRunning) return;
         this.isRunning = true;
 
-        let currentUrl: string | undefined = undefined;
         let stepCount = 0;
+        const sessionId = `agent-${Math.random().toString(36).substring(2, 9)}`;
+        let currentState: { url?: string; title?: string; text?: string; botStatus?: string } = {};
 
         try {
             while (stepCount < this.maxSteps && this.isRunning) {
@@ -38,7 +39,18 @@ export class UALAgentLoop {
                     timestamp: Date.now()
                 });
 
-                const actions = await this.client.planActions(goal, currentUrl);
+                // Pass context (url, title, snippet, botStatus) to planner
+                const plan = await this.client.planActions(goal, currentState.url, currentState);
+                const { actions, status, reasoning } = plan;
+
+                if (status === 'COMPLETED') {
+                    onStep({
+                        type: 'completed',
+                        message: reasoning || 'Goal achieved successfully.',
+                        timestamp: Date.now()
+                    });
+                    break;
+                }
 
                 if (!actions || actions.length === 0) {
                     onStep({
@@ -51,7 +63,7 @@ export class UALAgentLoop {
 
                 onStep({
                     type: 'executing',
-                    message: `Executing ${actions.length} actions...`,
+                    message: reasoning || `Executing ${actions.length} actions...`,
                     actions,
                     timestamp: Date.now()
                 });
@@ -59,14 +71,19 @@ export class UALAgentLoop {
                 // 2. EXECUTING
                 const result: UALResult = await this.client.executeTask({
                     goal,
-                    url: currentUrl,
+                    sessionId,
+                    url: currentState.url,
                     actions
                 });
 
                 // 3. OBSERVING
+                const obsMessage = result.data?.botStatus === "BLOCK_DETECTED"
+                    ? `⚠️ BOT BLOCK DETECTED on ${result.data?.title || 'Unknown Page'}`
+                    : `Observed: ${result.data?.title || 'Unknown Page'}`;
+
                 onStep({
                     type: 'observing',
-                    message: `Step ${stepCount} complete. Observing state...`,
+                    message: obsMessage,
                     screenshot: result.screenshot,
                     timestamp: Date.now()
                 });
@@ -80,27 +97,18 @@ export class UALAgentLoop {
                     break;
                 }
 
-                // Update context for next iteration
-                if (result.data?.url) {
-                    currentUrl = result.data.url;
+                // Update state for next iteration
+                if (result.data) {
+                    currentState = {
+                        url: result.data.url,
+                        title: result.data.title,
+                        text: result.data.text,
+                        botStatus: result.data.botStatus
+                    };
                 }
 
-                // Simple heuristic: If we have a screenshot and the planner didn't error, 
-                // we check if the goal might be reached. 
-                // In a real implementation, we'd have a 'critic' or 'evaluator' LLM call.
-                // For now, if the planner returns a screenshot action as the last step, we'll consider it a good point to stop or continue.
-                // BUT, since we want "Comet-like" behavior, we keep going until a terminal condition or max steps.
-
-                // Check if goal is achieved (placeholder for LLM evaluation)
-                const isGoalAchieved = await this.evaluateProgress(goal, result);
-                if (isGoalAchieved) {
-                    onStep({
-                        type: 'completed',
-                        message: 'Goal achieved successfully.',
-                        timestamp: Date.now()
-                    });
-                    break;
-                }
+                // Support for auto-finishing if reasoning suggests it
+                if (status === 'COMPLETED') break;
 
                 // Small delay between steps
                 await new Promise(r => setTimeout(r, 2000));

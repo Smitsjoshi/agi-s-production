@@ -10,11 +10,12 @@
  */
 
 export interface WebAction {
-    type: 'navigate' | 'click' | 'type' | 'scroll' | 'wait' | 'screenshot' | 'extract';
+    type: 'navigate' | 'click' | 'type' | 'scroll' | 'wait' | 'screenshot' | 'extract' | 'press';
     selector?: string;
     value?: string;
     url?: string;
     timeout?: number;
+    key?: string;
 }
 
 export interface UALResult {
@@ -27,6 +28,7 @@ export interface UALResult {
 
 export interface UALTask {
     goal: string;
+    sessionId?: string;
     url?: string;
     actions?: WebAction[];
 }
@@ -92,18 +94,17 @@ export class UALClient {
     /**
      * Plan actions using AI
      */
-    async planActions(goal: string, url?: string): Promise<WebAction[]> {
+    async planActions(goal: string, url?: string, state?: any): Promise<{ actions: WebAction[], status?: string, reasoning?: string }> {
         const response = await fetch('/api/ual/plan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ goal, context: { url } }),
+            body: JSON.stringify({ goal, context: { url, ...state } }),
         });
 
         if (!response.ok) {
             throw new Error(`UAL Planning API error: ${response.statusText}`);
         }
 
-        const data = await response.json();
-        return data.actions;
+        return await response.json();
     }
 }

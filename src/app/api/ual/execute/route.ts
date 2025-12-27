@@ -37,7 +37,7 @@ async function initBrowser() {
 export async function POST(req: NextRequest) {
     try {
         const task: UALTask = await req.json();
-        const { goal, url, actions } = task;
+        const { goal, url, actions, sessionId } = task;
 
         const steps: string[] = [];
         let screenshot: string | undefined;
@@ -46,178 +46,196 @@ export async function POST(req: NextRequest) {
         const { puppeteer: pup, chromium: chr } = await initBrowser();
         let browser;
 
+        // BROWSER STEALTH CONFIG
+        const USER_AGENTS = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+        ];
+        const randomUA = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+
+        // Persistent User Data Directory for local dev to keep sessions
+        const userDataDir = sessionId ? `./.ual-sessions/${sessionId}` : undefined;
+
         try {
             if (chr && process.env.VERCEL) {
                 steps.push('🌐 Launching browser (Vercel/CDN Mode)...');
-
-                // USE REMOTE BINARY to avoid 50MB limit and path issues
-                // Using a specific compatible version pack
                 const remotePack = "https://github.com/Sparticuz/chromium/releases/download/v123.0.1/chromium-v123.0.1-pack.tar";
 
                 browser = await pup.default.launch({
-                    args: chr.default.args,
+                    args: [...chr.default.args, '--no-sandbox', '--disable-setuid-sandbox'],
                     defaultViewport: chr.default.defaultViewport,
                     executablePath: await chr.default.executablePath(remotePack),
                     headless: chr.default.headless,
                     ignoreHTTPSErrors: true,
                 });
             } else {
-                // Local development - Headful if requested (currently hardcoded or could be env driven)
-                steps.push('🌐 Launching browser (Local/Visible Mode)...');
+                steps.push(`🌐 Launching Stealth Browser${sessionId ? ' (Persistent)' : ''}...`);
                 browser = await pup.default.launch({
-                    headless: false, // Visible for demo
+                    headless: false,
                     defaultViewport: null,
+                    userDataDir, // Enable session persistence
                     args: [
                         '--start-maximized',
                         '--no-sandbox',
                         '--disable-setuid-sandbox',
+                        '--disable-blink-features=AutomationControlled',
                     ],
                 });
             }
         } catch (launchError: any) {
             console.error("Launch Error:", launchError);
-            steps.push(`❌ Critical Browser Error: ${launchError.message}`);
-
-            // Fallback response for Vercel Free Tier limitations
-            return NextResponse.json({
-                success: false,
-                error: `Browser automation failed. Vercel Free Tier has strictly limited binary support. (${launchError.message})`,
-                steps,
-            } as UALResult);
+            steps.push(`❌ Browser Error: ${launchError.message}`);
+            return NextResponse.json({ success: false, error: launchError.message, steps }, { status: 500 });
         }
 
         steps.push('✅ Browser engine active');
-        const page = await browser.newPage();
-        await page.setViewport({ width: 1280, height: 720 });
 
-        // Navigate to URL (either provided or from first action)
-        let initialUrl = url;
+        // Helper to always get the most recently created/active page
+        const getActivePage = async (b: any) => {
+            const currentPages = await b.pages();
+            return currentPages[currentPages.length - 1];
+        };
 
-        // If no initial URL provided, check if first action is navigation
-        if (!initialUrl && actions && actions.length > 0 && actions[0].type === 'navigate' && actions[0].url) {
-            initialUrl = actions[0].url;
+        let page = await getActivePage(browser);
+        await page.setUserAgent(randomUA);
+
+        // Hide automation flags
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        });
+
+        if (!process.env.VERCEL) {
+            await page.setViewport({ width: 1440, height: 900 });
         }
 
-        if (initialUrl) {
-            steps.push(`🌐 Navigating to ${initialUrl}...`);
+        // Logic to determine if we need to navigate or if we're already on a page
+        const currentUrl = page.url();
+        let targetUrl = url;
+
+        if (!targetUrl && actions?.[0]?.type === 'navigate') {
+            targetUrl = actions[0].url;
+        }
+
+        // Only navigate if we're not already there or near there
+        if (targetUrl && (currentUrl === 'about:blank' || (targetUrl !== 'NONE' && !currentUrl.includes(targetUrl.replace(/^https?:\/\/(www\.)?/, ''))))) {
+            steps.push(`🌐 Navigating to ${targetUrl}...`);
             try {
-                await page.goto(initialUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+                await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 30000 });
                 steps.push('✅ Page loaded');
-            } catch (navError: any) {
-                steps.push(`⚠️ Navigation warning: ${navError.message}`);
+                page = await getActivePage(browser);
+            } catch (e: any) {
+                steps.push(`⚠️ Nav warning: ${e.message}`);
             }
-        } else {
-            steps.push('⚠️ No start URL provided. Attempting to execute actions directly...');
         }
 
-        // EXECUTE ACTIONS
-        for (const action of actions) {
-            steps.push(`Running: ${action.type} ${action.selector || action.url || ''}`);
-
+        // EXECUTE ACTIONS ROBOUSTY
+        for (const action of actions || []) {
             try {
-                if (action.type === 'navigate' && action.url) {
-                    await page.goto(action.url, { waitUntil: 'networkidle0', timeout: 30000 });
+                // Refresh page reference in case previous action opened a new tab
+                page = await getActivePage(browser);
+
+                switch (action.type) {
+                    case 'navigate':
+                        if (action.url) {
+                            steps.push(`🌐 Navigating to ${action.url}...`);
+                            await page.goto(action.url, { waitUntil: 'networkidle2' });
+                        }
+                        break;
+                    case 'click':
+                        if (action.selector) {
+                            steps.push(`🖱️ Clicking ${action.selector}...`);
+                            await page.waitForSelector(action.selector, { timeout: 10000, visible: true });
+
+                            // Human-like mouse move
+                            const element = await page.$(action.selector);
+                            const box = await element.boundingBox();
+                            if (box) {
+                                await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+                            }
+                            await page.click(action.selector);
+                        }
+                        break;
+                    case 'type':
+                        if (action.selector && action.value) {
+                            steps.push(`⌨️ Typing into ${action.selector}...`);
+                            await page.waitForSelector(action.selector, { timeout: 10000, visible: true });
+                            await page.click(action.selector, { clickCount: 3 }); // Select all text
+                            await page.keyboard.press('Backspace');
+
+                            // Human-like typing
+                            for (const char of action.value) {
+                                await page.keyboard.type(char, { delay: 30 + Math.random() * 50 });
+                            }
+
+                            // If value ends with \n or it's a search, press Enter automatically
+                            if (action.value.endsWith('\n') || goal.toLowerCase().includes('search')) {
+                                await new Promise(r => setTimeout(r, 200 + Math.random() * 300));
+                                await page.keyboard.press('Enter');
+                                steps.push('⌨️ Pressed Enter');
+                                await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => { });
+                            }
+                        }
+                        break;
+                    case 'press':
+                        if (action.key) {
+                            steps.push(`⌨️ Pressing ${action.key}...`);
+                            await page.keyboard.press(action.key);
+                            if (action.key === 'Enter') {
+                                await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => { });
+                            }
+                        }
+                        break;
+                    case 'wait':
+                        const ms = action.timeout || 2000;
+                        steps.push(`⏳ Waiting ${ms}ms...`);
+                        await new Promise(r => setTimeout(r, ms));
+                        break;
+                    case 'screenshot':
+                        screenshot = await page.screenshot({ encoding: 'base64', fullPage: false });
+                        steps.push('📸 Captured state');
+                        break;
+                    case 'scroll':
+                        steps.push('📜 Scrolling...');
+                        await page.evaluate(() => window.scrollBy(0, 500));
+                        break;
                 }
-                else if (action.type === 'click' && action.selector) {
-                    await page.click(action.selector);
-                }
-                else if (action.type === 'type' && action.selector && action.value) {
-                    await page.type(action.selector, action.value);
-                }
-                else if (action.type === 'wait') {
-                    await new Promise(r => setTimeout(r, action.timeout || 1000));
-                }
-                else if (action.type === 'screenshot') {
-                    screenshot = await page.screenshot({ encoding: 'base64' });
-                }
-            } catch (actError: any) {
-                console.error(`Action ${action.type} failed:`, actError);
-                steps.push(`Warning: ${action.type} failed - ${actError.message}`);
+            } catch (err: any) {
+                steps.push(`⚠️ Failed: ${action.type} - ${err.message}`);
+                console.error(`Action ${action.type} failed`, err);
             }
         }
 
-        // FORCE FINAL SCREENSHOT IF MISSING
+        // Finalize state
         if (!screenshot) {
-            steps.push('📸 Auto-capturing final state...');
-            try {
-                screenshot = await page.screenshot({ encoding: 'base64' });
-            } catch (e) {
-                console.error('Final screenshot failed', e);
-            }
+            screenshot = await page.screenshot({ encoding: 'base64' });
         }
 
-        // Extract basic data
         try {
-            extractedData = {
-                title: await page.title(),
-                url: page.url(),
-                text: await page.evaluate(() => document.body.innerText.substring(0, 500))
-            };
+            const title = await page.title();
+            const currentUrl = page.url();
+            const text = await page.evaluate(() => document.body.innerText.substring(0, 1500));
+
+            // Bot detection check
+            let botStatus = "CLEAN";
+            if (title.toLowerCase().includes("captcha") || title.toLowerCase().includes("robot") || text.toLowerCase().includes("please verify you are a human")) {
+                botStatus = "BLOCK_DETECTED";
+            }
+
+            extractedData = { title, url: currentUrl, text, botStatus };
         } catch (e) { }
 
         await browser.close();
-        steps.push('✅ Session closed');
+        steps.push('✅ Cycle complete');
 
         return NextResponse.json({
             success: true,
             steps,
-            screenshot, // Should now be guaranteed
+            screenshot,
             data: extractedData
         });
 
     } catch (error: any) {
-        console.error('UAL Error:', error);
-        return NextResponse.json({
-            success: false,
-            error: error.message,
-            steps: [`❌ Fatal Error: ${error.message}`],
-        }, { status: 500 });
+        return NextResponse.json({ success: false, error: error.message, steps: [`❌ Fatal: ${error.message}`] }, { status: 500 });
     }
 }
 
-async function executeAction(page: any, action: WebAction, steps: string[]) {
-    // ... (Keep existing execution logic same)
-    switch (action.type) {
-        case 'navigate':
-            if (action.url) {
-                steps.push(`🌐 Navigating to ${action.url}...`);
-                await page.goto(action.url, { waitUntil: 'networkidle2' });
-                steps.push('✅ Navigation complete');
-            }
-            break;
-        case 'click':
-            if (action.selector) {
-                steps.push(`🖱️ Clicking ${action.selector}...`);
-                await page.waitForSelector(action.selector, { timeout: 5000 });
-                await page.click(action.selector);
-                steps.push('✅ Click complete');
-            }
-            break;
-        case 'type':
-            if (action.selector && action.value) {
-                steps.push(`⌨️ Typing into ${action.selector}...`);
-                await page.waitForSelector(action.selector, { timeout: 5000 });
-                await page.type(action.selector, action.value);
-                steps.push('✅ Typing complete');
-            }
-            break;
-        case 'scroll':
-            steps.push('📜 Scrolling page...');
-            await page.evaluate(() => window.scrollBy(0, window.innerHeight));
-            steps.push('✅ Scroll complete');
-            break;
-        case 'wait':
-            const timeout = action.timeout || 1000;
-            steps.push(`⏳ Waiting ${timeout}ms...`);
-            await page.waitForTimeout(timeout);
-            steps.push('✅ Wait complete');
-            break;
-        case 'screenshot':
-            steps.push('📸 Taking screenshot...');
-            await page.screenshot({ encoding: 'base64' });
-            steps.push('✅ Screenshot taken');
-            break;
-        default:
-            steps.push(`⚠️ Unknown action type: ${action.type}`);
-    }
-}
