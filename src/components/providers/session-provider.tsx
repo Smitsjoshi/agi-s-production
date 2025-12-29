@@ -37,12 +37,17 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             pages: ['all']
           };
           setUser(userData);
-        } else if (email === 'dushyant@testing.com') {
-          // Tester: Partial Access
+        } else if (['dushyant@testing.com', 'yash@testing.com', 'dhruv@testing.com'].includes(email || '')) {
+          // Testers: Partial Access
+          const names: { [key: string]: string } = {
+            'dushyant@testing.com': 'Dushyant',
+            'yash@testing.com': 'Yash',
+            'dhruv@testing.com': 'Dhruv'
+          };
           const userData: User = {
             id: firebaseUser.uid,
             email: firebaseUser.email!,
-            name: 'Dushyant',
+            name: names[email || ''] || 'Tester',
             avatarUrl: firebaseUser.photoURL || '',
             pages: ['/ask']
           };
