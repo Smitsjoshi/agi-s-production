@@ -23,30 +23,36 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const ADMIN_EMAIL = 'mmsjsmit@gmail.com';
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // Simple permission logic: 
-        // Admin gets 'all'. 
-        // Others get 'none' (or specific pages if we expanded this logic later).
-        // Since the prompt instructions said "only i can access... else people should not access",
-        // we'll give full access to the admin and very limited or no access to others.
+        const email = firebaseUser.email?.toLowerCase();
 
-        let pages: string[] = [];
-        if (firebaseUser.email === ADMIN_EMAIL) {
-          pages = ['all'];
+        if (email === ADMIN_EMAIL.toLowerCase()) {
+          // Admin: Full Access
+          const userData: User = {
+            id: firebaseUser.uid,
+            email: firebaseUser.email!,
+            name: firebaseUser.displayName || 'Admin',
+            avatarUrl: firebaseUser.photoURL || '',
+            pages: ['all']
+          };
+          setUser(userData);
+        } else if (email === 'dushyant@testing.com') {
+          // Tester: Partial Access
+          const userData: User = {
+            id: firebaseUser.uid,
+            email: firebaseUser.email!,
+            name: 'Dushyant',
+            avatarUrl: firebaseUser.photoURL || '',
+            pages: ['/ask']
+          };
+          setUser(userData);
         } else {
-          // Locking sidebar: unauthorized users get no special access
-          pages = [];
+          // Unauthorized
+          console.warn(`Unauthorized: ${email}`);
+          await logOut();
+          setUser(null);
         }
-
-        const appUser: User = {
-          id: firebaseUser.uid,
-          name: firebaseUser.displayName || 'User',
-          email: firebaseUser.email || '',
-          avatarUrl: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
-          pages: pages,
-        };
-        setUser(appUser);
       } else {
         setUser(null);
       }

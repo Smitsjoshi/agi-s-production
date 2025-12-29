@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('mmsjsmit@gmail.com');
-    const [password, setPassword] = useState('admin');
+    const [password, setPassword] = useState('ADMIN');
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
