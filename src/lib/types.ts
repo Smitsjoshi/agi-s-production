@@ -27,6 +27,7 @@ export interface User {
     email: string;
     name: string;
     avatarUrl: string;
+    pages?: string[];
 }
 
 export interface Agent {

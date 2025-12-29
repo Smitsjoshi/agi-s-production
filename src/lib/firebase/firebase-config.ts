@@ -25,4 +25,4 @@ remoteConfig.defaultConfig = {
   "upgrade_banner_visible": true
 };
 
-export { remoteConfig };
+export { remoteConfig, app };

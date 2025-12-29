@@ -45,7 +45,7 @@ export function UserNav() {
     return (
       <div className="p-2">
         <Button asChild className="w-full justify-start">
-          <Link href="/account">
+          <Link href="/login">
             <LogIn />
             {state === 'expanded' && <span>Sign In</span>}
           </Link>

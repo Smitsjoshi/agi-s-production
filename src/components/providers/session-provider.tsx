@@ -2,6 +2,7 @@
 
 import type { User } from '@/lib/types';
 import React, { createContext, useState, useMemo, useEffect } from 'react';
+import { auth, onAuthStateChanged, logOut } from '@/lib/firebase/auth';
 
 interface SessionContextType {
   user: User | null;
@@ -18,30 +19,67 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const isSignedIn = !!user;
 
+  // Use the admin email from the context (or hardcode for now as per instructions)
+  const ADMIN_EMAIL = 'mmsjsmit@gmail.com';
+
   useEffect(() => {
-    // Auto-sign-in the user with full access
-    const autoUser: User = {
-      id: 'mmsjsmit@gmail.com',
-      name: 'Smit Joshi',
-      email: 'mmsjsmit@gmail.com',
-      avatarUrl: `https://picsum.photos/seed/mmsjsmit@gmail.com/100/100`,
-      pages: ['all'],
-    };
-    setUser(autoUser);
-    setIsLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        // Simple permission logic: 
+        // Admin gets 'all'. 
+        // Others get 'none' (or specific pages if we expanded this logic later).
+        // Since the prompt instructions said "only i can access... else people should not access",
+        // we'll give full access to the admin and very limited or no access to others.
+
+        let pages: string[] = [];
+        if (firebaseUser.email === ADMIN_EMAIL) {
+          pages = ['all'];
+        } else {
+          // Locking sidebar: unauthorized users get no special access
+          pages = [];
+        }
+
+        const appUser: User = {
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || 'User',
+          email: firebaseUser.email || '',
+          avatarUrl: firebaseUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${firebaseUser.email}`,
+          pages: pages,
+        };
+        setUser(appUser);
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const signIn = (email: string, pass: string): Promise<User> => {
-    // This function is no longer used for login but kept for compatibility
-    return new Promise((resolve, reject) => {
-        reject(new Error('Manual sign-in is disabled.'));
-    });
+  const signIn = async (email: string, pass: string): Promise<User> => {
+    // This is just a stub for the context interface, actual auth happens in login page via library
+    // We could redirect here if we wanted to enforce flow
+    throw new Error("Use the login page.");
   };
 
   const signOut = () => {
-    // Sign out is not really possible in this auto-login setup
-    console.log("Sign out clicked, but user is auto-logged in.");
+    logOut();
   };
+
+  // Redirect if not signed in and not on a public page
+  useEffect(() => {
+    if (!isLoading && !user) {
+      // Basic client-side protection
+      // We could use usePathname to check if we are already on /login or /signup
+      // But for now, let's just expose the logic and let the layout/page handle it or 
+      // add a specific 'ProtectedLayout' component.
+      // Actually, let's do it here for simplicity as requested.
+      const isPublicPath = window.location.pathname === '/login' || window.location.pathname === '/signup';
+      if (!isPublicPath) {
+        window.location.href = '/login';
+      }
+    }
+  }, [user, isLoading]);
 
   const value = useMemo(
     () => ({
