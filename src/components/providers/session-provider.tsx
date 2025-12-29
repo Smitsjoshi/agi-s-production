@@ -37,10 +37,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             pages: ['all']
           };
           setUser(userData);
-        } else if (['dushyant@testing.com', 'yash@testing.com', 'dhruv@testing.com'].includes(email || '')) {
+        } else if (['dushyant@testing.com', 'dushyant@gmail.com', 'yash@testing.com', 'dhruv@testing.com'].includes(email || '')) {
           // Testers: Partial Access
           const names: { [key: string]: string } = {
             'dushyant@testing.com': 'Dushyant',
+            'dushyant@gmail.com': 'Dushyant',
             'yash@testing.com': 'Yash',
             'dhruv@testing.com': 'Dhruv'
           };
