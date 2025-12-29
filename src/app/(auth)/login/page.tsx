@@ -11,8 +11,8 @@ import { signIn } from '@/lib/firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('mmsjsmit@gmail.com');
+    const [password, setPassword] = useState('admin');
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const { toast } = useToast();
@@ -41,7 +41,7 @@ export default function LoginPage() {
         <div className="space-y-6">
             <div className="space-y-2 text-center">
                 <h1 className="text-3xl font-bold">Sign In</h1>
-                <p className="text-muted-foreground">Enter your credentials to access your account</p>
+                <p className="text-muted-foreground">AGI-S Administrative Access</p>
             </div>
             <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
@@ -71,12 +71,6 @@ export default function LoginPage() {
                     Sign In
                 </Button>
             </form>
-            <div className="text-center text-sm">
-                Don't have an account?{' '}
-                <Link href="/signup" className="underline underline-offset-4 hover:text-primary">
-                    Sign up
-                </Link>
-            </div>
         </div>
     );
 }
