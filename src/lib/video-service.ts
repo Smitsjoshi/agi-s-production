@@ -77,10 +77,10 @@ export class PollinationsService {
         // Based on latest docs, 'model=seedance' or 'model=turbo' (video-capable) is preferred.
         // We will specific set width/height for video aspect ratio.
         // Adding 'model=seedance' which is known for 2-10s clips.
-        // We fallback to the reliable image endpoint which often returns GIFs/Videos for specific models
-        // or high-quality images. This avoids CORB/404 errors.
-        // https://image.pollinations.ai/prompt/[prompt]?model=luma
-        const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=luma&seed=${seed}&nolog=true`;
+        // We use 'flux-pro' or 'turbo' model which is high quality. 
+        // We append 'nologo=true' to attempt to remove the watermark (best effort on free tier).
+        // https://image.pollinations.ai/prompt/[prompt]?model=flux-pro&nologo=true
+        const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux-pro&seed=${seed}&nologo=true`;
 
         return url;
     }
