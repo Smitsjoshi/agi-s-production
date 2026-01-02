@@ -311,31 +311,27 @@ export function VideoGenForm() {
                 </p>
               </div>
             ) : videoSrc ? (
-              // We add a key to force re-render when src changes
               <div className="relative w-full h-full flex items-center justify-center">
-                <video
-                  key={videoSrc}
-                  src={videoSrc}
-                  controls
-                  autoPlay
-                  loop
-                  className="max-h-full max-w-full w-auto h-auto shadow-2xl"
-                  onError={(e) => {
-                    // If video fails, try image fallback for cloud
-                    if (provider === 'cloud') {
-                      // Sometimes cloud returns an image if video model fails
-                      const img = e.currentTarget.parentElement?.querySelector('img');
-                      if (img) img.style.display = 'block';
-                      e.currentTarget.style.display = 'none';
-                    }
-                  }}
-                />
-                {/* Fallback image is only shown if JS enables it via onError above. Default hidden. */}
-                <img
-                  src={videoSrc}
-                  className="max-h-full max-w-full w-auto h-auto shadow-2xl hidden"
-                  alt="Video Preview"
-                />
+                {provider === 'cloud' ? (
+                  // Cloud (Pollinations) returns distinct media that works best in img tags (GIF/JPG)
+                  // to avoid CORB issues with video tags.
+                  <img
+                    src={videoSrc}
+                    alt="Generated Content"
+                    className="max-h-full max-w-full w-auto h-auto shadow-2xl rounded-md"
+                  />
+                ) : (
+                  // Local (ComfyUI) returns real MP4/WebM video files.
+                  <video
+                    key={videoSrc}
+                    src={videoSrc}
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    className="max-h-full max-w-full w-auto h-auto shadow-2xl rounded-md"
+                  />
+                )}
               </div>
             ) : (
               <div className="text-center space-y-2 text-muted-foreground">
