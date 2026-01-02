@@ -330,11 +330,11 @@ export function VideoGenForm() {
                     }
                   }}
                 />
-                {/* Fallback image for cloud if video fails to load or is just an image */}
+                {/* Fallback image is only shown if JS enables it via onError above. Default hidden. */}
                 <img
                   src={videoSrc}
                   className="max-h-full max-w-full w-auto h-auto shadow-2xl hidden"
-                  alt="Result"
+                  alt="Video Preview"
                 />
               </div>
             ) : (

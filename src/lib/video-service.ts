@@ -77,9 +77,10 @@ export class PollinationsService {
         // Based on latest docs, 'model=seedance' or 'model=turbo' (video-capable) is preferred.
         // We will specific set width/height for video aspect ratio.
         // Adding 'model=seedance' which is known for 2-10s clips.
-        const url = `https://pollinations.ai/p/${encodedPrompt}?width=1280&height=720&model=seedance&seed=${seed}&nolog=true`;
+        // Correct endpoint for video generation as of 2025.
+        // https://gen.pollinations.ai/video/[prompt]?model=seedance
+        const url = `https://gen.pollinations.ai/video/${encodedPrompt}?model=seedance&seed=${seed}`;
 
-        // Note: Pollinations might return a GIF or MP4.
         return url;
     }
 }
