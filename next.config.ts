@@ -5,9 +5,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+
 
   serverExternalPackages: ['genkit', 'genkitx-openai', '@google/generative-ai', 'grpc', '@grpc/grpc-js', 'protobufjs', '@sparticuz/chromium-min'],
   images: {
