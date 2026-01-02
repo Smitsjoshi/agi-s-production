@@ -74,13 +74,12 @@ export class PollinationsService {
 
         // We use a specific endpoint or parameter if documented. 
         // Based on search, 'model=luma' or 'model=video' is the key.
-        // We will try `model=luma` (Luma Dream Machine via Pollinations)
-        const url = `https://pollinations.ai/p/${encodedPrompt}?width=1280&height=720&model=luma&seed=${seed}&nolog=true`;
+        // Based on latest docs, 'model=seedance' or 'model=turbo' (video-capable) is preferred.
+        // We will specific set width/height for video aspect ratio.
+        // Adding 'model=seedance' which is known for 2-10s clips.
+        const url = `https://pollinations.ai/p/${encodedPrompt}?width=1280&height=720&model=seedance&seed=${seed}&nolog=true`;
 
-        // Pollinations usually returns the image/video binary directly. 
-        // We can just return this URL as the src for the video tag!
-        // However, we should verify it exists or is valid.
-
+        // Note: Pollinations might return a GIF or MP4.
         return url;
     }
 }
