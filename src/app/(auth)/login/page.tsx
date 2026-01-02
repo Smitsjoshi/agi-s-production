@@ -18,7 +18,7 @@ export default function LoginPage() {
     const router = useRouter();
     const { toast } = useToast();
 
-    const h5andleLogin = async (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
