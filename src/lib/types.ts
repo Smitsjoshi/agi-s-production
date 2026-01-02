@@ -43,6 +43,10 @@ export interface Agent {
     usageCount?: number;
     lastUsed?: number;
     isFavorite?: boolean;
+    skills?: string;
+    goals?: string;
+    constraints?: string;
+    personality?: string;
 }
 
 // Schema for Blueprint Flow (formerly Canvas)
