@@ -108,6 +108,40 @@ export async function POST(req: NextRequest) {
             await page.setViewport({ width: 1440, height: 900 });
         }
 
+        // Helper to handle cookie consent popups
+        const handlePopups = async (p: any) => {
+            try {
+                // Common selectors for consent buttons
+                const selectors = [
+                    "button[aria-label='Accept all']",
+                    "button[aria-label='Reject all']",
+                    "button:contains('Accept all')",
+                    "button:contains('Reject all')",
+                    "button:contains('I agree')",
+                    "div[role='dialog'] button:first-child", // Often the "Reject" or "More options" button
+                    "form[action*='consent'] button"
+                ];
+
+                // Check for "Before you continue" Google specific
+                const googleConsent = await p.$x("//button[contains(., 'Reject all')]");
+                if (googleConsent.length > 0) {
+                    await googleConsent[0].click();
+                    steps.push('🍪 Dismissed Google Consent (Reject all)');
+                    await new Promise(r => setTimeout(r, 1000));
+                    return;
+                }
+
+                const googleConsentAccept = await p.$x("//button[contains(., 'Accept all')]");
+                if (googleConsentAccept.length > 0) {
+                    await googleConsentAccept[0].click();
+                    steps.push('🍪 Dismissed Google Consent (Accept all)');
+                    await new Promise(r => setTimeout(r, 1000));
+                    return;
+                }
+
+            } catch (e) { }
+        };
+
         // Logic to determine if we need to navigate or if we're already on a page
         const currentUrl = page.url();
         let targetUrl = url;
@@ -120,12 +154,15 @@ export async function POST(req: NextRequest) {
         if (targetUrl && (currentUrl === 'about:blank' || (targetUrl !== 'NONE' && !currentUrl.includes(targetUrl.replace(/^https?:\/\/(www\.)?/, ''))))) {
             steps.push(`🌐 Navigating to ${targetUrl}...`);
             try {
-                await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+                await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }); // relaxation to domcontentloaded for speed
+                await handlePopups(page); // Check for popups immediately after load
                 steps.push('✅ Page loaded');
                 page = await getActivePage(browser);
             } catch (e: any) {
                 steps.push(`⚠️ Nav warning: ${e.message}`);
             }
+        } else {
+            await handlePopups(page); // Check for popups even if staying on page
         }
 
         // EXECUTE ACTIONS ROBOUSTY
@@ -138,41 +175,60 @@ export async function POST(req: NextRequest) {
                     case 'navigate':
                         if (action.url) {
                             steps.push(`🌐 Navigating to ${action.url}...`);
-                            await page.goto(action.url, { waitUntil: 'networkidle2' });
+                            await page.goto(action.url, { waitUntil: 'domcontentloaded' });
+                            await handlePopups(page);
                         }
                         break;
                     case 'click':
                         if (action.selector) {
                             steps.push(`🖱️ Clicking ${action.selector}...`);
-                            await page.waitForSelector(action.selector, { timeout: 10000, visible: true });
+                            await page.waitForSelector(action.selector, { timeout: 5000, visible: true });
+
+                            // Try to dismiss popups again if selector isn't clickable/found immediately
+                            await handlePopups(page);
 
                             // Human-like mouse move
                             const element = await page.$(action.selector);
-                            const box = await element.boundingBox();
-                            if (box) {
-                                await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+                            if (element) {
+                                const box = await element.boundingBox();
+                                if (box) {
+                                    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+                                }
+                                await page.click(action.selector);
+                            } else {
+                                throw new Error(`Element ${action.selector} not found`);
                             }
-                            await page.click(action.selector);
                         }
                         break;
                     case 'type':
                         if (action.selector && action.value) {
                             steps.push(`⌨️ Typing into ${action.selector}...`);
-                            await page.waitForSelector(action.selector, { timeout: 10000, visible: true });
+                            await page.waitForSelector(action.selector, { timeout: 5000, visible: true });
+
                             await page.click(action.selector, { clickCount: 3 }); // Select all text
                             await page.keyboard.press('Backspace');
 
                             // Human-like typing
                             for (const char of action.value) {
-                                await page.keyboard.type(char, { delay: 30 + Math.random() * 50 });
+                                await page.keyboard.type(char, { delay: 10 + Math.random() * 30 }); // Faster typing
                             }
 
-                            // If value ends with \n or it's a search, press Enter automatically
-                            if (action.value.endsWith('\n') || goal.toLowerCase().includes('search')) {
-                                await new Promise(r => setTimeout(r, 200 + Math.random() * 300));
+                            // Smart Enter Logic
+                            // If it's a search box OR the goal implies searching/finding
+                            const isSearchBox = action.selector.includes('q') || action.selector.includes('search') || action.selector.includes('k');
+                            const goalImpliesSearch = goal.toLowerCase().match(/^(find|search|buy|get|show|price)/);
+
+                            if (action.value.endsWith('\n') || isSearchBox || goalImpliesSearch) {
+                                await new Promise(r => setTimeout(r, 500));
                                 await page.keyboard.press('Enter');
-                                steps.push('⌨️ Pressed Enter');
-                                await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => { });
+                                steps.push('⌨️ Pressed Enter (Auto-Search)');
+
+                                // Wait for SOME navigation or DOM change
+                                try {
+                                    await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 5000 });
+                                } catch (e) {
+                                    // Ignore timeout, page might just update via AJAX
+                                }
                             }
                         }
                         break;
@@ -181,8 +237,12 @@ export async function POST(req: NextRequest) {
                             steps.push(`⌨️ Pressing ${action.key}...`);
                             await page.keyboard.press(action.key);
                             if (action.key === 'Enter') {
-                                await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 }).catch(() => { });
+                                try {
+                                    await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 5000 });
+                                } catch (e) { }
                             }
+                        } else {
+                            steps.push('⚠️ Skipping empty "press" action');
                         }
                         break;
                     case 'wait':
