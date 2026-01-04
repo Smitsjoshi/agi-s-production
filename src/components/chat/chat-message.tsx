@@ -58,7 +58,7 @@ const CodeBlock = ({ language, value }: { language: string; value: string }) => 
 // Enhanced markdown renderer
 const EnhancedMarkdown = ({ content = '' }: { content: string }) => {
   return (
-    <div className="prose prose-sm dark:prose-invert max-w-none">
+    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-7 prose-p:mb-4 prose-headings:mt-6 prose-headings:mb-3 prose-li:my-1">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
@@ -74,6 +74,30 @@ const EnhancedMarkdown = ({ content = '' }: { content: string }) => {
                 {children}
               </code>
             );
+          },
+          p({ children }) {
+            return <p className="mb-4 leading-7">{children}</p>;
+          },
+          ul({ children }) {
+            return <ul className="my-4 ml-6 list-disc space-y-2">{children}</ul>;
+          },
+          ol({ children }) {
+            return <ol className="my-4 ml-6 list-decimal space-y-2">{children}</ol>;
+          },
+          li({ children }) {
+            return <li className="leading-7">{children}</li>;
+          },
+          h1({ children }) {
+            return <h1 className="text-2xl font-bold mt-6 mb-3">{children}</h1>;
+          },
+          h2({ children }) {
+            return <h2 className="text-xl font-bold mt-6 mb-3">{children}</h2>;
+          },
+          h3({ children }) {
+            return <h3 className="text-lg font-semibold mt-4 mb-2">{children}</h3>;
+          },
+          blockquote({ children }) {
+            return <blockquote className="border-l-4 border-primary pl-4 my-4 italic">{children}</blockquote>;
           },
           table({ children }) {
             return (
