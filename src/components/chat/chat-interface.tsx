@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Paperclip, Send, Loader2, Bot, BrainCircuit, Code, FlaskConical, Microscope, PlusCircle, Briefcase, Globe, Feather, Dices, Palette, Soup, TrendingUp, GitCompareArrows, Scale, Cpu, Workflow, Mic, Image, ArrowRight } from 'lucide-react';
+import { Paperclip, Send, Loader2, Bot, BrainCircuit, Code, FlaskConical, Microscope, PlusCircle, Briefcase, Globe, Feather, Dices, Palette, Soup, TrendingUp, GitCompareArrows, Scale, Cpu, Workflow, Mic, Image, ArrowRight, Star, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -35,8 +35,10 @@ const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: st
   'The Forecaster': { icon: TrendingUp, description: 'A trend analyst and data-driven futurist.', isPersona: true },
   'Comparison Analyst': { icon: GitCompareArrows, description: 'An unbiased evaluator for side-by-side comparisons.', isPersona: true },
   'The Ethicist': { icon: Scale, description: 'Analyzes complex moral and ethical dilemmas.', isPersona: true },
-  'Synthesis': { icon: Code, description: 'Placeholder' }, // Added to satisfy type, not shown in UI
-  'Crucible': { icon: Code, description: 'Placeholder' }, // Added to satisfy type, not shown in UI
+  'Synthesis': { icon: Code, description: 'Placeholder' }, // Added to satisfy type
+  'Crucible': { icon: Code, description: 'Placeholder' }, // Added to satisfy type
+  'Cosmos': { icon: Star, description: 'Generate entire fictional universes.' },
+  'Catalyst': { icon: BookOpen, description: 'Personalized learning paths.' },
 };
 
 const MAIN_AI_MODES = ['AI Knowledge', 'CodeX', 'Academic Research', 'Deep Dive', 'Canvas', 'Blueprint'] as AiMode[];
@@ -198,7 +200,7 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
     const userMessage: ChatMessage = { id: generateId(), role: 'user', content: currentInput };
 
     // Optimistically add user message
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev: ChatMessage[]) => [...prev, userMessage]);
     setIsLoading(true);
 
     // Play sound safely
@@ -224,14 +226,11 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
       const assistantMessage: ChatMessage = {
         id: generateId(),
         role: 'assistant',
-        content: result.answer || result.componentCode || result.summary || '',
-        sources: result.sources,
+        content: result.answer || result.componentCode || '',
         reasoning: result.reasoning,
-        confidenceScore: result.confidenceScore,
-        liveWebAgentOutput: result.visitedPages ? result : undefined,
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev: ChatMessage[]) => [...prev, assistantMessage]);
 
     } catch (error) {
       console.error(error);
@@ -246,7 +245,7 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
         role: 'assistant',
         content: '**Error:** I apologize, but I encountered an error. Please try again.',
       };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev: ChatMessage[]) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -262,22 +261,11 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
     <div className="flex h-full flex-col tour-chat-interface">
       <div className="flex-1 overflow-y-auto">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="p-4 md:p-6 space-y-6">
+          <div className="p-4 md:p-6 space-y-8 max-w-4xl mx-auto">
             {messages.length === 0 && !isLoading && (
-              <div className="flex flex-col items-center justify-center h-full text-center relative">
-
-                <div className="liquid-glow"></div>
-                <div className="relative z-10 p-4 bg-primary/10 rounded-full border-4 border-primary/20 mb-4">
-                  <Cpu size={40} className="text-primary" />
-                </div>
-                <div className="flex items-center justify-center gap-2 z-10">
-                  <h2 className="font-headline text-2xl font-semibold">Welcome to</h2>
-                  <Logo className="h-10 text-2xl" />
-                </div>
-                <p className="text-muted-foreground z-10 font-medium text-lg mt-2">One Interface. Infinite Capabilities.</p>
-                <p className="text-muted-foreground z-10 max-w-2xl mx-auto mt-4">
-                  AGI-S is built to be the one-stop solution for all your AI needs. This may result in a comprehensive application with many pages and powerful offerings, but our core goal is to fulfill all your requirements in one place, providing a truly integrated and seamless experience.
-                </p>
+              <div className="flex flex-col items-center justify-center h-[60vh] text-center opacity-40 hover:opacity-100 transition-opacity duration-700">
+                <Logo className="h-12 w-auto mb-6 grayscale opacity-80" />
+                <h1 className="text-xl font-medium tracking-tight text-foreground/80">One Interface. Infinite Capabilities.</h1>
               </div>
             )}
             {messages.map((msg) => (
@@ -290,9 +278,9 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
         </ScrollArea>
       </div>
 
-      <div className="border-t bg-background/95 p-2 backdrop-blur-sm sticky bottom-0 z-20">
+      <div className="p-4 md:p-6 max-w-4xl mx-auto w-full">
         {slashCommandOpen && (
-          <div className="absolute bottom-full left-2 mb-2 w-64 bg-popover border rounded-md shadow-lg overflow-hidden z-50 animate-in fade-in slide-in-from-bottom-2">
+          <div className="absolute bottom-full left-4 mb-2 w-64 bg-popover border rounded-md shadow-lg overflow-hidden z-50 animate-in fade-in slide-in-from-bottom-2">
             <div className="p-2 border-b text-xs font-medium text-muted-foreground">
               Select Mode
             </div>
@@ -323,131 +311,139 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
             </ScrollArea>
           </div>
         )}
-        <div className="relative rounded-lg border bg-background">
+        <div className="relative rounded-xl border bg-background/50 focus-within:ring-1 focus-within:ring-ring transition-all shadow-sm">
           <form
             onSubmit={handleSubmit}
-            className="flex items-center gap-2 p-1"
+            className="flex flex-col gap-2 p-3"
           >
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="shrink-0 w-44 justify-start font-medium tour-mode-selector" disabled={isLoading}>
-                  <ModeIcon className="h-4 w-4 mr-2 text-primary" />
-                  <span className="flex-1 text-left truncate text-sm">{mode}</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[26rem] p-0 mb-2">
-                <ScrollArea className="h-[32rem]">
-                  <div className="p-4 grid gap-4">
-                    <div className="space-y-2">
-                      <h4 className="font-medium leading-none">AI Modes</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Select a specialized AI agent for your task.
-                      </p>
-                    </div>
-                    <div className="grid gap-2">
-                      {MAIN_AI_MODES.map((m) => {
-                        const { icon: Icon, description } = AI_MODE_DETAILS[m];
-                        return (
-                          <div
-                            key={m}
-                            onClick={() => setMode(m)}
-                            className={cn(
-                              'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
-                              mode === m ? 'bg-secondary' : 'hover:bg-muted/50'
-                            )}
-                          >
-                            <Icon className="h-5 w-5 mt-0.5 text-primary" />
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium text-sm">{m}</p>
-                              </div>
-                              <p className="text-xs text-muted-foreground">{description}</p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <Separator />
-                    <div className="space-y-2">
-                      <h4 className="font-medium leading-none">Personas</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Chat with a specialized persona.
-                      </p>
-                    </div>
-                    <div className="grid gap-2">
-                      {PERSONAS.map((m) => {
-                        const { icon: Icon, description } = AI_MODE_DETAILS[m];
-                        return (
-                          <div
-                            key={m}
-                            onClick={() => setMode(m)}
-                            className={cn(
-                              'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
-                              mode === m ? 'bg-secondary' : 'hover:bg-muted/50'
-                            )}
-                          >
-                            <Icon className="h-5 w-5 mt-0.5 text-primary" />
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className="font-medium text-sm">{m}</p>
-                              </div>
-                              <p className="text-xs text-muted-foreground">{description}</p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </ScrollArea>
-              </PopoverContent>
-            </Popover>
             <Textarea
               value={input}
               onChange={handleInputChange}
-              placeholder={`Ask ${mode}... (Type / to switch mode)`}
-              className="chat-input flex-1 resize-none border-0 shadow-none focus-visible:ring-0 text-base py-3"
+              placeholder={`Ask ${mode}...`}
+              className="chat-input flex-1 resize-none border-0 shadow-none focus-visible:ring-0 text-base min-h-[60px] bg-transparent p-2"
               onKeyDown={handleKeyDown}
               disabled={isLoading}
               rows={1}
             />
-            <Button
-              type="button"
-              variant={isListening ? "destructive" : "ghost"}
-              size="icon"
-              className="shrink-0 h-8 w-8 tour-microphone-button"
-              onClick={() => {
-                if (isListening) {
-                  stopListening();
-                } else {
-                  startListening();
-                }
-              }}
-              disabled={isLoading}
-            >
-              <Mic className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="shrink-0 h-8 w-8 tour-attachment-button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isLoading}
-            >
-              <Image className="h-4 w-4" />
-            </Button>
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf" />
 
-            <Button type="submit" size="icon" className="shrink-0 h-8 w-8" disabled={isLoading || (!input.trim() && !file)}>
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            </Button>
+            <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground font-normal" disabled={isLoading}>
+                      <ModeIcon className="h-4 w-4" />
+                      <span className="text-xs">{mode}</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[26rem] p-0 mb-2">
+                    <ScrollArea className="h-[32rem]">
+                      <div className="p-4 grid gap-4">
+                        <div className="space-y-2">
+                          <h4 className="font-medium leading-none">AI Modes</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Select a specialized AI agent for your task.
+                          </p>
+                        </div>
+                        <div className="grid gap-2">
+                          {MAIN_AI_MODES.map((m) => {
+                            const { icon: Icon, description } = AI_MODE_DETAILS[m];
+                            return (
+                              <div
+                                key={m}
+                                onClick={() => setMode(m)}
+                                className={cn(
+                                  'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
+                                  mode === m ? 'bg-secondary' : 'hover:bg-muted/50'
+                                )}
+                              >
+                                <Icon className="h-5 w-5 mt-0.5 text-primary" />
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-medium text-sm">{m}</p>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">{description}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <Separator />
+                        <div className="space-y-2">
+                          <h4 className="font-medium leading-none">Personas</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Chat with a specialized persona.
+                          </p>
+                        </div>
+                        <div className="grid gap-2">
+                          {PERSONAS.map((m) => {
+                            const { icon: Icon, description } = AI_MODE_DETAILS[m];
+                            return (
+                              <div
+                                key={m}
+                                onClick={() => setMode(m)}
+                                className={cn(
+                                  'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
+                                  mode === m ? 'bg-secondary' : 'hover:bg-muted/50'
+                                )}
+                              >
+                                <Icon className="h-5 w-5 mt-0.5 text-primary" />
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-medium text-sm">{m}</p>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">{description}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </ScrollArea>
+                  </PopoverContent>
+                </Popover>
+
+                <Button
+                  type="button"
+                  variant={isListening ? "destructive" : "ghost"}
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                  onClick={() => {
+                    if (isListening) {
+                      stopListening();
+                    } else {
+                      startListening();
+                    }
+                  }}
+                  disabled={isLoading}
+                >
+                  <Mic className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isLoading}
+                >
+                  <Image className="h-4 w-4" />
+                </Button>
+                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf" />
+              </div>
+
+              <div className="flex items-center gap-2">
+                {file && (
+                  <span className="text-xs text-muted-foreground truncate max-w-[150px]">{file.name}</span>
+                )}
+                <Button type="submit" size="icon" className="h-8 w-8 rounded-lg bg-foreground text-background hover:bg-foreground/90" disabled={isLoading || (!input.trim() && !file)}>
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
           </form>
-          {file && (
-            <div className="p-2 pt-0 text-xs text-muted-foreground">Attached: {file.name}</div>
-          )}
         </div>
-        <p className="text-xs text-center text-muted-foreground mt-2 px-4">
-          AGI-S can make mistakes. Consider checking important information.
+        <p className="text-[10px] text-center text-muted-foreground/40 mt-3">
+          AGI-S can make mistakes.
         </p>
       </div>
     </div>

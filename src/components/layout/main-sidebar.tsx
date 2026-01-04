@@ -194,8 +194,8 @@ export function MainSidebar() {
       <SidebarSeparator />
       <SidebarMenuItem className="overflow-hidden">
         <Link href="/pro">
-          <SidebarMenuButton variant="outline" className="w-full justify-center text-primary hover:text-primary border-primary/50 hover:border-primary hover:bg-primary/10 animate-static-glow">
-            <Sparkles />
+          <SidebarMenuButton variant="outline" className="w-full justify-center text-muted-foreground hover:text-foreground border-border hover:bg-accent/50 transition-colors">
+            <Sparkles className="h-4 w-4" />
             <span className={cn(state === 'collapsed' && 'opacity-0')}>
               Upgrade to Pro
             </span>
