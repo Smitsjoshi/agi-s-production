@@ -1,0 +1,71 @@
+// This is your Prisma schema file
+// Database schema for AGI-S
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  conversations Conversation[]
+  memories      Memory[]
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  role      String   // 'user' | 'assistant'
+  content   String   @db.Text
+ reasoning  String?  @db.Text
+  createdAt DateTime @default(now())
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  agentSteps AgentStep[]
+}
+
+model AgentStep {
+  id        String   @id @default(cuid())
+  type      String   // 'planning' | 'executing' | 'observing' | 'completed' | 'failed'
+  message   String   @db.Text
+  screenshot String? @db.Text
+  timestamp DateTime @default(now())
+
+  messageId String
+  message_rel   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model Memory {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  embedding Float[]  // Vector embedding
+  metadata  Json?    // Additional context
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}

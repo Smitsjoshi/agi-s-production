@@ -173,6 +173,33 @@ Return ONLY the JSON object.`;
 
         let actions = plan.actions || [];
 
+        // CRITICAL: VALIDATE AND AUTO-CORRECT PLAN
+        // The LLM keeps forgetting to include values, so we force-fix it here
+        actions = actions.map((action, idx) => {
+            // If it's a type action without a value, auto-fill it
+            if (action.type === 'type' && !action.value) {
+                // Infer the value from the goal
+                let inferredValue = goal;
+
+                // Clean up command patterns
+                inferredValue = inferredValue
+                    .replace(/^(find|search for|get|buy|show me|look for|what is|price of)\s+/i, '')
+                    .replace(/\s+(on|from|in|at)\s+\w+$/i, '')
+                    .trim();
+
+                console.warn(`[UAL Planner] Action ${idx}: Missing value, auto-filling with: "${inferredValue}"`);
+                return { ...action, value: inferredValue };
+            }
+
+            // Remove invalid action types
+            if (!['navigate', 'type', 'click', 'press', 'wait', 'screenshot', 'scroll'].includes(action.type)) {
+                console.warn(`[UAL Planner] Action ${idx}: Invalid type "${action.type}", converting to wait`);
+                return { type: 'wait', timeout: 1000 };
+            }
+
+            return action;
+        });
+
         // INTELLIGENT FALLBACK FOR EMPTY PLANS
         if (actions.length === 0 && plan.status !== 'COMPLETED') {
             console.warn('[UAL Planner] Empty plan generated. Triggering intelligent fallback.');
