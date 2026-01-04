@@ -202,56 +202,53 @@ export async function POST(req: NextRequest) {
                         break;
                     case 'type':
                         if (action.selector) {
-                            // INTELLIGENT SEARCH DETECTION
-                            // Check if this is a search input
-                            const isSearchInput =
-                                action.selector.includes('search') ||
-                                action.selector.includes('[name="q"]') ||
-                                action.selector.includes('[name=\'q\']') ||
-                                action.selector.includes('twotabsearchtextbox') ||
-                                action.selector.toLowerCase().includes('query');
-
-                            // Determine what to type
+                            // ═══════════════════════════════════════════════════════
+                            // ABSOLUTE FAILSAFE: ALWAYS ENSURE WE HAVE TEXT TO TYPE
+                            // ═══════════════════════════════════════════════════════
                             let textToType = action.value || '';
 
-                            if (isSearchInput && !textToType) {
-                                // Auto-inject the goal as search query
-                                textToType = goal;
-
-                                // Clean up command words
-                                textToType = textToType
+                            // If NO value provided, auto-inject the goal
+                            if (!textToType || textToType.trim() === '') {
+                                textToType = goal
                                     .replace(/^(find|search for|get|buy|show me|look for|what is|price of|gind)\s+/i, '')
                                     .replace(/\s+(on|from|in|at)\s+\w+$/i, '')
                                     .trim();
 
-                                steps.push(`🔍 Auto-detected search box - injecting query: "${textToType}"`);
-                            } else if (!textToType) {
-                                steps.push(`⚠️ Type action has no value and not a search box - skipping`);
-                                break;
+                                steps.push(`🚨 FAILSAFE ACTIVATED: No value provided, injecting: "${textToType}"`);
                             }
 
                             steps.push(`⌨️ Typing into ${action.selector}: "${textToType}"`);
 
-                            await page.waitForSelector(action.selector, { timeout: 5000, visible: true });
-                            await page.click(action.selector, { clickCount: 3 }); // Select all
-                            await page.keyboard.press('Backspace');
+                            try {
+                                await page.waitForSelector(action.selector, { timeout: 5000, visible: true });
+                                await page.click(action.selector, { clickCount: 3 });
+                                await page.keyboard.press('Backspace');
 
-                            // Type character by character
-                            for (const char of textToType) {
-                                await page.keyboard.type(char, { delay: 10 + Math.random() * 30 });
-                            }
-
-                            // Auto-press Enter for search boxes
-                            if (isSearchInput) {
-                                await new Promise(r => setTimeout(r, 500));
-                                await page.keyboard.press('Enter');
-                                steps.push('⌨️ Pressed Enter (Auto-Search)');
-
-                                try {
-                                    await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 5000 });
-                                } catch (e) {
-                                    // Ignore - page might update via AJAX
+                                // Type character by character
+                                for (const char of textToType) {
+                                    await page.keyboard.type(char, { delay: 10 + Math.random() * 30 });
                                 }
+
+                                // ALWAYS press Enter for search boxes
+                                const isSearchBox =
+                                    action.selector.toLowerCase().includes('search') ||
+                                    action.selector.includes('name="q"') ||
+                                    action.selector.includes("name='q'") ||
+                                    action.selector.includes('twotabsearchtextbox');
+
+                                if (isSearchBox || goal.toLowerCase().match(/^(find|search|buy|get|show|price)/)) {
+                                    await new Promise(r => setTimeout(r, 500));
+                                    await page.keyboard.press('Enter');
+                                    steps.push('✅ Pressed Enter');
+
+                                    try {
+                                        await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 5000 });
+                                    } catch (e) {
+                                        // Ignore - AJAX update
+                                    }
+                                }
+                            } catch (err: any) {
+                                steps.push(`❌ Type failed: ${err.message}`);
                             }
                         }
                         break;

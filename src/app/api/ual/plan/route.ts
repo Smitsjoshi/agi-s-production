@@ -168,37 +168,35 @@ Return ONLY the JSON object.`;
             }
         } catch (parseError) {
             console.error('[UAL Planner] JSON Parse Error:', parseError);
-            plan = { status: 'CONTINUE', actions: [] }; // Force empty to trigger fallback
+            plan = { status: 'CONTINUE', actions: [] };
         }
 
         let actions = plan.actions || [];
 
-        // CRITICAL: VALIDATE AND AUTO-CORRECT PLAN
-        // The LLM keeps forgetting to include values, so we force-fix it here
+        // ═══════════════════════════════════════════════════════════════
+        // ABSOLUTE FAILSAFE: FORCE VALUE ON EVERY TYPE ACTION
+        // ═══════════════════════════════════════════════════════════════
+        console.log('[UAL Planner] Validating actions...');
+
         actions = actions.map((action, idx) => {
-            // If it's a type action without a value, auto-fill it
-            if (action.type === 'type' && !action.value) {
-                // Infer the value from the goal
-                let inferredValue = goal;
+            // CRITICAL: If it's a type action, ENSURE it has a value
+            if (action.type === 'type') {
+                if (!action.value || action.value.trim() === '') {
+                    // Extract search query from goal
+                    let searchQuery = goal
+                        .replace(/^(find|search for|get|buy|show me|look for|what is|price of|gind)\s+/i, '')
+                        .replace(/\s+(on|from|in|at)\s+\w+$/i, '')
+                        .trim();
 
-                // Clean up command patterns
-                inferredValue = inferredValue
-                    .replace(/^(find|search for|get|buy|show me|look for|what is|price of)\s+/i, '')
-                    .replace(/\s+(on|from|in|at)\s+\w+$/i, '')
-                    .trim();
-
-                console.warn(`[UAL Planner] Action ${idx}: Missing value, auto-filling with: "${inferredValue}"`);
-                return { ...action, value: inferredValue };
-            }
-
-            // Remove invalid action types
-            if (!['navigate', 'type', 'click', 'press', 'wait', 'screenshot', 'scroll'].includes(action.type)) {
-                console.warn(`[UAL Planner] Action ${idx}: Invalid type "${action.type}", converting to wait`);
-                return { type: 'wait', timeout: 1000 };
+                    console.warn(`[UAL Planner] ⚠️ Action ${idx}: Type action missing value! Auto-filling: "${searchQuery}"`);
+                    return { ...action, value: searchQuery };
+                }
             }
 
             return action;
         });
+
+        console.log('[UAL Planner] Final actions:', JSON.stringify(actions, null, 2));
 
         // INTELLIGENT FALLBACK FOR EMPTY PLANS
         if (actions.length === 0 && plan.status !== 'COMPLETED') {
