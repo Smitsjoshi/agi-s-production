@@ -77,37 +77,57 @@ export async function POST(req: NextRequest) {
             throw new Error("Missing GROQ_API_KEY environment variable. We tried to load it but failed.");
         }
 
-        const prompt = `You are a "Heavy Scale" Autonomous Agent Planner (Level 5 Intelligence).
-Your goal is to convert a user objective into a robust sequence of web actions based on the current page state.
+        const prompt = `You are an EXPERT Autonomous Web Agent Planner.
+Your ONLY job is to convert a user goal into PRECISE, EXECUTABLE web actions.
 
-User Objective: "${goal}"
+User Goal: "${goal}"
 
 CURRENT PAGE STATE:
 - URL: "${context?.url || 'about:blank'}"
 - Title: "${context?.title || 'Unknown'}"
-- Text Snippet: "${context?.text || 'No content visible'}"
+- Text Snippet: "${context?.text?.substring(0, 500) || 'No content visible'}"
 - Bot Status: "${context?.botStatus || 'CLEAN'}"
 
-STRICT OUTPUT FORMAT (JSON OBJECT ONLY):
+CRITICAL RULES:
+1. EVERY "type" action MUST include a "value" field with the ACTUAL TEXT TO TYPE.
+2. If you need to search for something, the "value" is the search query (e.g., "green nike shoes amazon").
+3. DO NOT generate empty "type" or "press" actions.
+4. If status is "COMPLETED", provide the extracted answer in the "answer" field.
+
+OUTPUT FORMAT (JSON ONLY, NO MARKDOWN):
 {
   "status": "CONTINUE" | "COMPLETED",
-  "reasoning": "Brief explanation of why the goal is or isn't met",
-  "answer": "The final extracted answer (ONLY if status is COMPLETED. e.g. 'The price of BTC is $65,432')",
+  "reasoning": "Brief explanation",
+  "answer": "Final extracted data (ONLY if COMPLETED)",
   "actions": [
-    { "type": "navigate", "url": "..." },
-    { "type": "type", "selector": "input[name='q']", "value": "..." },
+    { "type": "navigate", "url": "https://example.com" },
+    { "type": "type", "selector": "input[name='q']", "value": "YOUR SEARCH QUERY HERE" },
     { "type": "press", "key": "Enter" },
+    { "type": "click", "selector": "button.submit" },
+    { "type": "wait", "timeout": 2000 },
     { "type": "screenshot" }
   ]
 }
 
-CORE PHILOSOPHY:
-1. BYPASS BLOCKS: If Bot Status is "BLOCK_DETECTED", DO NOT try the same site again. Switch to an alternative immediately (e.g. if Google is blocked, try Bing or DuckDuckGo).
-2. EXTRACT ANSWER: When status is "COMPLETED", the "answer" field MUST contain the specific data the user asked for (price, news, etc.) extracted from the text snippet.
-3. FLEXIBILITY: If the goal specifies a site but it blocks us, find the data anywhere.
-4. SEARCH PATTERNS: Prefer 'type' then 'press' Enter for search.
+EXAMPLE for "find green nike shoes from amazon":
+{
+  "status": "CONTINUE",
+  "reasoning": "Need to search on Google first to find Amazon",
+  "actions": [
+    { "type": "navigate", "url": "https://www.google.com" },
+    { "type": "type", "selector": "input[name='q']", "value": "green nike shoes amazon" },
+    { "type": "press", "key": "Enter" },
+    { "type": "wait", "timeout": 2000 },
+    { "type": "screenshot" }
+  ]
+}
 
-CRITICAL: Return ONLY the JSON Object. No markdown. No text outside JSON.`;
+STRATEGY:
+- If Bot Status is "BLOCK_DETECTED", switch to alternative sites (Bing, DuckDuckGo).
+- If you need data from a page, extract it from the text snippet and set status to "COMPLETED".
+- Keep actions simple and direct.
+
+OUTPUT ONLY THE JSON OBJECT. NO OTHER TEXT.`;
 
         console.log(`[UAL Planner] Sending Heavy Prompt to Groq...`);
 
