@@ -201,68 +201,58 @@ export async function POST(req: NextRequest) {
                         }
                         break;
                     case 'type':
-                        if (action.selector && action.value) {
-                            steps.push(`⌨️ Typing into ${action.selector}...`);
-                            await page.waitForSelector(action.selector, { timeout: 5000, visible: true });
+                        if (action.selector) {
+                            // INTELLIGENT SEARCH DETECTION
+                            // Check if this is a search input
+                            const isSearchInput =
+                                action.selector.includes('search') ||
+                                action.selector.includes('[name="q"]') ||
+                                action.selector.includes('[name=\'q\']') ||
+                                action.selector.includes('twotabsearchtextbox') ||
+                                action.selector.toLowerCase().includes('query');
 
-                            await page.click(action.selector, { clickCount: 3 }); // Select all text
-                            await page.keyboard.press('Backspace');
+                            // Determine what to type
+                            let textToType = action.value || '';
 
-                            // Human-like typing
-                            for (const char of action.value) {
-                                await page.keyboard.type(char, { delay: 10 + Math.random() * 30 }); // Faster typing
+                            if (isSearchInput && !textToType) {
+                                // Auto-inject the goal as search query
+                                textToType = goal;
+
+                                // Clean up command words
+                                textToType = textToType
+                                    .replace(/^(find|search for|get|buy|show me|look for|what is|price of|gind)\s+/i, '')
+                                    .replace(/\s+(on|from|in|at)\s+\w+$/i, '')
+                                    .trim();
+
+                                steps.push(`🔍 Auto-detected search box - injecting query: "${textToType}"`);
+                            } else if (!textToType) {
+                                steps.push(`⚠️ Type action has no value and not a search box - skipping`);
+                                break;
                             }
 
-                            // Smart Enter Logic
-                            // If it's a search box OR the goal implies searching/finding
-                            const isSearchBox = action.selector.includes('q') || action.selector.includes('search') || action.selector.includes('k');
-                            const goalImpliesSearch = goal.toLowerCase().match(/^(find|search|buy|get|show|price)/);
+                            steps.push(`⌨️ Typing into ${action.selector}: "${textToType}"`);
 
-                            if (action.value.endsWith('\n') || isSearchBox || goalImpliesSearch) {
+                            await page.waitForSelector(action.selector, { timeout: 5000, visible: true });
+                            await page.click(action.selector, { clickCount: 3 }); // Select all
+                            await page.keyboard.press('Backspace');
+
+                            // Type character by character
+                            for (const char of textToType) {
+                                await page.keyboard.type(char, { delay: 10 + Math.random() * 30 });
+                            }
+
+                            // Auto-press Enter for search boxes
+                            if (isSearchInput) {
                                 await new Promise(r => setTimeout(r, 500));
                                 await page.keyboard.press('Enter');
                                 steps.push('⌨️ Pressed Enter (Auto-Search)');
 
-                                // Wait for SOME navigation or DOM change
                                 try {
                                     await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 5000 });
                                 } catch (e) {
-                                    // Ignore timeout, page might just update via AJAX
+                                    // Ignore - page might update via AJAX
                                 }
                             }
-                        } else if (action.selector && !action.value) {
-                            // INTELLIGENT FALLBACK: AI forgot to include value, infer it from goal
-                            steps.push(`⚠️ Type action missing value - inferring from goal...`);
-
-                            // Extract search intent from goal
-                            let inferredValue = goal;
-
-                            // Clean up common command patterns
-                            inferredValue = inferredValue
-                                .replace(/^(find|search for|get|buy|show me|look for)\s+/i, '')
-                                .replace(/\s+(on|from|in|at)\s+\w+$/i, '') // Remove "from amazon" etc
-                                .trim();
-
-                            steps.push(`💡 Inferred search query: "${inferredValue}"`);
-
-                            await page.waitForSelector(action.selector, { timeout: 5000, visible: true });
-                            await page.click(action.selector, { clickCount: 3 });
-                            await page.keyboard.press('Backspace');
-
-                            for (const char of inferredValue) {
-                                await page.keyboard.type(char, { delay: 10 + Math.random() * 30 });
-                            }
-
-                            // Auto-press Enter for search
-                            await new Promise(r => setTimeout(r, 500));
-                            await page.keyboard.press('Enter');
-                            steps.push('⌨️ Pressed Enter (Inferred)');
-
-                            try {
-                                await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 5000 });
-                            } catch (e) { }
-                        } else {
-                            steps.push('⚠️ Type action missing selector - skipping');
                         }
                         break;
                     case 'press':
