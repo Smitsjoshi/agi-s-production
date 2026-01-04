@@ -77,57 +77,71 @@ export async function POST(req: NextRequest) {
             throw new Error("Missing GROQ_API_KEY environment variable. We tried to load it but failed.");
         }
 
-        const prompt = `You are an EXPERT Autonomous Web Agent Planner.
-Your ONLY job is to convert a user goal into PRECISE, EXECUTABLE web actions.
+        const prompt = `You are an AUTONOMOUS WEB AGENT PLANNER.
+Your job: Convert user goals into EXECUTABLE browser actions.
 
-User Goal: "${goal}"
+USER GOAL: "${goal}"
 
-CURRENT PAGE STATE:
-- URL: "${context?.url || 'about:blank'}"
-- Title: "${context?.title || 'Unknown'}"
-- Text Snippet: "${context?.text?.substring(0, 500) || 'No content visible'}"
-- Bot Status: "${context?.botStatus || 'CLEAN'}"
+CURRENT STATE:
+URL: ${context?.url || 'about:blank'}
+Title: ${context?.title || 'Unknown'}
+Page Text: ${context?.text?.substring(0, 300) || 'Empty page'}
 
-CRITICAL RULES:
-1. EVERY "type" action MUST include a "value" field with the ACTUAL TEXT TO TYPE.
-2. If you need to search for something, the "value" is the search query (e.g., "green nike shoes amazon").
-3. DO NOT generate empty "type" or "press" actions.
-4. If status is "COMPLETED", provide the extracted answer in the "answer" field.
+═══════════════════════════════════════════════════════════════
+CRITICAL RULE - READ THIS CAREFULLY:
+═══════════════════════════════════════════════════════════════
 
-OUTPUT FORMAT (JSON ONLY, NO MARKDOWN):
-{
-  "status": "CONTINUE" | "COMPLETED",
-  "reasoning": "Brief explanation",
-  "answer": "Final extracted data (ONLY if COMPLETED)",
-  "actions": [
-    { "type": "navigate", "url": "https://example.com" },
-    { "type": "type", "selector": "input[name='q']", "value": "YOUR SEARCH QUERY HERE" },
-    { "type": "press", "key": "Enter" },
-    { "type": "click", "selector": "button.submit" },
-    { "type": "wait", "timeout": 2000 },
-    { "type": "screenshot" }
-  ]
-}
+When you generate a "type" action, you MUST include the "value" field.
+The "value" is THE ACTUAL TEXT TO TYPE.
 
-EXAMPLE for "find green nike shoes from amazon":
+WRONG ❌:
+{ "type": "type", "selector": "input[name='q']" }  // NO VALUE = BROKEN
+
+CORRECT ✅:
+{ "type": "type", "selector": "input[name='q']", "value": "green nike shoes amazon" }
+
+═══════════════════════════════════════════════════════════════
+
+OUTPUT FORMAT (JSON ONLY):
 {
   "status": "CONTINUE",
-  "reasoning": "Need to search on Google first to find Amazon",
+  "reasoning": "Why this plan achieves the goal",
   "actions": [
     { "type": "navigate", "url": "https://www.google.com" },
-    { "type": "type", "selector": "input[name='q']", "value": "green nike shoes amazon" },
-    { "type": "press", "key": "Enter" },
-    { "type": "wait", "timeout": 2000 },
-    { "type": "screenshot" }
+    { "type": "type", "selector": "input[name='q']", "value": "THE SEARCH QUERY HERE" },
+    { "type": "press", "key": "Enter" }
   ]
 }
 
-STRATEGY:
-- If Bot Status is "BLOCK_DETECTED", switch to alternative sites (Bing, DuckDuckGo).
-- If you need data from a page, extract it from the text snippet and set status to "COMPLETED".
-- Keep actions simple and direct.
+EXAMPLES FOR COMMON GOALS:
 
-OUTPUT ONLY THE JSON OBJECT. NO OTHER TEXT.`;
+Goal: "find green nike shoes from amazon"
+{
+  "status": "CONTINUE",
+  "reasoning": "Search Google for Amazon listings",
+  "actions": [
+    { "type": "type", "selector": "input[name='q']", "value": "green nike shoes amazon" },
+    { "type": "press", "key": "Enter" }
+  ]
+}
+
+Goal: "what is the price of bitcoin"
+{
+  "status": "CONTINUE", 
+  "reasoning": "Search for BTC price",
+  "actions": [
+    { "type": "navigate", "url": "https://www.google.com" },
+    { "type": "type", "selector": "input[name='q']", "value": "bitcoin price usd" },
+    { "type": "press", "key": "Enter" }
+  ]
+}
+
+YOUR TASK NOW:
+Generate actions for: "${goal}"
+
+Remember: EVERY "type" action needs a "value". No exceptions.
+
+Return ONLY the JSON object.`;
 
         console.log(`[UAL Planner] Sending Heavy Prompt to Groq...`);
 

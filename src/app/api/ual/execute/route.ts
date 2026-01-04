@@ -230,6 +230,39 @@ export async function POST(req: NextRequest) {
                                     // Ignore timeout, page might just update via AJAX
                                 }
                             }
+                        } else if (action.selector && !action.value) {
+                            // INTELLIGENT FALLBACK: AI forgot to include value, infer it from goal
+                            steps.push(`⚠️ Type action missing value - inferring from goal...`);
+
+                            // Extract search intent from goal
+                            let inferredValue = goal;
+
+                            // Clean up common command patterns
+                            inferredValue = inferredValue
+                                .replace(/^(find|search for|get|buy|show me|look for)\s+/i, '')
+                                .replace(/\s+(on|from|in|at)\s+\w+$/i, '') // Remove "from amazon" etc
+                                .trim();
+
+                            steps.push(`💡 Inferred search query: "${inferredValue}"`);
+
+                            await page.waitForSelector(action.selector, { timeout: 5000, visible: true });
+                            await page.click(action.selector, { clickCount: 3 });
+                            await page.keyboard.press('Backspace');
+
+                            for (const char of inferredValue) {
+                                await page.keyboard.type(char, { delay: 10 + Math.random() * 30 });
+                            }
+
+                            // Auto-press Enter for search
+                            await new Promise(r => setTimeout(r, 500));
+                            await page.keyboard.press('Enter');
+                            steps.push('⌨️ Pressed Enter (Inferred)');
+
+                            try {
+                                await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 5000 });
+                            } catch (e) { }
+                        } else {
+                            steps.push('⚠️ Type action missing selector - skipping');
                         }
                         break;
                     case 'press':
