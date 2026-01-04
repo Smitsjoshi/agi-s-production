@@ -213,10 +213,50 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
     try {
       // Use the captured values for the API call
       // Pass the *updated* messages array logic (current prev + userMessage) is handled by the backend/action usually requesting full history.
-      // But typically we pass the *new* list.
-      // Let's rely on the setMessages callback for correctness in the UI, but for the API, we construct it manually.
       const messagesForApi = [...messages, userMessage];
 
+      // UNIVERSAL ACTION LAYER (UAL) INTEGRATION
+      if (mode === 'Canvas') {
+        const { UALAgentLoop } = await import('@/lib/ual/ual-agent-loop'); // Dynamic import
+        const assistantMsgId = generateId();
+
+        // Create initial placeholder message
+        const initialAssistantMsg: ChatMessage = {
+          id: assistantMsgId,
+          role: 'assistant',
+          content: 'Initialize Autonomous Web Agent...',
+          agentSteps: [],
+        };
+
+        setMessages((prev: ChatMessage[]) => [...prev, initialAssistantMsg]);
+
+        const loop = new UALAgentLoop();
+        await loop.run(currentInput, (step) => {
+          setMessages((prev: ChatMessage[]) => {
+            const newMsgs = [...prev];
+            const msgIndex = newMsgs.findIndex(m => m.id === assistantMsgId);
+            if (msgIndex !== -1) {
+              const msg = { ...newMsgs[msgIndex] };
+              msg.agentSteps = [...(msg.agentSteps || []), step];
+
+              // Update main content based on state
+              if (step.type === 'completed') {
+                msg.content = step.message;
+              } else if (step.type === 'failed') {
+                msg.content = `**Task Failed**: ${step.message}`;
+              } else {
+                msg.content = step.message; // Detailed status as main content during execution
+              }
+              newMsgs[msgIndex] = msg;
+            }
+            return newMsgs;
+          });
+        });
+
+        return; // Exit normally after loop finishes
+      }
+
+      // STANDARD AI CHAT
       const result = await askAi(currentInput, mode, messagesForApi, currentFile || undefined);
 
       if (result.error) {

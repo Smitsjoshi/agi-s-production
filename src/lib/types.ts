@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { LucideIcon } from 'lucide-react';
+import type { AgentStep } from './universal-action-layer';
 
 export type AiMode =
     | 'AI Knowledge'
@@ -308,6 +309,7 @@ export interface ChatMessage {
 
     // Fields for Live Web Agent (Canvas) output
     liveWebAgentOutput?: LiveWebAgentOutput;
+    agentSteps?: AgentStep[];
 }
 
 export interface Extension {

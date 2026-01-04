@@ -1,12 +1,4 @@
-import { UALClient, WebAction, UALResult } from '@/lib/universal-action-layer';
-
-export interface AgentStep {
-    type: 'planning' | 'executing' | 'observing' | 'completed' | 'failed';
-    message: string;
-    screenshot?: string;
-    actions?: WebAction[];
-    timestamp: number;
-}
+import { UALClient, WebAction, UALResult, AgentStep } from '@/lib/universal-action-layer';
 
 export class UALAgentLoop {
     private client: UALClient;

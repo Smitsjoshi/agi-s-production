@@ -186,6 +186,58 @@ export function ChatMessageDisplay({
                 <EnhancedMarkdown content={message.content} />
               </div>
 
+              {message.agentSteps && message.agentSteps.length > 0 && (
+                <div className="mt-4 border rounded-md p-3 bg-muted/30">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Agent Execution Strategy</h4>
+                  <div className="space-y-2">
+                    {message.agentSteps.map((step, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-xs">
+                        <div className={cn(
+                          "w-2 h-2 rounded-full mt-1",
+                          step.type === 'completed' ? "bg-green-500" :
+                            step.type === 'failed' ? "bg-red-500" :
+                              step.type === 'planning' ? "bg-blue-500" :
+                                step.type === 'executing' ? "bg-yellow-500" : "bg-gray-500"
+                        )} />
+                        <div className="flex-1">
+                          <span className="font-medium text-foreground">{step.type.toUpperCase()}</span>: {step.message}
+                          {step.screenshot && (
+                            <img src={`data:image/png;base64,${step.screenshot}`} alt="Step Screenshot" className="mt-1 rounded border max-w-[200px]" />
+                          )}
+                        </div>
+                        <span className="text-muted-foreground tabular-nums">{new Date(step.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {message.agentSteps && message.agentSteps.length > 0 && (
+                <div className="mt-4 border rounded-md p-3 bg-muted/30">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Agent Execution Strategy</h4>
+                  <div className="space-y-2">
+                    {message.agentSteps.map((step, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-xs">
+                        <div className={cn(
+                          "w-2 h-2 rounded-full mt-1",
+                          step.type === 'completed' ? "bg-green-500" :
+                            step.type === 'failed' ? "bg-red-500" :
+                              step.type === 'planning' ? "bg-blue-500" :
+                                step.type === 'executing' ? "bg-yellow-500" : "bg-gray-500"
+                        )} />
+                        <div className="flex-1">
+                          <span className="font-medium text-foreground">{step.type.toUpperCase()}</span>: {step.message}
+                          {step.screenshot && (
+                            <img src={`data:image/png;base64,${step.screenshot}`} alt="Step Screenshot" className="mt-1 rounded border max-w-[200px]" />
+                          )}
+                        </div>
+                        <span className="text-muted-foreground tabular-nums">{new Date(step.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {isLiveAgentResponse && message.liveWebAgentOutput?.results && message.liveWebAgentOutput.results.length > 0 && (
                 <div>
                   <h4 className="font-semibold mb-3 text-base">Agent Results:</h4>

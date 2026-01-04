@@ -33,6 +33,14 @@ export interface UALTask {
     actions?: WebAction[];
 }
 
+export interface AgentStep {
+    type: 'planning' | 'executing' | 'observing' | 'completed' | 'failed';
+    message: string;
+    screenshot?: string;
+    actions?: WebAction[];
+    timestamp: number;
+}
+
 /**
  * Universal Action Layer - Browser Automation Engine
  * 
