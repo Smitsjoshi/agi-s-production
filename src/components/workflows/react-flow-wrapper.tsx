@@ -34,7 +34,7 @@ import {
     Rss, Wifi, Battery, BatteryCharging, Plug, Component, ToyBrick, Puzzle, Glasses, Sticker, Book, Bookmark, Clipboard, ClipboardList,
     ClipboardCheck, Copy, Scissors, Paperclip, Unlink, ExternalLink, Bold, Italic, Underline, Strikethrough, Heading1, Heading2, Heading3,
     // Massive Update Missing Icons
-    Brain, Twitter, Instagram, Megaphone, Music, Box, Trello, LineChart, Calculator, Coins, TrendingUp, Receipt, Lock, SearchCode, FileSearch, Fingerprint, AlertTriangle, GraduationCap, Users2, Sparkles, Microscope, Languages
+    Brain, Twitter, Instagram, Megaphone, Music, Box, Trello, LineChart, Calculator, Coins, TrendingUp, Receipt, Lock, SearchCode, FileSearch, Fingerprint, AlertTriangle, GraduationCap, Users2, Sparkles, Microscope, Languages, Github
 } from 'lucide-react';
 
 import CustomNode, { CustomNodeData } from './custom-node';
