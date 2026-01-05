@@ -4,11 +4,10 @@ import { useState, useId, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, ShieldHalf, Sparkles } from 'lucide-react';
+import { Loader2, ShieldHalf, Sparkles, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { generateCrucibleAction } from '@/app/actions';
 import type { CrucibleOutput, AdversaryPersona, CrucibleCritique } from '@/lib/types';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -102,12 +101,16 @@ export default function CruciblePage() {
     }
   }, [result]);
 
-  const handlePersonaToggle = (persona: AdversaryPersona) => {
-    setSelectedPersonas(prev =>
-      prev.some(p => p.id === persona.id)
-        ? prev.filter(p => p.id !== persona.id)
-        : [...prev, persona]
-    );
+  const handlePersonaToggle = (personaId: string) => {
+    setSelectedPersonas(prev => {
+      const isSelected = prev.some(p => p.id === personaId);
+      if (isSelected) {
+        return prev.filter(p => p.id !== personaId);
+      } else {
+        const persona = ADVERSARY_PERSONAS.find(p => p.id === personaId);
+        return persona ? [...prev, persona] : prev;
+      }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -198,33 +201,38 @@ export default function CruciblePage() {
                   </div>
                 </div>
                 <div className="space-y-1 p-1 bg-muted/20 border rounded-xl max-h-[400px] overflow-y-auto scrollbar-hide">
-                  {ADVERSARY_PERSONAS.map((persona) => (
-                    <div
-                      key={persona.id}
-                      className={cn(
-                        "flex items-center space-x-3 p-2.5 rounded-lg transition-all cursor-pointer hover:bg-muted/40",
-                        selectedPersonas.some(p => p.id === persona.id) ? "bg-muted shadow-sm ring-1 ring-border" : "opacity-60 grayscale-[0.5]"
-                      )}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handlePersonaToggle(persona);
-                      }}
-                    >
-                      <Checkbox
-                        id={`${id}-${persona.id}`}
-                        checked={selectedPersonas.some(p => p.id === persona.id)}
-                        disabled={isLoading}
-                        className="pointer-events-none"
-                      />
-                      <div className="flex-1 min-w-0 pointer-events-none">
-                        <Label htmlFor={`${id}-${persona.id}`} className="flex flex-col cursor-pointer">
-                          <span className="font-bold text-sm tracking-tight">{persona.name}</span>
-                          <span className="text-[10px] leading-tight text-muted-foreground truncate">{persona.description}</span>
-                        </Label>
+                  {ADVERSARY_PERSONAS.map((persona) => {
+                    const isSelected = selectedPersonas.some(p => p.id === persona.id);
+                    return (
+                      <div
+                        key={persona.id}
+                        className={cn(
+                          "flex items-center space-x-3 p-2.5 rounded-lg transition-all cursor-pointer hover:bg-muted/40 group",
+                          isSelected ? "bg-muted shadow-sm ring-1 ring-border" : "opacity-60 grayscale-[0.5]"
+                        )}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePersonaToggle(persona.id);
+                        }}
+                      >
+                        {/* Presentational Checkbox */}
+                        <div className={cn(
+                          "h-4 w-4 shrink-0 rounded border transition-colors flex items-center justify-center",
+                          isSelected ? "bg-primary border-primary" : "border-primary/50"
+                        )}>
+                          {isSelected && <Check className="h-3 w-3 text-white" />}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-sm tracking-tight">{persona.name}</span>
+                            <span className="text-[10px] leading-tight text-muted-foreground truncate">{persona.description}</span>
+                          </div>
+                        </div>
+                        {persona.icon && <persona.icon className={cn("h-4 w-4 shrink-0", isSelected ? "text-primary" : "text-muted-foreground/30")} />}
                       </div>
-                      {persona.icon && <persona.icon className={cn("h-4 w-4 shrink-0", selectedPersonas.some(p => p.id === persona.id) ? "text-primary" : "text-muted-foreground/30")} />}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading || !plan.trim() || selectedPersonas.length === 0}>
