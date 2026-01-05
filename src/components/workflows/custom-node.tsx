@@ -93,9 +93,12 @@ const CustomNode = ({ id, data, selected }: NodeProps<CustomNodeData>) => {
           {/* Configuration Section (Editable) */}
           {selected && (
             <div className="space-y-3 pt-1 nodrag">
-              <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-wider">
-                <Settings2 className="h-3 w-3" />
-                Configuration
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-wider">
+                  <Settings2 className="h-3 w-3" />
+                  Configuration
+                </div>
+                <span className="text-[8px] text-muted-foreground italic">Double-click to delete node</span>
               </div>
 
               {/* Prompt Field */}
