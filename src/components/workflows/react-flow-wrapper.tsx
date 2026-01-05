@@ -20,10 +20,10 @@ import {
     ArrowRightLeft, FileJson, Link2, MousePointer, Type, Eye, Camera, Download, Slack, AtSign, Send,
     Table, BookUser, Search, GitBranch, Asterisk, BookCopy, Zap, Cpu, ShieldHalf, Star, BookOpen, BookCheck,
     // New Icons for the massive update
-    BrainCircuit, GitCommit, Server, Cloud, ShoppingCart, Briefcase, BarChart, Mic, Video, Users,
+    BrainCircuit, GitCommit, Server, Cloud, ShoppingCart, Briefcase, BarChart, BarChart3, Mic, Video, Users,
     File, Folder, Trash, Upload, DownloadCloud, FileUp, FileDown, Layers, Package, GitPullRequest,
     Code2, Braces, Settings, ToggleRight, AlertCircle, Bug, TestTube, Rocket, Anchor, Globe,
-    Network, Key, Shield, User, UserPlus, UserMinus, Calendar, MapPin, Phone, Mailbox,
+    Network, Key, Shield, ShieldCheck, ShieldAlert, User, UserPlus, UserMinus, UserCheck, UserX, Calendar, MapPin, Phone, PhoneCall, Mailbox,
     MessageCircle, Share, ThumbsUp, ThumbsDown, Award, Trophy, Gift, Sun, Moon, Sunset,
     Sunrise, Wind, CloudSun, CloudMoon, CloudRain, CloudSnow, CloudLightning, Gauge,
     Bitcoin, DollarSign, Euro, PoundSterling, CreditCard, Banknote, Wallet, Landmark, Building,
@@ -32,8 +32,9 @@ import {
     CircleDot, Triangle, Octagon, Square, Spline, Waypoints, Workflow, Timer, Watch, Laptop,
     Smartphone, Tablet, HardDrive, Mouse, Keyboard, Speaker, Disc, Save, Printer, Radio,
     Rss, Wifi, Battery, BatteryCharging, Plug, Component, ToyBrick, Puzzle, Glasses, Sticker, Book, Bookmark, Clipboard, ClipboardList,
-    ClipboardCheck, Copy, Scissors, Paperclip, Unlink, ExternalLink, Bold, Italic, Underline, Strikethrough, Heading1, Heading2, Heading3
-
+    ClipboardCheck, Copy, Scissors, Paperclip, Unlink, ExternalLink, Bold, Italic, Underline, Strikethrough, Heading1, Heading2, Heading3,
+    // Massive Update Missing Icons
+    Brain, Twitter, Instagram, Megaphone, Music, Box, Trello, LineChart, Calculator, Coins, TrendingUp, Receipt, Lock, SearchCode, FileSearch, Fingerprint, AlertTriangle, GraduationCap, Users2, Sparkles, Microscope, Languages
 } from 'lucide-react';
 
 import CustomNode, { CustomNodeData } from './custom-node';
