@@ -15,13 +15,29 @@ import { Badge } from '@/components/ui/badge';
 import {
   generateSynthesisAction,
   extractYouTubeTranscript,
-  scrapeWebPage
+  scrapeWebPage,
+  generateAudioOverviewAction,
+  generateVideoOverviewAction,
+  generateMindMapAction,
+  generateFlashcardsAction,
+  generateQuizAction,
+  generateInfographicAction,
+  generateSlideDeckAction,
+  generateReportAction
 } from '@/app/actions';
 import type {
   ChatMessage,
   SynthesisOutput,
   Source,
-  SourceType
+  SourceType,
+  AudioOverview,
+  VideoOverview,
+  MindMap,
+  FlashcardDeck,
+  Quiz,
+  Infographic,
+  SlideDeck,
+  Report
 } from '@/lib/types';
 import { nanoid } from 'nanoid';
 import { ChatMessageDisplay } from '@/components/chat/chat-message';
@@ -37,6 +53,14 @@ export default function SynthesisPage() {
   const [activeAnalysis, setActiveAnalysis] = useState<SynthesisOutput | null>(null);
   const [showSourceInput, setShowSourceInput] = useState<SourceType | null>(null);
   const [sourceUrl, setSourceUrl] = useState('');
+
+  // Studio Results State
+  const [studioResult, setStudioResult] = useState<{
+    type: string;
+    data: any;
+  } | null>(null);
+  const [isGenerating, setIsGenerating] = useState<string | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -189,12 +213,53 @@ export default function SynthesisPage() {
     }
   };
 
-  // Studio feature handlers (placeholders for now)
-  const handleStudioFeature = (feature: string) => {
-    toast({
-      title: `${feature} Coming Soon`,
-      description: 'This feature is being implemented with full AI capabilities'
-    });
+  // Studio feature handlers
+  const handleStudioFeature = async (feature: string) => {
+    if (sources.length === 0) return;
+
+    setIsGenerating(feature);
+    try {
+      const sourcePayload = sources.map(s => ({ name: s.name, content: s.content }));
+      let result;
+
+      switch (feature) {
+        case 'Audio Overview':
+          result = await generateAudioOverviewAction(sourcePayload);
+          break;
+        case 'Video Overview':
+          result = await generateVideoOverviewAction(sourcePayload);
+          break;
+        case 'Mind Map':
+          result = await generateMindMapAction(sourcePayload);
+          break;
+        case 'Flashcards':
+          result = await generateFlashcardsAction(sourcePayload);
+          break;
+        case 'Quiz':
+          result = await generateQuizAction(sourcePayload);
+          break;
+        case 'Infographic':
+          result = await generateInfographicAction(sourcePayload);
+          break;
+        case 'Slide Deck':
+          result = await generateSlideDeckAction(sourcePayload);
+          break;
+        case 'Reports':
+          result = await generateReportAction(sourcePayload);
+          break;
+      }
+
+      if (result && result.success) {
+        setStudioResult({ type: feature, data: result.data });
+        toast({ title: 'Success', description: `${feature} generated successfully.` });
+      } else {
+        throw new Error(result?.error || 'Failed to generate content');
+      }
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setIsGenerating(null);
+    }
   };
 
   const getSourceIcon = (type: SourceType) => {
@@ -388,6 +453,44 @@ export default function SynthesisPage() {
         )}
       </div>
 
+      {/* STUDIO RESULT VIEWER OVERLAY */}
+      <AnimatePresence>
+        {studioResult && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 md:p-8"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-background border rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
+            >
+              <div className="p-4 border-b flex items-center justify-between bg-muted/50">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h2 className="font-bold text-lg">{studioResult.type}</h2>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => setStudioResult(null)}>
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+
+              <ScrollArea className="flex-1 p-6">
+                <StudioResultDisplay result={studioResult} />
+              </ScrollArea>
+
+              <div className="p-4 border-t bg-muted/30 flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setStudioResult(null)}>Close</Button>
+                <Button onClick={() => window.print()}>Export PDF</Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* RIGHT SIDEBAR - Studio */}
       <div className="w-[320px] border-l flex flex-col bg-muted/30">
         <div className="p-4 border-b">
@@ -411,9 +514,11 @@ export default function SynthesisPage() {
                   size="sm"
                   className="w-full bg-gradient-to-r from-purple-500 to-pink-500"
                   onClick={() => handleStudioFeature('Audio Overview')}
-                  disabled={sources.length === 0}
+                  disabled={sources.length === 0 || !!isGenerating}
                 >
-                  Create Audio Overview
+                  {isGenerating === 'Audio Overview' ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...</>
+                  ) : 'Create Audio Overview'}
                 </Button>
               </div>
             </Card>
@@ -424,43 +529,50 @@ export default function SynthesisPage() {
                 icon={<Film className="h-4 w-4" />}
                 title="Video Overview"
                 onClick={() => handleStudioFeature('Video Overview')}
-                disabled={sources.length === 0}
+                disabled={sources.length === 0 || !!isGenerating}
+                loading={isGenerating === 'Video Overview'}
               />
               <StudioCard
                 icon={<Map className="h-4 w-4" />}
                 title="Mind Map"
                 onClick={() => handleStudioFeature('Mind Map')}
-                disabled={sources.length === 0}
+                disabled={sources.length === 0 || !!isGenerating}
+                loading={isGenerating === 'Mind Map'}
               />
               <StudioCard
                 icon={<FileBarChart className="h-4 w-4" />}
                 title="Reports"
                 onClick={() => handleStudioFeature('Reports')}
-                disabled={sources.length === 0}
+                disabled={sources.length === 0 || !!isGenerating}
+                loading={isGenerating === 'Reports'}
               />
               <StudioCard
                 icon={<CreditCard className="h-4 w-4" />}
                 title="Flashcards"
                 onClick={() => handleStudioFeature('Flashcards')}
-                disabled={sources.length === 0}
+                disabled={sources.length === 0 || !!isGenerating}
+                loading={isGenerating === 'Flashcards'}
               />
               <StudioCard
                 icon={<HelpCircle className="h-4 w-4" />}
                 title="Quiz"
                 onClick={() => handleStudioFeature('Quiz')}
-                disabled={sources.length === 0}
+                disabled={sources.length === 0 || !!isGenerating}
+                loading={isGenerating === 'Quiz'}
               />
               <StudioCard
                 icon={<BarChart3 className="h-4 w-4" />}
                 title="Infographic"
                 onClick={() => handleStudioFeature('Infographic')}
-                disabled={sources.length === 0}
+                disabled={sources.length === 0 || !!isGenerating}
+                loading={isGenerating === 'Infographic'}
               />
               <StudioCard
                 icon={<Presentation className="h-4 w-4" />}
                 title="Slide Deck"
                 onClick={() => handleStudioFeature('Slide Deck')}
-                disabled={sources.length === 0}
+                disabled={sources.length === 0 || !!isGenerating}
+                loading={isGenerating === 'Slide Deck'}
               />
             </div>
 
@@ -476,30 +588,218 @@ export default function SynthesisPage() {
   );
 }
 
+// Studio Result Display Component
+function StudioResultDisplay({ result }: { result: { type: string, data: any } }) {
+  const { type, data } = result;
+
+  switch (type) {
+    case 'Audio Overview':
+      return (
+        <div className="space-y-6">
+          <Card className="p-6 bg-muted/30 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Mic className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold text-xl mb-1">Deep Dive Podcast</h3>
+                <p className="text-sm text-muted-foreground">Featuring Jordan & Taylor</p>
+              </div>
+              <audio controls className="w-full mt-4" src={data.audioUrl} />
+            </div>
+          </Card>
+          <div className="space-y-4">
+            <h4 className="font-bold text-lg flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              Transcript
+            </h4>
+            <div className="p-4 border rounded-lg bg-card whitespace-pre-wrap leading-relaxed text-sm">
+              {data.script}
+            </div>
+          </div>
+        </div>
+      );
+
+    case 'Mind Map':
+      return (
+        <div className="space-y-6">
+          <div className="p-4 border rounded-lg bg-card font-mono text-xs overflow-auto max-h-[300px]">
+            <pre>{data.mermaidSyntax}</pre>
+          </div>
+          <div className="grid gap-4">
+            <MindMapNodeDisplay node={data.rootNode} />
+          </div>
+        </div>
+      );
+
+    case 'Flashcards':
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {data.cards.map((card: any) => (
+            <div key={card.id} className="group h-48 [perspective:1000px]">
+              <div className="relative h-full w-full rounded-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] border bg-card">
+                <div className="absolute inset-0 flex items-center justify-center p-6 text-center [backface-visibility:hidden]">
+                  <p className="font-medium">{card.front}</p>
+                </div>
+                <div className="absolute inset-0 h-full w-full rounded-xl bg-primary/10 p-6 text-center [transform:rotateY(180deg)] [backface-visibility:hidden] flex items-center justify-center">
+                  <p className="text-sm">{card.back}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+
+    case 'Quiz':
+      return (
+        <div className="space-y-8">
+          {data.questions.map((q: any, i: number) => (
+            <div key={q.id} className="space-y-4 p-4 border rounded-lg">
+              <p className="font-bold">{i + 1}. {q.question}</p>
+              <div className="grid grid-cols-1 gap-2">
+                {q.options.map((opt: string, optIdx: number) => (
+                  <Button
+                    key={optIdx}
+                    variant="outline"
+                    className="justify-start h-auto py-2 px-4 whitespace-normal text-left"
+                  >
+                    {opt}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+
+    case 'Infographic':
+      return (
+        <div className="space-y-6">
+          <img src={data.imageUrl} alt={data.title} className="w-full rounded-xl shadow-lg border" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {data.dataPoints.map((dp: any, i: number) => (
+              <Card key={i} className="p-4 flex flex-col items-center text-center">
+                <Badge className="mb-2">{dp.type}</Badge>
+                <div className="text-2xl font-bold text-primary mb-1">{dp.value}</div>
+                <div className="text-xs text-muted-foreground">{dp.label}</div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 'Reports':
+      return (
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <h1 className="text-3xl font-bold mb-4">{data.title}</h1>
+          <section className="mb-8 p-4 bg-primary/5 border rounded-lg">
+            <h2 className="text-xl font-bold mb-2">Executive Summary</h2>
+            <p>{data.executiveSummary}</p>
+          </section>
+          {data.sections.map((section: any, i: number) => (
+            <section key={i} className="mb-6">
+              <h3 className="text-lg font-bold mb-2">{section.heading}</h3>
+              <p className="whitespace-pre-wrap">{section.content}</p>
+            </section>
+          ))}
+        </div>
+      );
+
+    case 'Slide Deck':
+      return (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold">{data.title}</h2>
+          <div className="space-y-4">
+            {data.slides.map((slide: any, i: number) => (
+              <Card key={i} className="p-8 aspect-video border-2 flex flex-col justify-center bg-muted/20 relative overflow-hidden">
+                <div className="absolute top-4 right-4 text-muted-foreground text-sm">Slide {i + 1}</div>
+                <h3 className="text-2xl font-bold mb-6 text-center border-b pb-4">{slide.title}</h3>
+                <ul className="list-disc pl-6 space-y-3">
+                  {slide.content.map((point: string, j: number) => (
+                    <li key={j} className="text-lg">{point}</li>
+                  ))}
+                </ul>
+              </Card>
+            ))}
+          </div>
+        </div>
+      );
+
+    case 'Video Overview':
+      return (
+        <div className="space-y-6">
+          <div className="aspect-video relative rounded-xl overflow-hidden border shadow-xl">
+            <img src={data.thumbnailUrl} alt="Video Preview" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group hover:bg-black/40 transition-colors">
+              <Button size="lg" className="rounded-full h-16 w-16">
+                <Video className="h-8 w-8" />
+              </Button>
+            </div>
+          </div>
+          <div className="space-y-4">
+            {data.slides.map((s: any, i: number) => (
+              <div key={i} className="flex gap-4 p-3 border rounded-lg">
+                <div className="font-bold text-primary">{s.timestamp}s</div>
+                <div>
+                  <div className="font-bold">{s.title}</div>
+                  <ul className="text-sm text-muted-foreground list-disc pl-4">
+                    {s.content.map((p: string, j: number) => <li key={j}>{p}</li>)}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+
+    default:
+      return <div>Feature display not implemented yet.</div>;
+  }
+}
+
+function MindMapNodeDisplay({ node, depth = 0 }: { node: any, depth?: number }) {
+  return (
+    <div style={{ marginLeft: `${depth * 20}px` }} className="space-y-2">
+      <div className="p-2 border rounded bg-card flex items-center gap-2">
+        <Badge variant="outline">{node.level}</Badge>
+        <span className="font-medium">{node.label}</span>
+      </div>
+      {node.children && node.children.map((child: any) => (
+        <MindMapNodeDisplay key={child.id || child.label} node={child} depth={depth + 1} />
+      ))}
+    </div>
+  );
+}
+
 // Studio Card Component
 function StudioCard({
   icon,
   title,
   onClick,
-  disabled
+  disabled,
+  loading
 }: {
   icon: React.ReactNode;
   title: string;
   onClick: () => void;
   disabled?: boolean;
+  loading?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
       className={cn(
-        "p-3 rounded-lg border bg-card hover:bg-accent transition-colors text-left",
-        "disabled:opacity-50 disabled:cursor-not-allowed"
+        "p-3 rounded-lg border bg-card hover:bg-accent transition-colors text-left relative overflow-hidden",
+        "disabled:opacity-50 disabled:cursor-not-allowed",
+        loading && "animate-pulse"
       )}
     >
       <div className="flex flex-col gap-1">
-        <div className="text-primary">{icon}</div>
-        <span className="text-xs font-medium">{title}</span>
+        <div className="text-primary">
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : icon}
+        </div>
+        <span className="text-[10px] font-medium leading-tight">{title}</span>
       </div>
     </button>
   );

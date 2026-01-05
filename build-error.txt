@@ -1,0 +1,3041 @@
+﻿
+> nextn@0.1.0 build
+> next build
+
+node.exe : 
+[baseline-browser-mapping] 
+The data in this module is 
+over two months old.  To 
+ensure accurate Baseline 
+data, please update: `npm i ba
+seline-browser-mapping@latest 
+-D`
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: ([baseline  
+  -brows...ping@latest -D`:   
+ String) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+   Γû▓ Next.js 16.0.0-beta.0 (Turbopack)
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ┬╖ serverActions
+
+ ΓÜá The "middleware" file 
+convention is deprecated. 
+Please use "proxy" instead.
+   Creating an optimized production build ...
+[baseline-browser-mapping] 
+The data in this module is 
+over two months old.  To 
+ensure accurate Baseline 
+data, please update: `npm i ba
+seline-browser-mapping@latest 
+-D`
+
+> Build error occurred
+Error: Turbopack build failed 
+with 32 errors:
+./src/app/actions.ts:2:1
+Ecmascript file had an error
+[0m [90m 1 |[39m [32m'use 
+server'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 2 
+|[39m [36mexport[39m 
+[36mconst[39m runtime 
+[33m=[39m 
+[32m'nodejs'[39m[33m;[39m 
+[90m// Ensure Node.js 
+runtime for pdf-parse (Buffer 
+support)[39m
+ [90m   |[39m [31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m
+ [90m 4 |[39m 
+[36mimport[39m type {
+ [90m 5 |[39m   
+[33mAiMode[39m[33m,[39m [
+33mSynthesisOutput[39m[33m,
+[39m [33mSynthesisInput[39m
+[33m,[39m [33mCrucibleOutput
+[39m[33m,[39m [33mCrucible
+Input[39m[33m,[39m [33mCat
+alystOutput[39m[33m,[39m [
+33mCatalystInput[39m[33m,[3
+9m[0m
+
+Only async functions are 
+allowed to be exported in a 
+"use server" file.
+
+
+
+./src/app/actions.ts:2:1
+Ecmascript file had an error
+[0m [90m 1 |[39m [32m'use 
+server'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 2 
+|[39m [36mexport[39m 
+[36mconst[39m runtime 
+[33m=[39m 
+[32m'nodejs'[39m[33m;[39m 
+[90m// Ensure Node.js 
+runtime for pdf-parse (Buffer 
+support)[39m
+ [90m   |[39m [31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m
+ [90m 4 |[39m 
+[36mimport[39m type {
+ [90m 5 |[39m   
+[33mAiMode[39m[33m,[39m [
+33mSynthesisOutput[39m[33m,
+[39m [33mSynthesisInput[39m
+[33m,[39m [33mCrucibleOutput
+[39m[33m,[39m [33mCrucible
+Input[39m[33m,[39m [33mCat
+alystOutput[39m[33m,[39m [
+33mCatalystInput[39m[33m,[3
+9m[0m
+
+Only async functions are 
+allowed to be exported in a 
+"use server" file.
+
+
+
+./src/app/(main)/codex/page.ts
+x:12:1
+Export askAi doesn't exist in 
+target module
+[0m [90m 10 |[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 12 
+|[39m [36mimport[39m { 
+askAi } [36mfrom[39m [32m'@
+/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 13 |[39m 
+[36mimport[39m { 
+motion[33m,[39m 
+[33mAnimatePresence[39m } 
+[36mfrom[39m [32m'framer-mo
+tion'[39m[33m;[39m
+ [90m 14 |[39m 
+[36mimport[39m { 
+[33mCard[39m[33m,[39m 
+[33mCardContent[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/card'[39m[33m;[39m
+ [90m 15 |[39m 
+[36mimport[39m 
+[33mEditor[39m 
+[36mfrom[39m [32m'@monaco-e
+ditor/react'[39m[33m;[39m[
+0m
+
+The export askAi was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/codex/page.ts
+x:12:1
+Export askAi doesn't exist in 
+target module
+[0m [90m 10 |[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 12 
+|[39m [36mimport[39m { 
+askAi } [36mfrom[39m [32m'@
+/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 13 |[39m 
+[36mimport[39m { 
+motion[33m,[39m 
+[33mAnimatePresence[39m } 
+[36mfrom[39m [32m'framer-mo
+tion'[39m[33m;[39m
+ [90m 14 |[39m 
+[36mimport[39m { 
+[33mCard[39m[33m,[39m 
+[33mCardContent[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/card'[39m[33m;[39m
+ [90m 15 |[39m 
+[36mimport[39m 
+[33mEditor[39m 
+[36mfrom[39m [32m'@monaco-e
+ditor/react'[39m[33m;[39m[
+0m
+
+The export askAi was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/components/blueprint/blu
+eprint-interface.tsx:10:1
+Export askAi doesn't exist in 
+target module
+[0m [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+ [90m  9 |[39m 
+[36mimport[39m 
+useLocalStorage 
+[36mfrom[39m [32m'@/hooks/u
+se-local-storage'[39m[33m;[
+39m
+[31m[1m>[22m[39m[90m 10 
+|[39m [36mimport[39m { 
+askAi } [36mfrom[39m [32m'@
+/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 11 |[39m 
+[36mimport[39m type { [33mC
+hatMessage[39m[33m,[39m 
+[33mWebAgentOutput[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { nanoid } 
+[36mfrom[39m 
+[32m'nanoid'[39m[33m;[39m
+ [90m 13 |[39m 
+[36mimport[39m { 
+motion[33m,[39m 
+[33mAnimatePresence[39m } 
+[36mfrom[39m [32m'framer-mo
+tion'[39m[33m;[39m[0m
+
+The export askAi was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/components/blueprint/blu
+eprint-interface.tsx:10:1
+Export askAi doesn't exist in 
+target module
+[0m [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+ [90m  9 |[39m 
+[36mimport[39m 
+useLocalStorage 
+[36mfrom[39m [32m'@/hooks/u
+se-local-storage'[39m[33m;[
+39m
+[31m[1m>[22m[39m[90m 10 
+|[39m [36mimport[39m { 
+askAi } [36mfrom[39m [32m'@
+/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 11 |[39m 
+[36mimport[39m type { [33mC
+hatMessage[39m[33m,[39m 
+[33mWebAgentOutput[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { nanoid } 
+[36mfrom[39m 
+[32m'nanoid'[39m[33m;[39m
+ [90m 13 |[39m 
+[36mimport[39m { 
+motion[33m,[39m 
+[33mAnimatePresence[39m } 
+[36mfrom[39m [32m'framer-mo
+tion'[39m[33m;[39m[0m
+
+The export askAi was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/components/chat/chat-int
+erface.tsx:10:1
+Export askAi doesn't exist in 
+target module
+[0m [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+ [90m  9 |[39m 
+[36mimport[39m 
+useLocalStorage 
+[36mfrom[39m [32m'@/hooks/u
+se-local-storage'[39m[33m;[
+39m
+[31m[1m>[22m[39m[90m 10 
+|[39m [36mimport[39m { 
+askAi } [36mfrom[39m [32m'@
+/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 11 |[39m 
+[36mimport[39m type { [33mC
+hatMessage[39m[33m,[39m 
+[33mAiMode[39m[33m,[39m 
+[33mAgent[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { 
+[33mChatMessageDisplay[39m 
+} [36mfrom[39m [32m'@/compo
+nents/chat/chat-message'[39m
+[33m;[39m
+ [90m 13 |[39m 
+[36mimport[39m { nanoid } 
+[36mfrom[39m [32m'nanoid'[
+39m[33m;[39m[0m
+
+The export askAi was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/components/chat/chat-int
+erface.tsx:10:1
+Export askAi doesn't exist in 
+target module
+[0m [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+ [90m  9 |[39m 
+[36mimport[39m 
+useLocalStorage 
+[36mfrom[39m [32m'@/hooks/u
+se-local-storage'[39m[33m;[
+39m
+[31m[1m>[22m[39m[90m 10 
+|[39m [36mimport[39m { 
+askAi } [36mfrom[39m [32m'@
+/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 11 |[39m 
+[36mimport[39m type { [33mC
+hatMessage[39m[33m,[39m 
+[33mAiMode[39m[33m,[39m 
+[33mAgent[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { 
+[33mChatMessageDisplay[39m 
+} [36mfrom[39m [32m'@/compo
+nents/chat/chat-message'[39m
+[33m;[39m
+ [90m 13 |[39m 
+[36mimport[39m { nanoid } 
+[36mfrom[39m [32m'nanoid'[
+39m[33m;[39m[0m
+
+The export askAi was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/components/vision/vision
+-interface.tsx:9:1
+Export askAi doesn't exist in 
+target module
+[0m [90m  7 |[39m 
+[36mimport[39m { 
+[33mButton[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/button'[39m[33m;[39m
+ [90m  8 |[39m 
+[36mimport[39m { 
+[33mInput[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/input'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 
+|[39m [36mimport[39m { 
+askAi } [36mfrom[39m [32m'@
+/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m 
+[36mimport[39m { 
+[33mChatMessageDisplay[39m 
+} [36mfrom[39m [32m'../chat
+/chat-message'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m type { 
+[33mChatMessage[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { nanoid } 
+[36mfrom[39m [32m'nanoid'[
+39m[33m;[39m[0m
+
+The export askAi was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/components/vision/vision
+-interface.tsx:9:1
+Export askAi doesn't exist in 
+target module
+[0m [90m  7 |[39m 
+[36mimport[39m { 
+[33mButton[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/button'[39m[33m;[39m
+ [90m  8 |[39m 
+[36mimport[39m { 
+[33mInput[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/input'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 
+|[39m [36mimport[39m { 
+askAi } [36mfrom[39m [32m'@
+/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m 
+[36mimport[39m { 
+[33mChatMessageDisplay[39m 
+} [36mfrom[39m [32m'../chat
+/chat-message'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m type { 
+[33mChatMessage[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { nanoid } 
+[36mfrom[39m [32m'nanoid'[
+39m[33m;[39m[0m
+
+The export askAi was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/components/workflows/rea
+ct-flow-wrapper.tsx:46:1
+Export askAi doesn't exist in 
+target module
+[0m [90m 44 |[39m 
+[36mimport[39m 
+[33mLink[39m [36mfrom[39m 
+[32m'next/link'[39m[33m;[3
+9m
+ [90m 45 |[39m 
+[36mimport[39m { [33mAccord
+ion[39m[33m,[39m [33mAccor
+dionContent[39m[33m,[39m [
+33mAccordionItem[39m[33m,[3
+9m [33mAccordionTrigger[39m 
+} [36mfrom[39m [32m'../ui/a
+ccordion'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 46 
+|[39m [36mimport[39m { 
+askAi } [36mfrom[39m [32m'@
+/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 47 |[39m 
+[36mimport[39m { cn } 
+[36mfrom[39m [32m'@/lib/uti
+ls'[39m[33m;[39m
+ [90m 48 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mPlay[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+ [90m 49 |[39m[0m
+
+The export askAi was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/components/workflows/rea
+ct-flow-wrapper.tsx:46:1
+Export askAi doesn't exist in 
+target module
+[0m [90m 44 |[39m 
+[36mimport[39m 
+[33mLink[39m [36mfrom[39m 
+[32m'next/link'[39m[33m;[3
+9m
+ [90m 45 |[39m 
+[36mimport[39m { [33mAccord
+ion[39m[33m,[39m [33mAccor
+dionContent[39m[33m,[39m [
+33mAccordionItem[39m[33m,[3
+9m [33mAccordionTrigger[39m 
+} [36mfrom[39m [32m'../ui/a
+ccordion'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 46 
+|[39m [36mimport[39m { 
+askAi } [36mfrom[39m [32m'@
+/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 47 |[39m 
+[36mimport[39m { cn } 
+[36mfrom[39m [32m'@/lib/uti
+ls'[39m[33m;[39m
+ [90m 48 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mPlay[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+ [90m 49 |[39m[0m
+
+The export askAi was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/components/agents/create
+-agent-form.tsx:15:1
+Export createAgentAction 
+doesn't exist in target module
+[0m [90m 13 |[39m 
+[36mimport[39m { 
+[33mTextarea[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/textarea'[39m[33m;[3
+9m
+ [90m 14 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 15 
+|[39m [36mimport[39m { 
+createAgentAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 16 |[39m
+ [90m 17 |[39m 
+[36mconst[39m formSchema 
+[33m=[39m 
+z[33m.[39mobject({
+ [90m 18 |[39m   
+name[33m:[39m z[33m.[39mst
+ring()[33m.[39mmin([35m3[3
+9m[33m,[39m [32m'Name must 
+be at least 3 characters.'[39
+m)[33m,[39m[0m
+
+The export createAgentAction 
+was not found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/components/agents/create
+-agent-form.tsx:15:1
+Export createAgentAction 
+doesn't exist in target module
+[0m [90m 13 |[39m 
+[36mimport[39m { 
+[33mTextarea[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/textarea'[39m[33m;[3
+9m
+ [90m 14 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 15 
+|[39m [36mimport[39m { 
+createAgentAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 16 |[39m
+ [90m 17 |[39m 
+[36mconst[39m formSchema 
+[33m=[39m 
+z[33m.[39mobject({
+ [90m 18 |[39m   
+name[33m:[39m z[33m.[39mst
+ring()[33m.[39mmin([35m3[3
+9m[33m,[39m [32m'Name must 
+be at least 3 characters.'[39
+m)[33m,[39m[0m
+
+The export createAgentAction 
+was not found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/synthesis/pag
+e.tsx:15:1
+Export 
+extractYouTubeTranscript 
+doesn't exist in target module
+[0m [90m 13 |[39m 
+[36mimport[39m { 
+[33mScrollArea[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/scroll-area'[39m[33m;
+[39m
+ [90m 14 |[39m 
+[36mimport[39m { 
+[33mBadge[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/badge'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 15 
+|[39m [36mimport[39m {
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 16 
+|[39m   generateSynthesisActi
+on[33m,[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 17 
+|[39m   extractYouTubeTranscr
+ipt[33m,[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 18 
+|[39m   scrapeWebPage
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 19 
+|[39m } [36mfrom[39m [32m'
+@/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m
+ [90m 20 |[39m 
+[36mimport[39m type {
+ [90m 21 |[39m   [33mChatMe
+ssage[39m[33m,[39m
+ [90m 22 |[39m   [33mSynthe
+sisOutput[39m[33m,[39m[0m
+
+The export 
+extractYouTubeTranscript was 
+not found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/synthesis/pag
+e.tsx:15:1
+Export 
+extractYouTubeTranscript 
+doesn't exist in target module
+[0m [90m 13 |[39m 
+[36mimport[39m { 
+[33mScrollArea[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/scroll-area'[39m[33m;
+[39m
+ [90m 14 |[39m 
+[36mimport[39m { 
+[33mBadge[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/badge'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 15 
+|[39m [36mimport[39m {
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 16 
+|[39m   generateSynthesisActi
+on[33m,[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 17 
+|[39m   extractYouTubeTranscr
+ipt[33m,[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 18 
+|[39m   scrapeWebPage
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 19 
+|[39m } [36mfrom[39m [32m'
+@/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m
+ [90m 20 |[39m 
+[36mimport[39m type {
+ [90m 21 |[39m   [33mChatMe
+ssage[39m[33m,[39m
+ [90m 22 |[39m   [33mSynthe
+sisOutput[39m[33m,[39m[0m
+
+The export 
+extractYouTubeTranscript was 
+not found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/aether/page.t
+sx:9:1
+Export generateAetherAction 
+doesn't exist in target module
+[0m [90m  7 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mSparkles[39m[33m,[39m 
+[33mWind[39m[33m,[39m 
+[33mEye[39m[33m,[39m 
+[33mX[39m } [36mfrom[39m 
+[32m'lucide-react'[39m[33m;
+[39m
+ [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 
+|[39m [36mimport[39m { 
+generateAetherAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m 
+[36mimport[39m type { 
+[33mAetherOutput[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m 
+[33mImage[39m 
+[36mfrom[39m [32m'next/imag
+e'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m 
+useLocalStorage 
+[36mfrom[39m [32m'@/hooks/u
+se-local-storage'[39m[33m;[
+39m[0m
+
+The export 
+generateAetherAction was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/aether/page.t
+sx:9:1
+Export generateAetherAction 
+doesn't exist in target module
+[0m [90m  7 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mSparkles[39m[33m,[39m 
+[33mWind[39m[33m,[39m 
+[33mEye[39m[33m,[39m 
+[33mX[39m } [36mfrom[39m 
+[32m'lucide-react'[39m[33m;
+[39m
+ [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 
+|[39m [36mimport[39m { 
+generateAetherAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m 
+[36mimport[39m type { 
+[33mAetherOutput[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m 
+[33mImage[39m 
+[36mfrom[39m [32m'next/imag
+e'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m 
+useLocalStorage 
+[36mfrom[39m [32m'@/hooks/u
+se-local-storage'[39m[33m;[
+39m[0m
+
+The export 
+generateAetherAction was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/components/media/tts-for
+m.tsx:8:1
+Export generateAudioAction 
+doesn't exist in target module
+[0m [90m  6 |[39m 
+[36mimport[39m [33m*[39m 
+[36mas[39m z [36mfrom[39m 
+[32m'zod'[39m[33m;[39m
+ [90m  7 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mMic[39m[33m,[39m 
+[33mWand2[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  8 
+|[39m [36mimport[39m { 
+generateAudioAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m
+ [90m  9 |[39m 
+[36mimport[39m { 
+[33mButton[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/button'[39m[33m;[39m
+ [90m 10 |[39m 
+[36mimport[39m { 
+[33mForm[39m[33m,[39m [33
+mFormControl[39m[33m,[39m 
+[33mFormDescription[39m[33m,
+[39m [33mFormField[39m[33m
+,[39m 
+[33mFormItem[39m[33m,[39m 
+[33mFormLabel[39m[33m,[39m
+ [33mFormMessage[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/form'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m { 
+[33mTextarea[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/textarea'[39m[33m;[3
+9m[0m
+
+The export 
+generateAudioAction was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/components/media/tts-for
+m.tsx:8:1
+Export generateAudioAction 
+doesn't exist in target module
+[0m [90m  6 |[39m 
+[36mimport[39m [33m*[39m 
+[36mas[39m z [36mfrom[39m 
+[32m'zod'[39m[33m;[39m
+ [90m  7 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mMic[39m[33m,[39m 
+[33mWand2[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  8 
+|[39m [36mimport[39m { 
+generateAudioAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m
+ [90m  9 |[39m 
+[36mimport[39m { 
+[33mButton[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/button'[39m[33m;[39m
+ [90m 10 |[39m 
+[36mimport[39m { 
+[33mForm[39m[33m,[39m [33
+mFormControl[39m[33m,[39m 
+[33mFormDescription[39m[33m,
+[39m [33mFormField[39m[33m
+,[39m 
+[33mFormItem[39m[33m,[39m 
+[33mFormLabel[39m[33m,[39m
+ [33mFormMessage[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/form'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m { 
+[33mTextarea[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/textarea'[39m[33m;[3
+9m[0m
+
+The export 
+generateAudioAction was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/catalyst/page
+.tsx:9:1
+Export generateCatalystAction 
+doesn't exist in target module
+[0m [90m  7 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mWand2[39m[33m,[39m 
+[33mBookOpen[39m[33m,[39m 
+[33mBook[39m[33m,[39m 
+[33mYoutube[39m[33m,[39m 
+[33mNewspaper[39m[33m,[39m 
+[33mCheck[39m[33m,[39m 
+[33mX[39m[33m,[39m [33mLi
+ghtbulb[39m[33m,[39m 
+[33mSparkles[39m[33m,[39m 
+[33mMessageCircle[39m[33m,
+[39m [33mGraduationCap[39m[
+33m,[39m 
+[33mAward[39m[33m,[39m 
+[33mInfo[39m[33m,[39m [33
+mListChecks[39m[33m,[39m 
+[33mTrophy[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+ [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 
+|[39m [36mimport[39m { 
+generateCatalystAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m
+ [90m 10 |[39m 
+[36mimport[39m type { 
+[33mCatalystOutput[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m { [33mAnimat
+ePresence[39m[33m,[39m 
+motion } [36mfrom[39m [32m'
+framer-motion'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { [33mAccord
+ion[39m[33m,[39m [33mAccor
+dionContent[39m[33m,[39m [
+33mAccordionItem[39m[33m,[3
+9m [33mAccordionTrigger[39m 
+} [36mfrom[39m [32m'@/compo
+nents/ui/accordion'[39m[33m;
+[39m[0m
+
+The export 
+generateCatalystAction was 
+not found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/catalyst/page
+.tsx:9:1
+Export generateCatalystAction 
+doesn't exist in target module
+[0m [90m  7 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mWand2[39m[33m,[39m 
+[33mBookOpen[39m[33m,[39m 
+[33mBook[39m[33m,[39m 
+[33mYoutube[39m[33m,[39m 
+[33mNewspaper[39m[33m,[39m 
+[33mCheck[39m[33m,[39m 
+[33mX[39m[33m,[39m [33mLi
+ghtbulb[39m[33m,[39m 
+[33mSparkles[39m[33m,[39m 
+[33mMessageCircle[39m[33m,
+[39m [33mGraduationCap[39m[
+33m,[39m 
+[33mAward[39m[33m,[39m 
+[33mInfo[39m[33m,[39m [33
+mListChecks[39m[33m,[39m 
+[33mTrophy[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+ [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 
+|[39m [36mimport[39m { 
+generateCatalystAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m
+ [90m 10 |[39m 
+[36mimport[39m type { 
+[33mCatalystOutput[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m { [33mAnimat
+ePresence[39m[33m,[39m 
+motion } [36mfrom[39m [32m'
+framer-motion'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { [33mAccord
+ion[39m[33m,[39m [33mAccor
+dionContent[39m[33m,[39m [
+33mAccordionItem[39m[33m,[3
+9m [33mAccordionTrigger[39m 
+} [36mfrom[39m [32m'@/compo
+nents/ui/accordion'[39m[33m;
+[39m[0m
+
+The export 
+generateCatalystAction was 
+not found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/continuum/pag
+e.tsx:9:1
+Export 
+generateContinuumAction 
+doesn't exist in target module
+[0m [90m  7 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mSparkles[39m[33m,[39m 
+[33mWand2[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+ [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 
+|[39m [36mimport[39m { 
+generateContinuumAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m 
+[36mimport[39m type { 
+[33mContinuumOutput[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m 
+[33mImage[39m 
+[36mfrom[39m [32m'next/imag
+e'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { 
+[33mCarousel[39m[33m,[39m 
+[33mCarouselContent[39m[33m
+,[39m [33mCarouselItem[39m
+[33m,[39m [33mCarouselNext[
+39m[33m,[39m 
+[33mCarouselPrevious[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/carousel'[39m[33m;[3
+9m[0m
+
+The export 
+generateContinuumAction was 
+not found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/continuum/pag
+e.tsx:9:1
+Export 
+generateContinuumAction 
+doesn't exist in target module
+[0m [90m  7 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mSparkles[39m[33m,[39m 
+[33mWand2[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+ [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 
+|[39m [36mimport[39m { 
+generateContinuumAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m 
+[36mimport[39m type { 
+[33mContinuumOutput[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m 
+[33mImage[39m 
+[36mfrom[39m [32m'next/imag
+e'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { 
+[33mCarousel[39m[33m,[39m 
+[33mCarouselContent[39m[33m
+,[39m [33mCarouselItem[39m
+[33m,[39m [33mCarouselNext[
+39m[33m,[39m 
+[33mCarouselPrevious[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/carousel'[39m[33m;[3
+9m[0m
+
+The export 
+generateContinuumAction was 
+not found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/cosmos/page.t
+sx:9:1
+Export generateCosmosAction 
+doesn't exist in target module
+[0m [90m  7 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mWand2[39m[33m,[39m 
+[33mMap[39m[33m,[39m 
+[33mUsers[39m[33m,[39m 
+[33mHistory[39m[33m,[39m 
+[33mShield[39m[33m,[39m 
+[33mUser[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+ [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 
+|[39m [36mimport[39m { 
+generateCosmosAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m 
+[36mimport[39m type { 
+[33mCosmosOutput[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m 
+[33mImage[39m 
+[36mfrom[39m [32m'next/imag
+e'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { 
+motion[33m,[39m 
+[33mAnimatePresence[39m } 
+[36mfrom[39m [32m'framer-mo
+tion'[39m[33m;[39m[0m
+
+The export 
+generateCosmosAction was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/cosmos/page.t
+sx:9:1
+Export generateCosmosAction 
+doesn't exist in target module
+[0m [90m  7 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mWand2[39m[33m,[39m 
+[33mMap[39m[33m,[39m 
+[33mUsers[39m[33m,[39m 
+[33mHistory[39m[33m,[39m 
+[33mShield[39m[33m,[39m 
+[33mUser[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+ [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 
+|[39m [36mimport[39m { 
+generateCosmosAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+ [90m 10 |[39m 
+[36mimport[39m type { 
+[33mCosmosOutput[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m 
+[33mImage[39m 
+[36mfrom[39m [32m'next/imag
+e'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { 
+motion[33m,[39m 
+[33mAnimatePresence[39m } 
+[36mfrom[39m [32m'framer-mo
+tion'[39m[33m;[39m[0m
+
+The export 
+generateCosmosAction was not 
+found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/crucible/page
+.tsx:9:1
+Export generateCrucibleAction 
+doesn't exist in target module
+[0m [90m  7 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mShieldHalf[39m[33m,[39m
+ 
+[33mSparkles[39m[33m,[39m 
+[33mCheck[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+ [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 
+|[39m [36mimport[39m { 
+generateCrucibleAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m
+ [90m 10 |[39m 
+[36mimport[39m type { [33mC
+rucibleOutput[39m[33m,[39m 
+[33mAdversaryPersona[39m[33
+m,[39m 
+[33mCrucibleCritique[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m { 
+[33mLabel[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/label'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { [33mAnimat
+ePresence[39m[33m,[39m 
+motion } [36mfrom[39m [32m'
+framer-motion'[39m[33m;[39m
+[0m
+
+The export 
+generateCrucibleAction was 
+not found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/crucible/page
+.tsx:9:1
+Export generateCrucibleAction 
+doesn't exist in target module
+[0m [90m  7 |[39m 
+[36mimport[39m { 
+[33mLoader2[39m[33m,[39m 
+[33mShieldHalf[39m[33m,[39m
+ 
+[33mSparkles[39m[33m,[39m 
+[33mCheck[39m } 
+[36mfrom[39m [32m'lucide-re
+act'[39m[33m;[39m
+ [90m  8 |[39m 
+[36mimport[39m { useToast } 
+[36mfrom[39m [32m'@/hooks/u
+se-toast'[39m[33m;[39m
+[31m[1m>[22m[39m[90m  9 
+|[39m [36mimport[39m { 
+generateCrucibleAction } 
+[36mfrom[39m [32m'@/app/act
+ions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m
+ [90m 10 |[39m 
+[36mimport[39m type { [33mC
+rucibleOutput[39m[33m,[39m 
+[33mAdversaryPersona[39m[33
+m,[39m 
+[33mCrucibleCritique[39m } 
+[36mfrom[39m [32m'@/lib/typ
+es'[39m[33m;[39m
+ [90m 11 |[39m 
+[36mimport[39m { 
+[33mLabel[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/label'[39m[33m;[39m
+ [90m 12 |[39m 
+[36mimport[39m { [33mAnimat
+ePresence[39m[33m,[39m 
+motion } [36mfrom[39m [32m'
+framer-motion'[39m[33m;[39m
+[0m
+
+The export 
+generateCrucibleAction was 
+not found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/synthesis/pag
+e.tsx:15:1
+Export 
+generateSynthesisAction 
+doesn't exist in target module
+[0m [90m 13 |[39m 
+[36mimport[39m { 
+[33mScrollArea[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/scroll-area'[39m[33m;
+[39m
+ [90m 14 |[39m 
+[36mimport[39m { 
+[33mBadge[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/badge'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 15 
+|[39m [36mimport[39m {
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 16 
+|[39m   generateSynthesisActi
+on[33m,[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 17 
+|[39m   extractYouTubeTranscr
+ipt[33m,[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 18 
+|[39m   scrapeWebPage
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 19 
+|[39m } [36mfrom[39m [32m'
+@/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m
+ [90m 20 |[39m 
+[36mimport[39m type {
+ [90m 21 |[39m   [33mChatMe
+ssage[39m[33m,[39m
+ [90m 22 |[39m   [33mSynthe
+sisOutput[39m[33m,[39m[0m
+
+The export 
+generateSynthesisAction was 
+not found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/synthesis/pag
+e.tsx:15:1
+Export 
+generateSynthesisAction 
+doesn't exist in target module
+[0m [90m 13 |[39m 
+[36mimport[39m { 
+[33mScrollArea[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/scroll-area'[39m[33m;
+[39m
+ [90m 14 |[39m 
+[36mimport[39m { 
+[33mBadge[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/badge'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 15 
+|[39m [36mimport[39m {
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 16 
+|[39m   generateSynthesisActi
+on[33m,[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 17 
+|[39m   extractYouTubeTranscr
+ipt[33m,[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 18 
+|[39m   scrapeWebPage
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 19 
+|[39m } [36mfrom[39m [32m'
+@/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m
+ [90m 20 |[39m 
+[36mimport[39m type {
+ [90m 21 |[39m   [33mChatMe
+ssage[39m[33m,[39m
+ [90m 22 |[39m   [33mSynthe
+sisOutput[39m[33m,[39m[0m
+
+The export 
+generateSynthesisAction was 
+not found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/synthesis/pag
+e.tsx:15:1
+Export scrapeWebPage doesn't 
+exist in target module
+[0m [90m 13 |[39m 
+[36mimport[39m { 
+[33mScrollArea[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/scroll-area'[39m[33m;
+[39m
+ [90m 14 |[39m 
+[36mimport[39m { 
+[33mBadge[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/badge'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 15 
+|[39m [36mimport[39m {
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 16 
+|[39m   generateSynthesisActi
+on[33m,[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 17 
+|[39m   extractYouTubeTranscr
+ipt[33m,[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 18 
+|[39m   scrapeWebPage
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 19 
+|[39m } [36mfrom[39m [32m'
+@/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m
+ [90m 20 |[39m 
+[36mimport[39m type {
+ [90m 21 |[39m   [33mChatMe
+ssage[39m[33m,[39m
+ [90m 22 |[39m   [33mSynthe
+sisOutput[39m[33m,[39m[0m
+
+The export scrapeWebPage was 
+not found in module 
+[project]/src/app/actions.ts 
+[app-client] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+./src/app/(main)/synthesis/pag
+e.tsx:15:1
+Export scrapeWebPage doesn't 
+exist in target module
+[0m [90m 13 |[39m 
+[36mimport[39m { 
+[33mScrollArea[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/scroll-area'[39m[33m;
+[39m
+ [90m 14 |[39m 
+[36mimport[39m { 
+[33mBadge[39m } 
+[36mfrom[39m [32m'@/compone
+nts/ui/badge'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 15 
+|[39m [36mimport[39m {
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 16 
+|[39m   generateSynthesisActi
+on[33m,[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 17 
+|[39m   extractYouTubeTranscr
+ipt[33m,[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 18 
+|[39m   scrapeWebPage
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m
+[31m[1m>[22m[39m[90m 19 
+|[39m } [36mfrom[39m [32m'
+@/app/actions'[39m[33m;[39m
+ [90m    |[39m [31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m
+ [90m 20 |[39m 
+[36mimport[39m type {
+ [90m 21 |[39m   [33mChatMe
+ssage[39m[33m,[39m
+ [90m 22 |[39m   [33mSynthe
+sisOutput[39m[33m,[39m[0m
+
+The export scrapeWebPage was 
+not found in module 
+[project]/src/app/actions.ts 
+[app-ssr] (ecmascript).
+The module has no exports at 
+all.
+All exports of the module are 
+statically known (It doesn't 
+have dynamic exports). So 
+it's known statically that 
+the requested export doesn't 
+exist.
+
+
+    at <unknown> 
+(./src/app/actions.ts:2:1)
+    at <unknown> 
+(./src/app/actions.ts:2:1)
+    at <unknown> (./src/app/(m
+ain)/codex/page.tsx:12:1)
+    at <unknown> (./src/app/(m
+ain)/codex/page.tsx:12:1)
+    at <unknown> (./src/compon
+ents/blueprint/blueprint-inter
+face.tsx:10:1)
+    at <unknown> (./src/compon
+ents/blueprint/blueprint-inter
+face.tsx:10:1)
+    at <unknown> (./src/compon
+ents/chat/chat-interface.tsx:1
+0:1)
+    at <unknown> (./src/compon
+ents/chat/chat-interface.tsx:1
+0:1)
+    at <unknown> (./src/compon
+ents/vision/vision-interface.t
+sx:9:1)
+    at <unknown> (./src/compon
+ents/vision/vision-interface.t
+sx:9:1)
+    at <unknown> (./src/compon
+ents/workflows/react-flow-wrap
+per.tsx:46:1)
+    at <unknown> (./src/compon
+ents/workflows/react-flow-wrap
+per.tsx:46:1)
+    at <unknown> (./src/compon
+ents/agents/create-agent-form.
+tsx:15:1)
+    at <unknown> (./src/compon
+ents/agents/create-agent-form.
+tsx:15:1)
+    at <unknown> (./src/app/(m
+ain)/synthesis/page.tsx:15:1)
+    at <unknown> (./src/app/(m
+ain)/synthesis/page.tsx:15:1)
+    at <unknown> (./src/app/(m
+ain)/aether/page.tsx:9:1)
+    at <unknown> (./src/app/(m
+ain)/aether/page.tsx:9:1)
+    at <unknown> (./src/compon
+ents/media/tts-form.tsx:8:1)
+    at <unknown> (./src/compon
+ents/media/tts-form.tsx:8:1)
+    at <unknown> (./src/app/(m
+ain)/catalyst/page.tsx:9:1)
+    at <unknown> (./src/app/(m
+ain)/catalyst/page.tsx:9:1)
+    at <unknown> (./src/app/(m
+ain)/continuum/page.tsx:9:1)
+    at <unknown> (./src/app/(m
+ain)/continuum/page.tsx:9:1)
+    at <unknown> (./src/app/(m
+ain)/cosmos/page.tsx:9:1)
+    at <unknown> (./src/app/(m
+ain)/cosmos/page.tsx:9:1)
+    at <unknown> (./src/app/(m
+ain)/crucible/page.tsx:9:1)
+    at <unknown> (./src/app/(m
+ain)/crucible/page.tsx:9:1)
+    at <unknown> (./src/app/(m
+ain)/synthesis/page.tsx:15:1)
+    ... collapsed 3 duplicate 
+lines matching above 1 lines 
+3 times...

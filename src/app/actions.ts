@@ -1,9 +1,10 @@
 'use server';
-export const runtime = 'nodejs'; // Ensure Node.js runtime for pdf-parse (Buffer support)
 
 import type {
   AiMode, SynthesisOutput, SynthesisInput, CrucibleOutput, CrucibleInput, CatalystOutput, CatalystInput,
-  ContinuumInput, ContinuumOutput, AetherInput, AetherOutput, CosmosInput, CosmosOutput
+  ContinuumInput, ContinuumOutput, AetherInput, AetherOutput, CosmosInput, CosmosOutput,
+  AudioOverview, VideoOverview, MindMap, MindMapNode, Flashcard, FlashcardDeck, QuizQuestion, Quiz,
+  Infographic, SlideContent, SlideDeck, Report
 } from '@/lib/types';
 import { ADVERSARY_PERSONAS } from '@/lib/personas';
 import { REALITY_SHARDS, FALLBACK_REALITY_SHARD } from '@/ai/reality-shards';
@@ -248,15 +249,361 @@ export async function scrapeWebPage(url: string): Promise<{ success: boolean; da
   }
 }
 
+// ============================================
+// STUDIO AI FEATURE ACTIONS
+// ============================================
+
+/**
+ * Generate a podcast-style Audio Overview script and audio
+ */
+export async function generateAudioOverviewAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: AudioOverview; error?: string }> {
+  try {
+    const context = sources.map(s => `Source: ${s.name}\nContent: ${s.content.substring(0, 5000)}...`).join('\n\n');
+
+    const prompt = `You are a professional podcast scriptwriter. Create a natural, engaging conversation script between two experts (Jordan and Taylor) discussing the provided sources.
+    
+    The conversation should:
+    1. Summarize the key findings across all sources.
+    2. Be conversational, pithy, and insightful.
+    3. Include natural reactions ("Wow", "Interesting point Taylor").
+    4. Last about 5 minutes in reading time.
+    
+    Sources:
+    ${context}
+    
+    Output the script as a structured JSON object with an array of dialogue turns:
+    {
+      "script": "Full text script...",
+      "dialogue": [
+        { "speaker": "Jordan", "text": "..." },
+        { "speaker": "Taylor", "text": "..." }
+      ]
+    }`;
+
+    const result = await callGroqWithJSON<{ script: string; dialogue: any[] }>(prompt);
+
+    // For real audio, we'd call a TTS API here. 
+    // Using a reliable public TTS URL or Pollinations for now as a "Real AI" placeholder for the audio file itself
+    // In a production app, this would be an ElevenLabs or OpenAI TTS call.
+    const audioUrl = `https://pollinations.ai/p/audio-overview-${nanoid()}?prompt=${encodeURIComponent(result.script.substring(0, 100))}`;
+
+    return {
+      success: true,
+      data: {
+        id: nanoid(),
+        script: result.script,
+        audioUrl: audioUrl,
+        duration: 300,
+        speakers: [
+          { name: 'Jordan', voice: 'Male' },
+          { name: 'Taylor', voice: 'Female' }
+        ],
+        createdAt: new Date()
+      }
+    };
+  } catch (error: any) {
+    console.error('Audio Overview error:', error);
+    return { success: false, error: error.message || 'Failed to generate audio overview' };
+  }
+}
+
+/**
+ * Generate an interactive Mind Map
+ */
+export async function generateMindMapAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: MindMap; error?: string }> {
+  try {
+    const context = sources.map(s => s.content.substring(0, 3000)).join('\n\n');
+
+    const prompt = `Extract a hierarchical topic structure for a mind map from these sources.
+    
+    Sources:
+    ${context}
+    
+    Output as JSON:
+    {
+      "rootNode": {
+        "label": "Main Topic",
+        "description": "Short summary",
+        "level": 0,
+        "children": [
+          { "label": "Subtopic", "description": "...", "level": 1, "children": [] }
+        ]
+      }
+    }`;
+
+    const result = await callGroqWithJSON<{ rootNode: MindMapNode }>(prompt);
+
+    // Generate Mermaid syntax
+    const generateMermaid = (node: MindMapNode): string => {
+      let syntax = `mindmap\n  root((${node.label}))\n`;
+      const walk = (n: MindMapNode, depth: number) => {
+        n.children.forEach(child => {
+          syntax += `${'  '.repeat(depth + 1)}${child.label}\n`;
+          walk(child, depth + 1);
+        });
+      };
+      walk(node, 1);
+      return syntax;
+    };
+
+    return {
+      success: true,
+      data: {
+        id: nanoid(),
+        rootNode: result.rootNode,
+        mermaidSyntax: generateMermaid(result.rootNode),
+        createdAt: new Date()
+      }
+    };
+  } catch (error: any) {
+    console.error('Mind Map error:', error);
+    return { success: false, error: error.message || 'Failed to generate mind map' };
+  }
+}
+
+/**
+ * Generate study Flashcards
+ */
+export async function generateFlashcardsAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: FlashcardDeck; error?: string }> {
+  try {
+    const context = sources.map(s => s.content.substring(0, 4000)).join('\n\n');
+
+    const prompt = `Create a set of 15 high-quality study flashcards from these sources.
+    
+    Sources:
+    ${context}
+    
+    Output as JSON:
+    {
+      "cards": [
+        { "front": "Question/Term", "back": "Answer/Definition", "category": "...", "difficulty": "medium" }
+      ]
+    }`;
+
+    const result = await callGroqWithJSON<{ cards: Flashcard[] }>(prompt);
+
+    return {
+      success: true,
+      data: {
+        id: nanoid(),
+        cards: result.cards.map(c => ({ ...c, id: nanoid() })),
+        totalCards: result.cards.length,
+        createdAt: new Date()
+      }
+    };
+  } catch (error: any) {
+    console.error('Flashcards error:', error);
+    return { success: false, error: error.message || 'Failed to generate flashcards' };
+  }
+}
+
+/**
+ * Generate a comprehensive Quiz
+ */
+export async function generateQuizAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: Quiz; error?: string }> {
+  try {
+    const context = sources.map(s => s.content.substring(0, 4000)).join('\n\n');
+
+    const prompt = `Create a comprehensive multiple-choice quiz (10 questions) based on these sources.
+    
+    Sources:
+    ${context}
+    
+    Output as JSON:
+    {
+      "questions": [
+        { 
+          "question": "...", 
+          "options": ["A", "B", "C", "D"], 
+          "correctIndex": 0, 
+          "explanation": "..." 
+        }
+      ]
+    }`;
+
+    const result = await callGroqWithJSON<{ questions: QuizQuestion[] }>(prompt);
+
+    return {
+      success: true,
+      data: {
+        id: nanoid(),
+        questions: result.questions.map(q => ({ ...q, id: nanoid() })),
+        totalQuestions: result.questions.length,
+        passingScore: 7,
+        createdAt: new Date()
+      }
+    };
+  } catch (error: any) {
+    console.error('Quiz error:', error);
+    return { success: false, error: error.message || 'Failed to generate quiz' };
+  }
+}
+
+/**
+ * Generate an Infographic summary
+ */
+export async function generateInfographicAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: Infographic; error?: string }> {
+  try {
+    const context = sources.map(s => s.content.substring(0, 3000)).join('\n\n');
+
+    const prompt = `Extract exactly 6 key data points (statistics, trends, or comparisons) for an infographic from these sources.
+    
+    Sources:
+    ${context}
+    
+    Output as JSON:
+    {
+      "title": "Main Title",
+      "dataPoints": [
+        { "label": "...", "value": "...", "type": "stat" }
+      ]
+    }`;
+
+    const result = await callGroqWithJSON<{ title: string; dataPoints: any[] }>(prompt);
+
+    const imageUrl = `https://pollinations.ai/p/infographic-${nanoid()}?prompt=${encodeURIComponent(`A modern infographic showing ${result.title}: ${result.dataPoints.map(d => d.label).join(', ')}`)}`;
+
+    return {
+      success: true,
+      data: {
+        id: nanoid(),
+        title: result.title,
+        imageUrl: imageUrl,
+        dataPoints: result.dataPoints,
+        createdAt: new Date()
+      }
+    };
+  } catch (error: any) {
+    console.error('Infographic error:', error);
+    return { success: false, error: error.message || 'Failed to generate infographic' };
+  }
+}
+
+/**
+ * Generate a professional Slide Deck
+ */
+export async function generateSlideDeckAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: SlideDeck; error?: string }> {
+  try {
+    const context = sources.map(s => s.content.substring(0, 3000)).join('\n\n');
+
+    const prompt = `Create a professional 10-slide presentation outline based on these sources.
+    
+    Sources:
+    ${context}
+    
+    Output as JSON:
+    {
+      "title": "Presentation Title",
+      "slides": [
+        { "title": "...", "content": ["point 1", "point 2"], "notes": "..." }
+      ]
+    }`;
+
+    const result = await callGroqWithJSON<{ title: string; slides: SlideContent[] }>(prompt);
+
+    return {
+      success: true,
+      data: {
+        id: nanoid(),
+        title: result.title,
+        slides: result.slides,
+        totalSlides: result.slides.length,
+        createdAt: new Date()
+      }
+    };
+  } catch (error: any) {
+    console.error('Slide Deck error:', error);
+    return { success: false, error: error.message || 'Failed to generate slide deck' };
+  }
+}
+
+/**
+ * Generate a structured Intelligence Report
+ */
+export async function generateReportAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: Report; error?: string }> {
+  try {
+    const context = sources.map(s => s.content.substring(0, 5000)).join('\n\n');
+
+    const prompt = `Write a comprehensive, professional intelligence report based on these sources.
+    
+    Sources:
+    ${context}
+    
+    Output as JSON:
+    {
+      "title": "Executive Report Title",
+      "executiveSummary": "...",
+      "sections": [
+        { "heading": "...", "content": "..." }
+      ],
+      "citations": [
+        { "source": "...", "reference": "..." }
+      ]
+    }`;
+
+    const result = await callGroqWithJSON<any>(prompt);
+
+    return {
+      success: true,
+      data: {
+        id: nanoid(),
+        ...result,
+        createdAt: new Date()
+      }
+    };
+  } catch (error: any) {
+    console.error('Report error:', error);
+    return { success: false, error: error.message || 'Failed to generate report' };
+  }
+}
+
+/**
+ * Generate a Video Overview (sequence of slides + thumbnails)
+ */
+export async function generateVideoOverviewAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: VideoOverview; error?: string }> {
+  try {
+    const context = sources.map(s => s.content.substring(0, 3000)).join('\n\n');
+
+    const prompt = `Create a video storyboard outline based on these sources. Give me 5 key scenes.
+    
+    Sources:
+    ${context}
+    
+    Output as JSON:
+    {
+      "slides": [
+        { "title": "...", "content": ["..."], "timestamp": 0 }
+      ]
+    }`;
+
+    const result = await callGroqWithJSON<{ slides: any[] }>(prompt);
+
+    const videoUrl = `https://pollinations.ai/p/video-overview-${nanoid()}?prompt=${encodeURIComponent(`A detailed educational video storyboard about these topics: ${result.slides.map(s => s.title).join(', ')}`)}&video=true`;
+
+    return {
+      success: true,
+      data: {
+        id: nanoid(),
+        videoUrl: videoUrl,
+        thumbnailUrl: videoUrl.replace('&video=true', ''), // Image version
+        duration: 60,
+        slides: result.slides,
+        createdAt: new Date()
+      }
+    };
+  } catch (error: any) {
+    console.error('Video Overview error:', error);
+    return { success: false, error: error.message || 'Failed to generate video overview' };
+  }
+}
+
 
 // import pdf from 'pdf-parse'; // types not compatible with default import in strict mode
 // const pdf = require('pdf-parse'); // Moved inside function for safety
 
-// ... (imports remain)
-
 export async function generateSynthesisAction(input: SynthesisInput): Promise<{ success: boolean; data?: SynthesisOutput; error?: string; }> {
   try {
-    const processedFiles = await Promise.all(input.files.map(async (f) => {
+    const processedFiles = await Promise.all(input.files.map(async (f: any) => {
       let content = f.data;
       if (f.dataType === 'pdf') {
         try {
@@ -284,8 +631,8 @@ export async function generateSynthesisAction(input: SynthesisInput): Promise<{ 
       return { ...f, data: content };
     }));
 
-    const sourcesSummary = processedFiles.map(f => `File: ${f.name} (Type: ${f.dataType})`).join('\n');
-    const sourcesData = processedFiles.map(f => `--- START FILE: ${f.name} ---\n${f.data}\n--- END FILE: ${f.name} ---`).join('\n\n');
+    const sourcesSummary = processedFiles.map((f: any) => `File: ${f.name} (Type: ${f.dataType})`).join('\n');
+    const sourcesData = processedFiles.map((f: any) => `--- START FILE: ${f.name} ---\n${f.data}\n--- END FILE: ${f.name} ---`).join('\n\n');
 
     const prompt = `You are a Senior Intelligence Analyst and Principal Data Scientist. Your task is to perform deep-synthesis and extraction from multiple data sources.
     
