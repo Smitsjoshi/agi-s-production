@@ -1,4 +1,5 @@
 'use server';
+export const runtime = 'nodejs'; // Ensure Node.js runtime for pdf-parse (Buffer support)
 
 import type {
   AiMode, SynthesisOutput, SynthesisInput, CrucibleOutput, CrucibleInput, CatalystOutput, CatalystInput,
@@ -162,6 +163,91 @@ export async function createAgentAction(data: { name: string; persona: string; k
   return { success: true };
 }
 
+// ============================================
+// SOURCE EXTRACTION ACTIONS
+// ============================================
+
+/**
+ * Extract transcript from YouTube video
+ */
+export async function extractYouTubeTranscript(url: string): Promise<{ success: boolean; data?: string; error?: string }> {
+  try {
+    const { YoutubeTranscript } = await import('youtube-transcript');
+
+    // Extract video ID from URL
+    const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+    if (!videoIdMatch) {
+      return { success: false, error: 'Invalid YouTube URL' };
+    }
+
+    const videoId = videoIdMatch[1];
+    const transcript = await YoutubeTranscript.fetchTranscript(videoId);
+
+    // Format transcript with timestamps
+    const formattedTranscript = transcript
+      .map(item => `[${Math.floor(item.offset / 1000)}s] ${item.text}`)
+      .join('\n');
+
+    return { success: true, data: formattedTranscript };
+  } catch (error: any) {
+    console.error('YouTube transcript extraction error:', error);
+    return { success: false, error: error.message || 'Failed to extract YouTube transcript' };
+  }
+}
+
+/**
+ * Scrape and extract main content from web page
+ */
+export async function scrapeWebPage(url: string): Promise<{ success: boolean; data?: string; error?: string }> {
+  try {
+    const axios = (await import('axios')).default;
+    const cheerio = await import('cheerio');
+
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      },
+      timeout: 10000
+    });
+
+    const $ = cheerio.load(response.data);
+
+    // Remove script, style, nav, footer, ads
+    $('script, style, nav, footer, aside, .ad, .advertisement, #comments').remove();
+
+    // Extract main content (try common selectors)
+    let content = '';
+    const mainSelectors = ['main', 'article', '.content', '.post-content', '#content', 'body'];
+
+    for (const selector of mainSelectors) {
+      const element = $(selector);
+      if (element.length > 0) {
+        content = element.text();
+        break;
+      }
+    }
+
+    if (!content) {
+      content = $('body').text();
+    }
+
+    // Clean up whitespace
+    content = content
+      .replace(/\s+/g, ' ')
+      .replace(/\n\s*\n/g, '\n\n')
+      .trim();
+
+    if (!content || content.length < 100) {
+      return { success: false, error: 'Could not extract meaningful content from page' };
+    }
+
+    return { success: true, data: content };
+  } catch (error: any) {
+    console.error('Web scraping error:', error);
+    return { success: false, error: error.message || 'Failed to scrape web page' };
+  }
+}
+
 
 // import pdf from 'pdf-parse'; // types not compatible with default import in strict mode
 // const pdf = require('pdf-parse'); // Moved inside function for safety
@@ -175,12 +261,19 @@ export async function generateSynthesisAction(input: SynthesisInput): Promise<{ 
       if (f.dataType === 'pdf') {
         try {
           // Dynamic require to prevent top-level build/runtime failures
-          const pdf = require('pdf-parse');
+          // pdf-parse v2 specific handling
+          const pkg = require('pdf-parse');
+          const { PDFParse } = pkg; // v2 export style
 
           // Remove data URL prefix if present (e.g., "data:application/pdf;base64,")
           const base64Data = f.data.replace(/^data:application\/pdf;base64,/, "");
           const buffer = Buffer.from(base64Data, 'base64');
-          const pdfData = await pdf(buffer);
+
+          // v2 requires Uint8Array, not Buffer
+          const uint8Array = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+
+          const instance = new PDFParse(uint8Array);
+          const pdfData = await instance.getText();
           content = pdfData.text;
         } catch (pdfError: any) {
           console.error(`Failed to parse PDF ${f.name}:`, pdfError);

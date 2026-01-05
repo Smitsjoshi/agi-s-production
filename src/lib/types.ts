@@ -156,6 +156,147 @@ export const SynthesisInputSchema = z.object({
 });
 export type SynthesisInput = z.infer<typeof SynthesisInputSchema>;
 
+// NotebookLM Source Types
+export type SourceType = 'pdf' | 'youtube' | 'web' | 'text' | 'csv' | 'json';
+
+export interface Source {
+    id: string;
+    type: SourceType;
+    name: string;
+    url?: string;
+    content: string;
+    metadata?: {
+        videoId?: string;
+        duration?: number;
+        author?: string;
+        publishedAt?: string;
+        [key: string]: any;
+    };
+    addedAt: Date;
+}
+
+// Studio Feature Outputs
+export interface AudioOverview {
+    id: string;
+    script: string;
+    audioUrl: string;
+    duration: number;
+    speakers: Array<{
+        name: string;
+        voice: string;
+    }>;
+    createdAt: Date;
+}
+
+export interface VideoOverview {
+    id: string;
+    videoUrl: string;
+    thumbnailUrl: string;
+    duration: number;
+    slides: Array<{
+        title: string;
+        content: string[];
+        timestamp: number;
+    }>;
+    createdAt: Date;
+}
+
+export interface MindMapNode {
+    id: string;
+    label: string;
+    description?: string;
+    children: MindMapNode[];
+    level: number;
+}
+
+export interface MindMap {
+    id: string;
+    rootNode: MindMapNode;
+    mermaidSyntax: string;
+    imageUrl?: string;
+    createdAt: Date;
+}
+
+export interface Flashcard {
+    id: string;
+    front: string;
+    back: string;
+    category?: string;
+    difficulty?: 'easy' | 'medium' | 'hard';
+}
+
+export interface FlashcardDeck {
+    id: string;
+    cards: Flashcard[];
+    totalCards: number;
+    createdAt: Date;
+}
+
+export interface QuizQuestion {
+    id: string;
+    question: string;
+    options: string[];
+    correctIndex: number;
+    explanation: string;
+    difficulty?: 'easy' | 'medium' | 'hard';
+}
+
+export interface Quiz {
+    id: string;
+    questions: QuizQuestion[];
+    totalQuestions: number;
+    passingScore: number;
+    createdAt: Date;
+}
+
+export interface Infographic {
+    id: string;
+    title: string;
+    imageUrl: string;
+    dataPoints: Array<{
+        label: string;
+        value: string | number;
+        type: 'stat' | 'trend' | 'comparison';
+    }>;
+    createdAt: Date;
+}
+
+export interface SlideContent {
+    title: string;
+    content: string[];
+    notes?: string;
+    imageUrl?: string;
+}
+
+export interface SlideDeck {
+    id: string;
+    title: string;
+    slides: SlideContent[];
+    totalSlides: number;
+    pdfUrl?: string;
+    createdAt: Date;
+}
+
+export interface Report {
+    id: string;
+    title: string;
+    sections: Array<{
+        heading: string;
+        content: string;
+        subsections?: Array<{
+            heading: string;
+            content: string;
+        }>;
+    }>;
+    executiveSummary: string;
+    citations: Array<{
+        source: string;
+        reference: string;
+    }>;
+    pdfUrl?: string;
+    createdAt: Date;
+}
+
 const SynthesisContentBlockSchema = z.union([
     z.object({
         type: z.literal('text'),

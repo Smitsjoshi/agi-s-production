@@ -2,130 +2,168 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  UploadCloud, FileJson, FileSpreadsheet, Send, Loader2,
-  BookCheck, MoreVertical, Trash2, Plus, Sparkles,
-  Search, ShieldAlert, FileText, ChevronRight,
-  MessageSquare, LayoutDashboard, BarChart3, Quote
+  Upload, FileText, Video, Globe, Plus, X, Send, Loader2,
+  Mic, Film, Map, FileBarChart, CreditCard, HelpCircle,
+  BarChart3, Presentation, StickyNote, Sparkles, BookOpen
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import {
-  generateSynthesisAction
+  generateSynthesisAction,
+  extractYouTubeTranscript,
+  scrapeWebPage
 } from '@/app/actions';
 import type {
   ChatMessage,
   SynthesisOutput,
-  SynthesisContentBlock,
-  SynthesisInput
+  Source,
+  SourceType
 } from '@/lib/types';
 import { nanoid } from 'nanoid';
-import {
-  Bar, BarChart as RechartsBarChart, ResponsiveContainer,
-  XAxis, YAxis, Tooltip, Legend, Pie, PieChart, Cell
-} from 'recharts';
 import { ChatMessageDisplay } from '@/components/chat/chat-message';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type FileState = {
-  id: string;
-  name: string;
-  dataType: 'csv' | 'json' | 'pdf';
-  data: string;
-};
-
-const CHART_COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
-];
-
 export default function SynthesisPage() {
-  const [files, setFiles] = useState<FileState[]>([]);
+  const { toast } = useToast();
+  const [sources, setSources] = useState<Source[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState('');
+  const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeAnalysis, setActiveAnalysis] = useState<SynthesisOutput | null>(null);
-  const { toast } = useToast();
+  const [showSourceInput, setShowSourceInput] = useState<SourceType | null>(null);
+  const [sourceUrl, setSourceUrl] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Persistence
-  useEffect(() => {
-    const savedFiles = localStorage.getItem('synthesis_files');
-    if (savedFiles) {
-      try {
-        setFiles(JSON.parse(savedFiles));
-      } catch (e) {
-        console.error("Failed to load saved files", e);
-      }
-    }
-  }, []);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    localStorage.setItem('synthesis_files', JSON.stringify(files));
-  }, [files]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-  const processFile = (fileToProcess: File) => {
-    const dataType = fileToProcess.name.endsWith('.csv') ? 'csv' : fileToProcess.name.endsWith('.json') ? 'json' : fileToProcess.name.endsWith('.pdf') ? 'pdf' : null;
-    if (!dataType) {
-      toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a CSV, JSON, or PDF file.' });
-      return;
-    }
-
-    // Check for duplicates
-    if (files.some(f => f.name === fileToProcess.name)) {
-      toast({ title: 'Already Exists', description: `${fileToProcess.name} is already in your sources.` });
-      return;
-    }
+  // Add source handlers
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
-      const fileContent = e.target?.result as string;
-      const newFile: FileState = {
+    reader.onload = async (event) => {
+      const content = event.target?.result as string;
+      const type: SourceType = file.name.endsWith('.pdf') ? 'pdf' :
+        file.name.endsWith('.csv') ? 'csv' : 'json';
+
+      const newSource: Source = {
         id: nanoid(),
-        name: fileToProcess.name,
-        dataType: dataType as 'csv' | 'json' | 'pdf',
-        data: fileContent,
+        type,
+        name: file.name,
+        content,
+        addedAt: new Date()
       };
-      setFiles(prev => [...prev, newFile]);
-      toast({ title: 'Source Added', description: `${fileToProcess.name} is ready for analysis.` });
+
+      setSources(prev => [...prev, newSource]);
+      toast({ title: 'Source Added', description: `${file.name} added successfully` });
     };
 
-    if (dataType === 'pdf') {
-      reader.readAsDataURL(fileToProcess);
+    if (file.name.endsWith('.pdf')) {
+      reader.readAsDataURL(file);
     } else {
-      reader.readAsText(fileToProcess);
+      reader.readAsText(file);
     }
   };
 
-  const removeFile = (id: string) => {
-    setFiles(prev => prev.filter(f => f.id !== id));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || files.length === 0) return;
-
-    const userMessage: ChatMessage = { id: nanoid(), role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+  const handleYouTubeAdd = async () => {
+    if (!sourceUrl) return;
     setIsLoading(true);
-    setInput('');
 
     try {
-      const synthesisInput: SynthesisInput = {
-        query: input,
-        files: files.map(f => ({
-          name: f.name,
-          dataType: f.dataType,
-          data: f.data
+      const result = await extractYouTubeTranscript(sourceUrl);
+      if (!result.success || !result.data) {
+        throw new Error(result.error || 'Failed to extract transcript');
+      }
+
+      const videoIdMatch = sourceUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+      const videoId = videoIdMatch?.[1] || 'video';
+
+      const newSource: Source = {
+        id: nanoid(),
+        type: 'youtube',
+        name: `YouTube: ${videoId}`,
+        url: sourceUrl,
+        content: result.data,
+        metadata: { videoId },
+        addedAt: new Date()
+      };
+
+      setSources(prev => [...prev, newSource]);
+      toast({ title: 'YouTube Added', description: 'Transcript extracted successfully' });
+      setSourceUrl('');
+      setShowSourceInput(null);
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleWebAdd = async () => {
+    if (!sourceUrl) return;
+    setIsLoading(true);
+
+    try {
+      const result = await scrapeWebPage(sourceUrl);
+      if (!result.success || !result.data) {
+        throw new Error(result.error || 'Failed to scrape page');
+      }
+
+      const urlObj = new URL(sourceUrl);
+      const newSource: Source = {
+        id: nanoid(),
+        type: 'web',
+        name: `Web: ${urlObj.hostname}`,
+        url: sourceUrl,
+        content: result.data,
+        addedAt: new Date()
+      };
+
+      setSources(prev => [...prev, newSource]);
+      toast({ title: 'Web Page Added', description: 'Content extracted successfully' });
+      setSourceUrl('');
+      setShowSourceInput(null);
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const removeSource = (id: string) => {
+    setSources(prev => prev.filter(s => s.id !== id));
+  };
+
+  // Chat handler
+  const handleSubmit = async () => {
+    if (!inputValue.trim() || sources.length === 0) return;
+
+    const userMessage: ChatMessage = {
+      id: nanoid(),
+      role: 'user',
+      content: inputValue,
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
+
+    try {
+      const synthesisInput = {
+        query: inputValue,
+        files: sources.map(s => ({
+          name: s.name,
+          dataType: s.type === 'pdf' ? 'pdf' as const : s.type === 'csv' ? 'csv' as const : 'json' as const,
+          data: s.content
         }))
       };
 
@@ -145,352 +183,324 @@ export default function SynthesisPage() {
       setMessages(prev => [...prev, assistantMessage]);
       setActiveAnalysis(result.data);
     } catch (error: any) {
-      console.error(error);
-      toast({ variant: 'destructive', title: 'Intelligence Error', description: error.message || 'Failed to cross-reference data sources.' });
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const renderContentBlock = (block: SynthesisContentBlock, index: number) => {
-    switch (block.type) {
-      case 'text':
-        return <p key={index} className="prose dark:prose-invert max-w-none text-muted-foreground leading-relaxed">{block.content}</p>;
-      case 'chart':
-        return (
-          <Card key={index} className="my-4 overflow-hidden border-primary/10 bg-primary/5">
-            <CardHeader className="py-3 px-4 flex flex-row items-center justify-between border-b border-primary/10">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" />
-                {block.title}
-              </CardTitle>
-              <Badge variant="outline" className="text-[10px] uppercase tracking-wider">{block.chartType}</Badge>
-            </CardHeader>
-            <CardContent className="p-6">
-              <ResponsiveContainer width="100%" height={260}>
-                {block.chartType === 'pie' ? (
-                  <PieChart>
-                    <Pie data={block.data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                      {block.data.map((entry, i) => (
-                        <Cell key={`cell-${i}`} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }}
-                    />
-                    <Legend iconType="circle" />
-                  </PieChart>
-                ) : (
-                  <RechartsBarChart data={block.data}>
-                    <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}
-                    />
-                    <Legend iconType="circle" />
-                    {Object.keys(block.data[0] || {}).filter(key => key !== 'name').map((key, i) => (
-                      <Bar key={key} dataKey={key} fill={CHART_COLORS[i % CHART_COLORS.length]} radius={[2, 2, 0, 0]} />
-                    ))}
-                  </RechartsBarChart>
-                )}
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        );
-      case 'table':
-        return (
-          <Card key={index} className="my-4 overflow-hidden border-border bg-card">
-            <CardHeader className="py-3 px-4 border-b">
-              <CardTitle className="text-sm font-semibold">{block.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="bg-muted/50 border-b">
-                      {block.headers.map(header => <th key={header} className="p-2 text-left font-medium text-muted-foreground">{header}</th>)}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {block.rows.map((row, rowIndex) => (
-                      <tr key={rowIndex} className="border-b hover:bg-muted/30 transition-colors">
-                        {row.map((cell, cellIndex) => <td key={cellIndex} className="p-2">{cell}</td>)}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        )
-      default:
-        return null;
+  // Studio feature handlers (placeholders for now)
+  const handleStudioFeature = (feature: string) => {
+    toast({
+      title: `${feature} Coming Soon`,
+      description: 'This feature is being implemented with full AI capabilities'
+    });
+  };
+
+  const getSourceIcon = (type: SourceType) => {
+    switch (type) {
+      case 'pdf': return <FileText className="h-4 w-4" />;
+      case 'youtube': return <Video className="h-4 w-4" />;
+      case 'web': return <Globe className="h-4 w-4" />;
+      default: return <FileText className="h-4 w-4" />;
     }
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden bg-background">
-      {/* Source Sidebar */}
-      <aside className="w-80 border-r bg-muted/10 flex flex-col hidden lg:flex">
-        <div className="p-4 border-b bg-background/50 backdrop-blur-md flex items-center justify-between">
-          <h2 className="font-semibold text-sm flex items-center gap-2">
-            <LayoutDashboard className="h-4 w-4 text-primary" />
-            Data Sources
-          </h2>
-          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => fileInputRef.current?.click()}>
-            <Plus className="h-4 w-4" />
-          </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) processFile(file);
-            }}
-            accept=".csv,.json,.pdf"
-          />
-        </div>
-        <ScrollArea className="flex-1 p-4">
+    <div className="h-screen flex bg-background">
+      {/* LEFT SIDEBAR - Sources */}
+      <div className="w-[300px] border-r flex flex-col">
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold">Sources</h2>
+            <Button size="sm" variant="ghost" onClick={() => setShowSourceInput(null)}>
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Add Source Buttons */}
           <div className="space-y-2">
-            {files.length === 0 ? (
-              <div className="text-center py-8">
-                <UploadCloud className="h-10 w-10 mx-auto text-muted-foreground/20 mb-2" />
-                <p className="text-xs text-muted-foreground">No sources uploaded yet.</p>
-              </div>
-            ) : (
-              files.map(file => (
-                <div key={file.id} className="group relative flex items-center gap-3 p-3 rounded-lg border bg-background hover:border-primary/50 transition-all cursor-pointer">
-                  <div className={cn(
-                    "h-8 w-8 rounded flex items-center justify-center",
-                    file.dataType === 'csv' ? "bg-emerald-500/10 text-emerald-500" : "bg-blue-500/10 text-blue-500"
-                  )}>
-                    {file.dataType === 'csv' ? <FileSpreadsheet className="h-4 w-4" /> : file.dataType === 'json' ? <FileJson className="h-4 w-4" /> : <BookCheck className="h-4 w-4" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate">{file.name}</p>
-                    <p className="text-[10px] text-muted-foreground uppercase">{file.dataType}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeFile(file.id);
-                    }}
-                  >
-                    <Trash2 className="h-3 w-3 text-destructive" />
-                  </Button>
-                </div>
-              ))
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Files
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept=".pdf,.csv,.json"
+              onChange={handleFileUpload}
+            />
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+              onClick={() => setShowSourceInput('youtube')}
+            >
+              <Video className="h-4 w-4 mr-2" />
+              YouTube URL
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+              onClick={() => setShowSourceInput('web')}
+            >
+              <Globe className="h-4 w-4 mr-2" />
+              Web Page
+            </Button>
           </div>
-        </ScrollArea>
-        <div className="p-4 border-t bg-background/50">
-          <Button className="w-full gap-2 text-xs h-9" variant="outline" onClick={() => fileInputRef.current?.click()}>
-            <Plus className="h-3.5 w-3.5" />
-            Add Source
-          </Button>
-        </div>
-      </aside>
 
-      {/* Main Analysis Area */}
-      <main className="flex-1 flex flex-col relative overflow-hidden">
-        <header className="p-4 border-b bg-background/50 backdrop-blur-md flex items-center justify-between sticky top-0 z-10 h-14">
-          <div className="flex items-center gap-3">
-            <Sparkles className="h-5 w-5 text-primary animate-pulse" />
-            <div>
-              <h1 className="text-sm font-bold tracking-tight">Intelligence Hub</h1>
-              <p className="text-[10px] text-muted-foreground">Deep Synthesis across {files.length} sources</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-[10px] font-mono">GROQ-SYNT-V2</Badge>
-          </div>
-        </header>
-
-        <ScrollArea className="flex-1">
-          <div className="max-w-4xl mx-auto p-6 space-y-8 pb-32">
-            {!activeAnalysis && messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="h-20 w-20 rounded-full bg-primary/5 flex items-center justify-center mb-6"
-                >
-                  <BookCheck className="h-10 w-10 text-primary" />
-                </motion.div>
-                <h2 className="text-2xl font-bold tracking-tight">Intelligence Synthesis</h2>
-                <p className="text-muted-foreground max-w-md mt-2">
-                  Upload multiple data sources and ask questions to perform deep cross-referenced analysis.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 w-full max-w-lg">
-                  <Card className="p-4 bg-muted/5 border-dashed cursor-pointer hover:bg-muted/10 transition-colors" onClick={() => setInput("What are the key trends across these sources?")}>
-                    <div className="text-xs text-primary font-bold mb-1">DISCOVERY</div>
-                    <p className="text-[11px] text-muted-foreground italic">"Identify top 3 cross-source trends..."</p>
-                  </Card>
-                  <Card className="p-4 bg-muted/5 border-dashed cursor-pointer hover:bg-muted/10 transition-colors" onClick={() => setInput("Identify any contradictions or anomalies in the data.")}>
-                    <div className="text-xs text-primary font-bold mb-1">HARD-AUDIT</div>
-                    <p className="text-[11px] text-muted-foreground italic">"Find contradictions or data anomalies..."</p>
-                  </Card>
-                </div>
-              </div>
-            )}
-
-            {/* Dashboard View (Latest Analysis Stats) */}
-            {activeAnalysis && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card className="col-span-1 md:col-span-2 bg-primary/5 border-primary/20">
-                    <CardHeader className="py-4">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-sm font-bold flex items-center gap-2">
-                          <Sparkles className="h-4 w-4" />
-                          Executive Insights
-                        </CardTitle>
-                        <Badge variant="outline" className="bg-primary/10 border-primary/20 text-primary text-[10px]">LATEST RUN</Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {activeAnalysis.keyInsights.map((insight, idx) => (
-                        <div key={idx} className="flex gap-3 text-xs">
-                          <div className="h-5 w-5 shrink-0 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[10px]">
-                            {idx + 1}
-                          </div>
-                          <p className="flex-1">{insight}</p>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-muted/30 border-dashed">
-                    <CardHeader className="py-4">
-                      <CardTitle className="text-sm font-bold flex items-center gap-2">
-                        <Quote className="h-4 w-4" />
-                        Grounded Citations
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {activeAnalysis.citations?.map((cite, idx) => (
-                        <div key={idx} className="p-2 rounded bg-background border text-[10px] space-y-1">
-                          <div className="flex items-center gap-1 font-bold text-primary">
-                            <FileText className="h-3 w-3" />
-                            {cite.source}
-                          </div>
-                          <p className="text-muted-foreground line-clamp-2">{cite.reference}</p>
-                        </div>
-                      ))}
-                      {(!activeAnalysis.citations || activeAnalysis.citations.length === 0) && (
-                        <p className="text-[10px] text-muted-foreground italic">No specific citations generated.</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <Separator />
-              </motion.div>
-            )}
-
-            {/* Chat History */}
-            <div className="space-y-6">
-              {messages.map(msg => (
-                <div key={msg.id} className={cn(
-                  "flex items-start gap-4",
-                  msg.role === 'user' ? "flex-row-reverse" : ""
-                )}>
-                  <div className={cn(
-                    "flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold",
-                    msg.role === 'user' ? "bg-primary text-white" : "bg-muted border"
-                  )}>
-                    {msg.role === 'user' ? 'U' : 'AI'}
-                  </div>
-                  <div className={cn(
-                    "flex-1 max-w-[85%]",
-                    msg.role === 'user' ? "text-right" : ""
-                  )}>
-                    {msg.role === 'user' ? (
-                      <div className="bg-primary/10 border border-primary/20 p-3 rounded-2xl rounded-tr-none text-sm inline-block">
-                        {msg.content}
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {msg.synthesisBlocks?.map(renderContentBlock)}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {isLoading && (
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-full bg-muted border flex items-center justify-center">
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  </div>
-                  <div className="flex-1 space-y-4">
-                    <div className="h-24 w-full rounded-2xl bg-muted/50 animate-pulse" />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </ScrollArea>
-
-        {/* Input Dock */}
-        <div className="p-4 border-t bg-background/80 backdrop-blur-xl absolute bottom-0 left-0 right-0 z-20">
-          <div className="max-w-4xl mx-auto">
-            {activeAnalysis && activeAnalysis.suggestedQuestions.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
-                {activeAnalysis.suggestedQuestions.map((q, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setInput(q)}
-                    className="whitespace-nowrap px-3 py-1.5 rounded-full border bg-background text-[10px] hover:border-primary/50 transition-colors flex items-center gap-1.5"
-                  >
-                    <Search className="h-3 w-3 text-primary" />
-                    {q}
-                  </button>
-                ))}
-              </div>
-            )}
-            <form onSubmit={handleSubmit} className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative flex items-center gap-2 bg-background border rounded-xl p-1.5 shadow-2xl">
-                <Input
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  placeholder={files.length > 0 ? `Ask about your ${files.length} sources...` : "Upload sources to begin..."}
-                  className="border-0 focus-visible:ring-0 text-sm h-10 px-4"
-                  disabled={isLoading || files.length === 0}
-                />
+          {/* URL Input */}
+          {showSourceInput && (
+            <div className="mt-3 space-y-2">
+              <Input
+                placeholder={showSourceInput === 'youtube' ? 'YouTube URL' : 'Web Page URL'}
+                value={sourceUrl}
+                onChange={(e) => setSourceUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    showSourceInput === 'youtube' ? handleYouTubeAdd() : handleWebAdd();
+                  }
+                }}
+              />
+              <div className="flex gap-2">
                 <Button
-                  type="submit"
-                  size="icon"
-                  className="h-10 w-10 shrink-0"
-                  disabled={isLoading || !input.trim() || files.length === 0}
+                  size="sm"
+                  className="flex-1"
+                  onClick={showSourceInput === 'youtube' ? handleYouTubeAdd : handleWebAdd}
+                  disabled={isLoading}
                 >
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  Add
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setShowSourceInput(null);
+                    setSourceUrl('');
+                  }}
+                >
+                  Cancel
                 </Button>
               </div>
-            </form>
-            <div className="pt-2 flex items-center justify-between text-[10px] text-muted-foreground px-2">
-              <div className="flex items-center gap-1">
-                <ShieldAlert className="h-3 w-3" />
-                Analysis is grounded in provided sources.
-              </div>
-              <div>
-                Press Enter to execute synthesis
-              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Sources List */}
+        <ScrollArea className="flex-1 p-4">
+          {sources.length === 0 ? (
+            <div className="text-center text-muted-foreground text-sm py-8">
+              <FileText className="h-12 w-12 mx-auto mb-2 opacity-20" />
+              <p>No sources added yet</p>
+              <p className="text-xs mt-1">Add PDFs, YouTube videos, or web pages</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {sources.map(source => (
+                <motion.div
+                  key={source.id}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="group relative p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex items-start gap-2">
+                    <div className={cn(
+                      "p-2 rounded",
+                      source.type === 'pdf' && "bg-red-500/10 text-red-500",
+                      source.type === 'youtube' && "bg-blue-500/10 text-blue-500",
+                      source.type === 'web' && "bg-green-500/10 text-green-500"
+                    )}>
+                      {getSourceIcon(source.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{source.name}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{source.type}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removeSource(source.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+      </div>
+
+      {/* CENTER - Chat */}
+      <div className="flex-1 flex flex-col">
+        {sources.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center max-w-md">
+              <Sparkles className="h-16 w-16 mx-auto mb-4 text-primary" />
+              <h2 className="text-2xl font-bold mb-2">Add a source to get started</h2>
+              <p className="text-muted-foreground">
+                Upload PDFs, add YouTube videos, or paste web URLs to begin your research
+              </p>
             </div>
           </div>
-        </div>
-      </main>
+        ) : (
+          <>
+            <ScrollArea className="flex-1 p-6">
+              <div className="max-w-3xl mx-auto space-y-4">
+                {messages.map(msg => (
+                  <ChatMessageDisplay key={msg.id} message={msg} />
+                ))}
+                {isLoading && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Analyzing sources...</span>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
 
-      {/* Mobile Drawer (Hidden for now) */}
+            <div className="border-t p-4">
+              <div className="max-w-3xl mx-auto flex gap-2">
+                <Input
+                  placeholder="Ask anything about your sources..."
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSubmit()}
+                  disabled={isLoading}
+                />
+                <Button onClick={handleSubmit} disabled={isLoading || !inputValue.trim()}>
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* RIGHT SIDEBAR - Studio */}
+      <div className="w-[320px] border-l flex flex-col bg-muted/30">
+        <div className="p-4 border-b">
+          <h2 className="font-semibold">Studio</h2>
+          <p className="text-xs text-muted-foreground mt-1">AI-powered tools</p>
+        </div>
+
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-4">
+            {/* Hero Card */}
+            <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/20">
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Mic className="h-5 w-5 text-purple-500" />
+                  <h3 className="font-semibold">Audio Overview</h3>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Generate a podcast-style discussion of your sources
+                </p>
+                <Button
+                  size="sm"
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500"
+                  onClick={() => handleStudioFeature('Audio Overview')}
+                  disabled={sources.length === 0}
+                >
+                  Create Audio Overview
+                </Button>
+              </div>
+            </Card>
+
+            {/* Feature Grid */}
+            <div className="grid grid-cols-2 gap-2">
+              <StudioCard
+                icon={<Film className="h-4 w-4" />}
+                title="Video Overview"
+                onClick={() => handleStudioFeature('Video Overview')}
+                disabled={sources.length === 0}
+              />
+              <StudioCard
+                icon={<Map className="h-4 w-4" />}
+                title="Mind Map"
+                onClick={() => handleStudioFeature('Mind Map')}
+                disabled={sources.length === 0}
+              />
+              <StudioCard
+                icon={<FileBarChart className="h-4 w-4" />}
+                title="Reports"
+                onClick={() => handleStudioFeature('Reports')}
+                disabled={sources.length === 0}
+              />
+              <StudioCard
+                icon={<CreditCard className="h-4 w-4" />}
+                title="Flashcards"
+                onClick={() => handleStudioFeature('Flashcards')}
+                disabled={sources.length === 0}
+              />
+              <StudioCard
+                icon={<HelpCircle className="h-4 w-4" />}
+                title="Quiz"
+                onClick={() => handleStudioFeature('Quiz')}
+                disabled={sources.length === 0}
+              />
+              <StudioCard
+                icon={<BarChart3 className="h-4 w-4" />}
+                title="Infographic"
+                onClick={() => handleStudioFeature('Infographic')}
+                disabled={sources.length === 0}
+              />
+              <StudioCard
+                icon={<Presentation className="h-4 w-4" />}
+                title="Slide Deck"
+                onClick={() => handleStudioFeature('Slide Deck')}
+                disabled={sources.length === 0}
+              />
+            </div>
+
+            {/* Add Note Button */}
+            <Button variant="outline" className="w-full" disabled={sources.length === 0}>
+              <StickyNote className="h-4 w-4 mr-2" />
+              Add note
+            </Button>
+          </div>
+        </ScrollArea>
+      </div>
     </div>
+  );
+}
+
+// Studio Card Component
+function StudioCard({
+  icon,
+  title,
+  onClick,
+  disabled
+}: {
+  icon: React.ReactNode;
+  title: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        "p-3 rounded-lg border bg-card hover:bg-accent transition-colors text-left",
+        "disabled:opacity-50 disabled:cursor-not-allowed"
+      )}
+    >
+      <div className="flex flex-col gap-1">
+        <div className="text-primary">{icon}</div>
+        <span className="text-xs font-medium">{title}</span>
+      </div>
+    </button>
   );
 }

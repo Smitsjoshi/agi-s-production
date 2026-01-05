@@ -1,0 +1,5 @@
+PDFParse type: function
+Is class-like: true
+Testing PDFParse...
+Instantiated PDFParse(uint8Array).
+Extracted text via getText(): {"pages":[{"text":"","num":1}],"text":"\n\n-- 1 of 1 --\n\n","total":1}
