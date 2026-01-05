@@ -92,6 +92,28 @@ async function callGroqText(messages: Array<{ role: string; content: string }>, 
   return data.choices[0]?.message?.content || '';
 }
 
+// Fallback "Jugad" using Pollinations for 405B intelligence
+async function callPollinations(messages: Array<{ role: string; content: string }>): Promise<string> {
+  // We use the OpenAI compatible endpoint for Pollinations
+  const response = await fetch('https://text.pollinations.ai/openai/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: messages,
+      model: 'llama', // Maps to Llama 3.1 405B on Pollinations
+      stream: false
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Pollinations API Error: ${response.status} ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0]?.message?.content || '';
+}
+
 export async function askAi(
   query: string,
   mode: AiMode,
@@ -120,18 +142,25 @@ ${REALITY_SHARDS[mode] || FALLBACK_REALITY_SHARD}`;
       { role: 'user', content: query }
     ];
 
-    let modelId = 'openai/gpt-oss-120b';
-    if (mode === 'AGI-S S-2') {
-      modelId = 'llama-3.1-405b-instruct';
-    } else if (mode === 'AGI-S S-1') {
-      modelId = 'openai/gpt-oss-120b';
-    }
+    let answer = '';
 
-    const answer = await callGroqText(messages, modelId);
+    if (mode === 'AGI-S S-2') {
+      try {
+        // Primary: Groq 405B
+        answer = await callGroqText(messages, 'llama-3.1-405b-instruct');
+      } catch (err) {
+        console.warn('Groq 405B failed, activating Jugad (Pollinations Fallback)...');
+        // Secondary: Pollinations Llama 405B
+        answer = await callPollinations(messages);
+      }
+    } else {
+      const modelId = mode === 'AGI-S S-1' ? 'openai/gpt-oss-120b' : 'openai/gpt-oss-120b';
+      answer = await callGroqText(messages, modelId);
+    }
 
     // For CodeX mode, return componentCode
     if (mode === 'CodeX') {
-      return { componentCode: answer, reasoning: `Generated code using ${modelId}` };
+      return { componentCode: answer, reasoning: `Generated code using AGI-S S-Series Engine` };
     }
 
     return { answer };
