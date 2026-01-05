@@ -148,8 +148,11 @@ export type AetherOutput = z.infer<typeof AetherOutputSchema>;
 // Schemas for Synthesis Flow
 export const SynthesisInputSchema = z.object({
     query: z.string().describe('The user\'s question or instruction about the data.'),
-    dataType: z.enum(['csv', 'json']).describe('The type of the uploaded data.'),
-    data: z.string().describe('The raw string content of the data file.'),
+    files: z.array(z.object({
+        name: z.string().describe('The filename.'),
+        dataType: z.enum(['csv', 'json']).describe('The format of the file.'),
+        data: z.string().describe('The raw content of the file.')
+    })).describe('An array of uploaded data sources to synthesize.')
 });
 export type SynthesisInput = z.infer<typeof SynthesisInputSchema>;
 
@@ -174,7 +177,14 @@ const SynthesisContentBlockSchema = z.union([
 export type SynthesisContentBlock = z.infer<typeof SynthesisContentBlockSchema>;
 
 export const SynthesisOutputSchema = z.object({
-    content: z.array(SynthesisContentBlockSchema).describe('An array of content blocks (text, tables, charts) that form the AI\'s response.'),
+    title: z.string().optional().describe('A descriptive title for this analysis session.'),
+    keyInsights: z.array(z.string()).describe('A collection of high-level insights extracted from the cross-referenced data.'),
+    content: z.array(SynthesisContentBlockSchema).describe('An array of content blocks (text, tables, charts) that form the detailed AI response.'),
+    suggestedQuestions: z.array(z.string()).describe('Dynamic follow-up questions tailored to the current data context.'),
+    citations: z.array(z.object({
+        source: z.string().describe('The specific file or source ID.'),
+        reference: z.string().describe('The exact row, key, or snippet referenced.'),
+    })).optional().describe('Semantic citations linking claims back to the original documentation.'),
 });
 export type SynthesisOutput = z.infer<typeof SynthesisOutputSchema>;
 

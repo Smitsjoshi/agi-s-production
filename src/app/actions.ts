@@ -162,46 +162,54 @@ export async function createAgentAction(data: { name: string; persona: string; k
   return { success: true };
 }
 
-export async function generateSynthesisAction(input: {
-  query: string;
-  type: 'csv' | 'json';
-  data: string;
-}): Promise<SynthesisOutput> {
+export async function generateSynthesisAction(input: SynthesisInput): Promise<SynthesisOutput> {
   try {
-    const prompt = `You are an expert Data Scientist analyzing ${input.type.toUpperCase()} data.
+    const sourcesSummary = input.files.map(f => `File: ${f.name} (Type: ${f.dataType})`).join('\n');
+    const sourcesData = input.files.map(f => `--- START FILE: ${f.name} ---\n${f.data}\n--- END FILE: ${f.name} ---`).join('\n\n');
 
-User Query: "${input.query}"
-
-Data Sample (first 5000 chars):
-${input.data.substring(0, 5000)}
-
-Generate a comprehensive analysis report in JSON format with the following structure:
-{
-  "content": [
-    {"type": "text", "content": "Introduction and key findings..."},
-    {"type": "chart", "title": "Chart Title", "chartType": "bar", "data": [{"name": "Category", "value": 100}]},
-    {"type": "table", "title": "Table Title", "headers": ["Col1", "Col2"], "rows": [["val1", "val2"]]},
-    {"type": "text", "content": "Conclusions and recommendations..."}
-  ]
-}
-
-Rules:
-- Include at least 1 chart and 1 table
-- Use "bar", "line", or "pie" for chartType
-- Make insights actionable
-- Return ONLY valid JSON`;
+    const prompt = `You are a Senior Intelligence Analyst and Principal Data Scientist. Your task is to perform deep-synthesis and extraction from multiple data sources.
+    
+    Current Sources:
+    ${sourcesSummary}
+    
+    Objective: "${input.query}"
+    
+    Data Content:
+    ${sourcesData}
+    
+    Instructions:
+    1. CROSS-REFERENCE: Look for connections, contradictions, or trends across ALL provided files.
+    2. EXTRACT: Pull specific figures, dates, and entities.
+    3. VISUALIZE: Choose the best chart types (bar, line, or pie) to represent quantitative relationships found in the data.
+    4. CITE: Every major claim MUST include a citation pointing to the specific file and row/key.
+    5. FORMAT: Return a valid JSON object matching the SynthesisOutput structure.
+    
+    JSON Structure to return:
+    {
+      "title": "A technical title for this analysis",
+      "keyInsights": ["Insight 1 with specific data point", "Insight 2 highlighting a cross-source trend"],
+      "content": [
+        { "type": "text", "content": "Detailed breakdown..." },
+        { "type": "chart", "title": "Quantitative Breakdown", "chartType": "bar", "data": [{"name": "Category", "value": 100}] },
+        { "type": "table", "title": "Detailed Data View", "headers": ["Col1", "Col2"], "rows": [["Val1", "Val2"]] }
+      ],
+      "suggestedQuestions": ["Specific analytical follow-up 1", "Deeper dive question 2"],
+      "citations": [
+        { "source": "filename.csv", "reference": "Row 42: Value X" }
+      ]
+    }
+    
+    Rules:
+    - Be rigorous. If data is missing, note it.
+    - Charts must have a 'name' field for the X-axis/label.
+    - Return ONLY valid JSON.`;
 
     const result = await callGroqWithJSON<SynthesisOutput>(prompt);
     return result;
 
   } catch (e: any) {
-    console.error("Synthesis Error:", e);
-    return {
-      content: [{
-        type: 'text',
-        content: `Error analyzing data: ${e.message}. Please try again with a different query or smaller dataset.`
-      }]
-    };
+    console.error("Synthesis Action Error:", e);
+    throw new Error(e.message);
   }
 }
 

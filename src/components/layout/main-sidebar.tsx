@@ -65,7 +65,7 @@ const createNavItems: NavItem[] = [
 ];
 
 const productivityNavItems: NavItem[] = [
-  { href: '/synthesis', icon: BookCheck, label: 'Synthesis', description: 'Your AI Data Analyst & Report Generator.', locked: true },
+  { href: '/synthesis', icon: BookCheck, label: 'Synthesis', description: 'Your AI Data Analyst & Report Generator.', locked: false },
   { href: '/blueprint', icon: Workflow, label: 'Blueprint', description: 'Deconstructs goals into actionable plans with tools.', locked: true },
 ];
 
@@ -74,7 +74,7 @@ const strategyNavItems: NavItem[] = [
 ];
 
 const learnNavItems: NavItem[] = [
-  { href: '/catalyst', icon: BookOpen, label: 'Catalyst', description: 'Generates personalized learning paths and curriculums on any topic.', locked: true },
+  { href: '/catalyst', icon: BookOpen, label: 'Catalyst', description: 'Generates personalized learning paths and curriculums on any topic.', locked: false },
 ];
 
 

@@ -1,22 +1,43 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { UploadCloud, FileJson, FileSpreadsheet, Send, Loader2, BookCheck } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  UploadCloud, FileJson, FileSpreadsheet, Send, Loader2,
+  BookCheck, MoreVertical, Trash2, Plus, Sparkles,
+  Search, ShieldAlert, FileText, ChevronRight,
+  MessageSquare, LayoutDashboard, BarChart3, Quote
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { generateSynthesisAction } from '@/app/actions';
-import type { ChatMessage, SynthesisOutput, SynthesisContentBlock } from '@/lib/types';
-import { nanoid } from 'nanoid';
-import { Bar, BarChart as RechartsBarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, Pie, PieChart, Cell } from 'recharts';
-import { ChatMessageDisplay } from '@/components/chat/chat-message';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import {
+  generateSynthesisAction
+} from '@/app/actions';
+import type {
+  ChatMessage,
+  SynthesisOutput,
+  SynthesisContentBlock,
+  SynthesisInput
+} from '@/lib/types';
+import { nanoid } from 'nanoid';
+import {
+  Bar, BarChart as RechartsBarChart, ResponsiveContainer,
+  XAxis, YAxis, Tooltip, Legend, Pie, PieChart, Cell
+} from 'recharts';
+import { ChatMessageDisplay } from '@/components/chat/chat-message';
+import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type FileState = {
+  id: string;
   name: string;
-  type: 'csv' | 'json';
-  data: string; // The raw string data of the file
+  dataType: 'csv' | 'json';
+  data: string;
 };
 
 const CHART_COLORS = [
@@ -28,55 +49,65 @@ const CHART_COLORS = [
 ];
 
 export default function SynthesisPage() {
-  const [file, setFile] = useState<FileState | null>(null);
+  const [files, setFiles] = useState<FileState[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [activeAnalysis, setActiveAnalysis] = useState<SynthesisOutput | null>(null);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) processFile(droppedFile);
-  };
+  // Persistence
+  useEffect(() => {
+    const savedFiles = localStorage.getItem('synthesis_files');
+    if (savedFiles) {
+      try {
+        setFiles(JSON.parse(savedFiles));
+      } catch (e) {
+        console.error("Failed to load saved files", e);
+      }
+    }
+  }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) processFile(selectedFile);
-  };
+  useEffect(() => {
+    localStorage.setItem('synthesis_files', JSON.stringify(files));
+  }, [files]);
 
   const processFile = (fileToProcess: File) => {
-    const fileType = fileToProcess.name.endsWith('.csv') ? 'csv' : fileToProcess.name.endsWith('.json') ? 'json' : null;
-    if (!fileType) {
+    const dataType = fileToProcess.name.endsWith('.csv') ? 'csv' : fileToProcess.name.endsWith('.json') ? 'json' : null;
+    if (!dataType) {
       toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a CSV or JSON file.' });
       return;
     }
+
+    // Check for duplicates
+    if (files.some(f => f.name === fileToProcess.name)) {
+      toast({ title: 'Already Exists', description: `${fileToProcess.name} is already in your sources.` });
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const fileContent = e.target?.result as string;
-      setFile({
+      const newFile: FileState = {
+        id: nanoid(),
         name: fileToProcess.name,
-        type: fileType,
+        dataType: dataType as 'csv' | 'json',
         data: fileContent,
-      });
-      setMessages([]);
-      toast({ title: 'File Ready', description: `Loaded ${fileToProcess.name}. Ask a question to begin analysis.` });
+      };
+      setFiles(prev => [...prev, newFile]);
+      toast({ title: 'Source Added', description: `${fileToProcess.name} is ready for analysis.` });
     };
     reader.readAsText(fileToProcess);
   };
-  
-  const resetState = () => {
-    setFile(null);
-    setMessages([]);
-    setInput('');
-    setIsLoading(false);
-  }
+
+  const removeFile = (id: string) => {
+    setFiles(prev => prev.filter(f => f.id !== id));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !file) return;
+    if (!input.trim() || files.length === 0) return;
 
     const userMessage: ChatMessage = { id: nanoid(), role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
@@ -84,20 +115,29 @@ export default function SynthesisPage() {
     setInput('');
 
     try {
-      const result: SynthesisOutput = await generateSynthesisAction({ query: input, ...file });
-      
+      const synthesisInput: SynthesisInput = {
+        query: input,
+        files: files.map(f => ({
+          name: f.name,
+          dataType: f.dataType,
+          data: f.data
+        }))
+      };
+
+      const result: SynthesisOutput = await generateSynthesisAction(synthesisInput);
+
       const assistantMessage: ChatMessage = {
         id: nanoid(),
         role: 'assistant',
-        content: '', // Main content will be in blocks
+        content: '',
         synthesisBlocks: result.content,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+      setActiveAnalysis(result);
     } catch (error) {
       console.error(error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to analyze the data.' });
-      setMessages(messages => messages.slice(0, -1));
+      toast({ variant: 'destructive', title: 'Intelligence Error', description: 'Failed to cross-reference data sources.' });
     } finally {
       setIsLoading(false);
     }
@@ -106,174 +146,342 @@ export default function SynthesisPage() {
   const renderContentBlock = (block: SynthesisContentBlock, index: number) => {
     switch (block.type) {
       case 'text':
-        return <p key={index} className="prose dark:prose-invert max-w-none">{block.content}</p>;
+        return <p key={index} className="prose dark:prose-invert max-w-none text-muted-foreground leading-relaxed">{block.content}</p>;
       case 'chart':
         return (
-          <Card key={index} className="my-4">
-            <CardHeader>
-                <CardTitle>{block.title}</CardTitle>
+          <Card key={index} className="my-4 overflow-hidden border-primary/10 bg-primary/5">
+            <CardHeader className="py-3 px-4 flex flex-row items-center justify-between border-b border-primary/10">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                {block.title}
+              </CardTitle>
+              <Badge variant="outline" className="text-[10px] uppercase tracking-wider">{block.chartType}</Badge>
             </CardHeader>
-            <CardContent className="p-6 pt-0">
-                <ResponsiveContainer width="100%" height={300}>
-                  {block.chartType === 'pie' ? (
-                    <PieChart>
-                      <Pie data={block.data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
-                        {block.data.map((entry, i) => (
-                          <Cell key={`cell-${i}`} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                            backgroundColor: 'hsl(var(--background))',
-                            border: '1px solid hsl(var(--border))',
-                        }}
-                      />
-                      <Legend iconType="circle" />
-                    </PieChart>
-                  ) : (
-                    <RechartsBarChart data={block.data}>
-                      <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`} />
-                      <Tooltip
-                          contentStyle={{
-                              backgroundColor: 'hsl(var(--background))',
-                              border: '1px solid hsl(var(--border))',
-                              borderRadius: 'var(--radius)',
-                          }}
-                      />
-                      <Legend iconType="circle" />
-                      {Object.keys(block.data[0] || {}).filter(key => key !== 'name').map((key, i) => (
-                          <Bar key={key} dataKey={key} fill={CHART_COLORS[i % CHART_COLORS.length]} radius={[4, 4, 0, 0]} />
+            <CardContent className="p-6">
+              <ResponsiveContainer width="100%" height={260}>
+                {block.chartType === 'pie' ? (
+                  <PieChart>
+                    <Pie data={block.data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                      {block.data.map((entry, i) => (
+                        <Cell key={`cell-${i}`} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                       ))}
-                    </RechartsBarChart>
-                  )}
-                </ResponsiveContainer>
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }}
+                    />
+                    <Legend iconType="circle" />
+                  </PieChart>
+                ) : (
+                  <RechartsBarChart data={block.data}>
+                    <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}
+                    />
+                    <Legend iconType="circle" />
+                    {Object.keys(block.data[0] || {}).filter(key => key !== 'name').map((key, i) => (
+                      <Bar key={key} dataKey={key} fill={CHART_COLORS[i % CHART_COLORS.length]} radius={[2, 2, 0, 0]} />
+                    ))}
+                  </RechartsBarChart>
+                )}
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         );
       case 'table':
-         return (
-            <Card key={index} className="my-4">
-                <CardHeader>
-                    <CardTitle>{block.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 pt-0">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                            <tr className="border-b">
-                                {block.headers.map(header => <th key={header} className="p-2 text-left font-medium text-muted-foreground">{header}</th>)}
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {block.rows.map((row, rowIndex) => (
-                                <tr key={rowIndex} className="border-b">
-                                {row.map((cell, cellIndex) => <td key={cellIndex} className="p-2">{cell}</td>)}
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </CardContent>
-            </Card>
+        return (
+          <Card key={index} className="my-4 overflow-hidden border-border bg-card">
+            <CardHeader className="py-3 px-4 border-b">
+              <CardTitle className="text-sm font-semibold">{block.title}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="bg-muted/50 border-b">
+                      {block.headers.map(header => <th key={header} className="p-2 text-left font-medium text-muted-foreground">{header}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {block.rows.map((row, rowIndex) => (
+                      <tr key={rowIndex} className="border-b hover:bg-muted/30 transition-colors">
+                        {row.map((cell, cellIndex) => <td key={cellIndex} className="p-2">{cell}</td>)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         )
       default:
         return null;
     }
   };
 
-  const AssistantMessageDisplay = ({ message }: { message: ChatMessage }) => (
-     <div className="flex items-start gap-4">
-        <div className="flex-shrink-0">
-          <ChatMessageDisplay message={{ id: message.id, role: 'assistant', content: '' }} />
-        </div>
-        <Card className="flex-1">
-            <CardContent className="p-4 space-y-4">
-            {isLoading && !message.synthesisBlocks ? (
-                 <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="animate-spin" />
-                    <span>AGI-S is analyzing...</span>
-                </div>
-            ) : (
-                message.synthesisBlocks?.map(renderContentBlock)
-            )}
-            </CardContent>
-        </Card>
-    </div>
-  );
-
-  if (!file) {
-    return (
-      <div className="container mx-auto p-4 md:p-8">
-        <div className="text-center mb-8">
-            <h1 className="font-headline text-4xl font-bold text-primary">Synthesis</h1>
-            <p className="text-muted-foreground text-lg mt-2">Your AI Data Analyst & Report Generator.</p>
-        </div>
-        <Card
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={handleFileDrop}
-            className="max-w-2xl mx-auto"
-        >
-            <CardHeader>
-                <CardTitle>Upload Your Data</CardTitle>
-                <CardDescription>Upload a CSV or JSON file to begin your analysis.</CardDescription>
-            </CardHeader>
-            <CardContent>
-            <label htmlFor="file-upload" className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <UploadCloud className="w-10 h-10 mb-3 text-muted-foreground" />
-                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                <p className="text-xs text-muted-foreground">CSV or JSON files</p>
-                </div>
-                <input ref={fileInputRef} id="file-upload" type="file" className="hidden" onChange={handleFileChange} accept=".csv,.json" />
-            </label>
-            </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex h-[calc(100vh-6rem)] flex-col">
-        <div className="p-4 border-b flex justify-between items-center bg-background">
-            <div className="flex items-center gap-2">
-                {file.type === 'csv' ? <FileSpreadsheet className="text-primary" /> : <FileJson className="text-primary" />}
-                <span className="font-medium">{file.name}</span>
-            </div>
-            <Button variant="outline" onClick={resetState}>Upload New File</Button>
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden bg-background">
+      {/* Source Sidebar */}
+      <aside className="w-80 border-r bg-muted/10 flex flex-col hidden lg:flex">
+        <div className="p-4 border-b bg-background/50 backdrop-blur-md flex items-center justify-between">
+          <h2 className="font-semibold text-sm flex items-center gap-2">
+            <LayoutDashboard className="h-4 w-4 text-primary" />
+            Data Sources
+          </h2>
+          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => fileInputRef.current?.click()}>
+            <Plus className="h-4 w-4" />
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) processFile(file);
+            }}
+            accept=".csv,.json"
+          />
         </div>
-        <ScrollArea className="flex-1">
-             <div className="p-4 md:p-6 space-y-6">
-                {messages.length === 0 && (
-                    <div className="text-center py-16">
-                        <BookCheck className="mx-auto h-12 w-12 text-muted-foreground" />
-                        <p className="mt-4 text-muted-foreground">Data loaded. Ask a question to begin your analysis.</p>
-                    </div>
-                )}
-                {messages.map(msg => (
-                     msg.role === 'user'
-                        ? <ChatMessageDisplay key={msg.id} message={msg} />
-                        : <AssistantMessageDisplay key={msg.id} message={msg} />
-                ))}
-                 {isLoading && messages[messages.length - 1]?.role === 'user' && (
-                    <AssistantMessageDisplay message={{ id: 'loading', role: 'assistant', content: '' }} />
-                )}
-            </div>
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-2">
+            {files.length === 0 ? (
+              <div className="text-center py-8">
+                <UploadCloud className="h-10 w-10 mx-auto text-muted-foreground/20 mb-2" />
+                <p className="text-xs text-muted-foreground">No sources uploaded yet.</p>
+              </div>
+            ) : (
+              files.map(file => (
+                <div key={file.id} className="group relative flex items-center gap-3 p-3 rounded-lg border bg-background hover:border-primary/50 transition-all cursor-pointer">
+                  <div className={cn(
+                    "h-8 w-8 rounded flex items-center justify-center",
+                    file.dataType === 'csv' ? "bg-emerald-500/10 text-emerald-500" : "bg-blue-500/10 text-blue-500"
+                  )}>
+                    {file.dataType === 'csv' ? <FileSpreadsheet className="h-4 w-4" /> : <FileJson className="h-4 w-4" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium truncate">{file.name}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase">{file.dataType}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeFile(file.id);
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3 text-destructive" />
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
         </ScrollArea>
-        <div className="border-t bg-background/95 p-4 backdrop-blur-sm">
-            <form onSubmit={handleSubmit} className="relative max-w-3xl mx-auto">
-                <Input
-                    value={input}
-                    onChange={e => setInput(e.target.value)}
-                    placeholder="Ask about your data, e.g., 'What are the key trends?' or 'Chart sales by region'"
-                    className="pr-12"
-                    disabled={isLoading}
-                />
-                <Button type="submit" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8" disabled={isLoading || !input.trim()}>
-                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                </Button>
-            </form>
+        <div className="p-4 border-t bg-background/50">
+          <Button className="w-full gap-2 text-xs h-9" variant="outline" onClick={() => fileInputRef.current?.click()}>
+            <Plus className="h-3.5 w-3.5" />
+            Add Source
+          </Button>
         </div>
+      </aside>
+
+      {/* Main Analysis Area */}
+      <main className="flex-1 flex flex-col relative overflow-hidden">
+        <header className="p-4 border-b bg-background/50 backdrop-blur-md flex items-center justify-between sticky top-0 z-10 h-14">
+          <div className="flex items-center gap-3">
+            <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+            <div>
+              <h1 className="text-sm font-bold tracking-tight">Intelligence Hub</h1>
+              <p className="text-[10px] text-muted-foreground">Deep Synthesis across {files.length} sources</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-[10px] font-mono">GROQ-SYNT-V2</Badge>
+          </div>
+        </header>
+
+        <ScrollArea className="flex-1">
+          <div className="max-w-4xl mx-auto p-6 space-y-8 pb-32">
+            {!activeAnalysis && messages.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="h-20 w-20 rounded-full bg-primary/5 flex items-center justify-center mb-6"
+                >
+                  <BookCheck className="h-10 w-10 text-primary" />
+                </motion.div>
+                <h2 className="text-2xl font-bold tracking-tight">Intelligence Synthesis</h2>
+                <p className="text-muted-foreground max-w-md mt-2">
+                  Upload multiple data sources and ask questions to perform deep cross-referenced analysis.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 w-full max-w-lg">
+                  <Card className="p-4 bg-muted/5 border-dashed cursor-pointer hover:bg-muted/10 transition-colors" onClick={() => setInput("What are the key trends across these sources?")}>
+                    <div className="text-xs text-primary font-bold mb-1">DISCOVERY</div>
+                    <p className="text-[11px] text-muted-foreground italic">"Identify top 3 cross-source trends..."</p>
+                  </Card>
+                  <Card className="p-4 bg-muted/5 border-dashed cursor-pointer hover:bg-muted/10 transition-colors" onClick={() => setInput("Identify any contradictions or anomalies in the data.")}>
+                    <div className="text-xs text-primary font-bold mb-1">HARD-AUDIT</div>
+                    <p className="text-[11px] text-muted-foreground italic">"Find contradictions or data anomalies..."</p>
+                  </Card>
+                </div>
+              </div>
+            )}
+
+            {/* Dashboard View (Latest Analysis Stats) */}
+            {activeAnalysis && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className="col-span-1 md:col-span-2 bg-primary/5 border-primary/20">
+                    <CardHeader className="py-4">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-bold flex items-center gap-2">
+                          <Sparkles className="h-4 w-4" />
+                          Executive Insights
+                        </CardTitle>
+                        <Badge variant="outline" className="bg-primary/10 border-primary/20 text-primary text-[10px]">LATEST RUN</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {activeAnalysis.keyInsights.map((insight, idx) => (
+                        <div key={idx} className="flex gap-3 text-xs">
+                          <div className="h-5 w-5 shrink-0 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[10px]">
+                            {idx + 1}
+                          </div>
+                          <p className="flex-1">{insight}</p>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-muted/30 border-dashed">
+                    <CardHeader className="py-4">
+                      <CardTitle className="text-sm font-bold flex items-center gap-2">
+                        <Quote className="h-4 w-4" />
+                        Grounded Citations
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {activeAnalysis.citations?.map((cite, idx) => (
+                        <div key={idx} className="p-2 rounded bg-background border text-[10px] space-y-1">
+                          <div className="flex items-center gap-1 font-bold text-primary">
+                            <FileText className="h-3 w-3" />
+                            {cite.source}
+                          </div>
+                          <p className="text-muted-foreground line-clamp-2">{cite.reference}</p>
+                        </div>
+                      ))}
+                      {(!activeAnalysis.citations || activeAnalysis.citations.length === 0) && (
+                        <p className="text-[10px] text-muted-foreground italic">No specific citations generated.</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Separator />
+              </motion.div>
+            )}
+
+            {/* Chat History */}
+            <div className="space-y-6">
+              {messages.map(msg => (
+                <div key={msg.id} className={cn(
+                  "flex items-start gap-4",
+                  msg.role === 'user' ? "flex-row-reverse" : ""
+                )}>
+                  <div className={cn(
+                    "flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold",
+                    msg.role === 'user' ? "bg-primary text-white" : "bg-muted border"
+                  )}>
+                    {msg.role === 'user' ? 'U' : 'AI'}
+                  </div>
+                  <div className={cn(
+                    "flex-1 max-w-[85%]",
+                    msg.role === 'user' ? "text-right" : ""
+                  )}>
+                    {msg.role === 'user' ? (
+                      <div className="bg-primary/10 border border-primary/20 p-3 rounded-2xl rounded-tr-none text-sm inline-block">
+                        {msg.content}
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {msg.synthesisBlocks?.map(renderContentBlock)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {isLoading && (
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 h-8 w-8 rounded-full bg-muted border flex items-center justify-center">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  </div>
+                  <div className="flex-1 space-y-4">
+                    <div className="h-24 w-full rounded-2xl bg-muted/50 animate-pulse" />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </ScrollArea>
+
+        {/* Input Dock */}
+        <div className="p-4 border-t bg-background/80 backdrop-blur-xl absolute bottom-0 left-0 right-0 z-20">
+          <div className="max-w-4xl mx-auto">
+            {activeAnalysis && activeAnalysis.suggestedQuestions.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+                {activeAnalysis.suggestedQuestions.map((q, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setInput(q)}
+                    className="whitespace-nowrap px-3 py-1.5 rounded-full border bg-background text-[10px] hover:border-primary/50 transition-colors flex items-center gap-1.5"
+                  >
+                    <Search className="h-3 w-3 text-primary" />
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
+            <form onSubmit={handleSubmit} className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative flex items-center gap-2 bg-background border rounded-xl p-1.5 shadow-2xl">
+                <Input
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  placeholder={files.length > 0 ? `Ask about your ${files.length} sources...` : "Upload sources to begin..."}
+                  className="border-0 focus-visible:ring-0 text-sm h-10 px-4"
+                  disabled={isLoading || files.length === 0}
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="h-10 w-10 shrink-0"
+                  disabled={isLoading || !input.trim() || files.length === 0}
+                >
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </Button>
+              </div>
+            </form>
+            <div className="pt-2 flex items-center justify-between text-[10px] text-muted-foreground px-2">
+              <div className="flex items-center gap-1">
+                <ShieldAlert className="h-3 w-3" />
+                Analysis is grounded in provided sources.
+              </div>
+              <div>
+                Press Enter to execute synthesis
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Mobile Drawer (Hidden for now) */}
     </div>
   );
 }
