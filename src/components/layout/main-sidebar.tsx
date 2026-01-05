@@ -49,7 +49,7 @@ const businessNavItems: NavItem[] = [
 ];
 
 const exploreNavItems: NavItem[] = [
-  { href: '/discover', icon: Compass, label: 'Discover', description: 'Your daily brief of market trends and top headlines.', locked: true },
+  { href: '/discover', icon: Compass, label: 'Discover', description: 'Your daily brief of market trends and top headlines.', locked: false },
   { href: '/notifications', icon: Bell, label: 'Notifications', description: 'Manage your notification settings.', locked: true },
   // Removed: api page
   { href: '/support', icon: LifeBuoy, label: 'Support', description: 'Get help and submit feedback.', locked: false },
@@ -70,7 +70,7 @@ const productivityNavItems: NavItem[] = [
 ];
 
 const strategyNavItems: NavItem[] = [
-  { href: '/crucible', icon: ShieldHalf, label: 'Crucible', description: 'The AI Red Team & Decision Simulator to pressure-test ideas.', locked: true },
+  { href: '/crucible', icon: ShieldHalf, label: 'Crucible', description: 'The AI Red Team & Decision Simulator to pressure-test ideas.', locked: false },
 ];
 
 const learnNavItems: NavItem[] = [

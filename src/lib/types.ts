@@ -180,7 +180,8 @@ export type SynthesisOutput = z.infer<typeof SynthesisOutputSchema>;
 
 // Schemas for Crucible Flow
 export const AdversaryPersonaIdSchema = z.enum([
-    "cfo", "competitor_ceo", "ethicist", "customer", "engineer", "legal"
+    "cfo", "competitor_ceo", "ethicist", "customer", "engineer", "legal",
+    "hacker", "visionary", "environmentalist", "logistician", "detective", "disruptor"
 ]);
 export type AdversaryPersonaId = z.infer<typeof AdversaryPersonaIdSchema>;
 
@@ -201,6 +202,7 @@ export const CrucibleCritiqueSchema = z.object({
     personaName: z.string().describe('The name of the adversary persona providing the critique.'),
     keyConcerns: z.array(z.string()).describe('A list of 2-3 short bullet points highlighting the main concerns from this persona\'s perspective.'),
     analysis: z.string().describe('A detailed, paragraph-form analysis from the persona\'s point of view, explaining their reasoning and identifying specific flaws or risks.'),
+    riskScore: z.number().min(0).max(100).describe('A numerical score representing the severity of the risk identified by this persona (0-100).'),
 });
 export type CrucibleCritique = z.infer<typeof CrucibleCritiqueSchema>;
 

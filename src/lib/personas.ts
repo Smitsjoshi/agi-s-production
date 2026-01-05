@@ -1,4 +1,4 @@
-import { DollarSign, Scale, Users, HardHat, Briefcase, Microscope, Cpu, GitCommit, Search, Code, BarChart2, Brush } from 'lucide-react';
+import { DollarSign, Scale, Users, HardHat, Briefcase, Microscope, Cpu, GitCommit, Search, Code, BarChart2, Brush, ShieldAlert, Zap, Globe, Gauge, Fingerprint, Rocket } from 'lucide-react';
 import type { AdversaryPersona } from './types';
 
 export const ADVERSARY_PERSONAS: AdversaryPersona[] = [
@@ -37,6 +37,42 @@ export const ADVERSARY_PERSONAS: AdversaryPersona[] = [
         name: 'The Cautious Legal Counsel',
         description: 'Identifies potential regulatory hurdles, data privacy risks, and intellectual property issues.',
         icon: Microscope,
+    },
+    {
+        id: 'hacker',
+        name: 'The Black-Hat Hacker',
+        description: 'Exploits digital vulnerabilities, security gaps, and potential data breach points.',
+        icon: ShieldAlert,
+    },
+    {
+        id: 'visionary',
+        name: 'The Futurist Tech-Visionary',
+        description: 'Critiques the plan based on future technological shifts and potential obsolescence.',
+        icon: Zap,
+    },
+    {
+        id: 'environmentalist',
+        name: 'The ESG / Eco-Guardian',
+        description: 'Analyzes environmental impact, carbon footprint, and sustainability violations.',
+        icon: Globe,
+    },
+    {
+        id: 'logistician',
+        name: 'The Master Logistician',
+        description: 'Tears apart the supply chain, delivery timelines, and operational bottlenecks.',
+        icon: Gauge,
+    },
+    {
+        id: 'detective',
+        name: 'The Intelligence Agent',
+        description: 'Uncovers hidden connections, political risks, and covert influences in your plan.',
+        icon: Fingerprint,
+    },
+    {
+        id: 'disruptor',
+        name: 'The Market Disruptor',
+        description: 'Challenges the plan for not being aggressive enough to truly dominate or shift the market.',
+        icon: Rocket,
     },
 ];
 

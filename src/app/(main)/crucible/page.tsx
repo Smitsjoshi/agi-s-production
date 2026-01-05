@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ADVERSARY_PERSONAS } from '@/lib/personas';
+import { cn } from '@/lib/utils';
 
 
 const useTypewriter = (text: string, speed = 20) => {
@@ -39,32 +40,40 @@ const useTypewriter = (text: string, speed = 20) => {
 };
 
 const CritiqueCard = ({ critique }: { critique: CrucibleCritique }) => {
-    const persona = ADVERSARY_PERSONAS.find(p => p.name === critique.personaName);
-    const typedAnalysis = useTypewriter(critique.analysis);
-  
-    return (
-      <Card className="overflow-hidden">
-        <CardHeader className="flex flex-row items-center gap-4 bg-muted/50 p-4">
-          <Avatar>
-            <AvatarFallback className="bg-primary/20 text-primary">
-              {persona?.icon ? <persona.icon /> : <ShieldHalf />}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <CardTitle className="text-lg">{critique.personaName}</CardTitle>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {critique.keyConcerns.map(concern => (
-                <Badge key={concern} variant="destructive">{concern}</Badge>
-              ))}
+  const persona = ADVERSARY_PERSONAS.find(p => p.name === critique.personaName);
+  const typedAnalysis = useTypewriter(critique.analysis);
+
+  return (
+    <Card className="overflow-hidden border-destructive/20 hover:border-destructive/40 transition-colors">
+      <CardHeader className="flex flex-row items-center gap-4 bg-muted/30 p-4">
+        <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
+          <AvatarFallback className="bg-primary/10 text-primary">
+            {persona?.icon ? <persona.icon className="h-6 w-6" /> : <ShieldHalf className="h-6 w-6" />}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-bold">{critique.personaName}</CardTitle>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Risk Level</span>
+              <Badge variant={critique.riskScore > 75 ? "destructive" : critique.riskScore > 40 ? "secondary" : "default"} className="font-mono">
+                {critique.riskScore}%
+              </Badge>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="p-6">
-          <h4 className="font-semibold mb-2">Detailed Analysis</h4>
-          <p className="text-sm text-muted-foreground whitespace-pre-line">{typedAnalysis}</p>
-        </CardContent>
-      </Card>
-    );
+          <div className="flex flex-wrap gap-2 mt-2">
+            {critique.keyConcerns.map(concern => (
+              <Badge key={concern} variant="outline" className="text-[10px] py-0 border-destructive/30 text-destructive">{concern}</Badge>
+            ))}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-6 bg-gradient-to-b from-transparent to-muted/5">
+        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-3">Threat Assessment</h4>
+        <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line font-light">{typedAnalysis}</p>
+      </CardContent>
+    </Card>
+  );
 };
 
 
@@ -79,17 +88,17 @@ export default function CruciblePage() {
 
   useEffect(() => {
     if (result) {
-        setDisplayedCritiques([]);
-        let critiqueIndex = 0;
-        const intervalId = setInterval(() => {
-            if (critiqueIndex < result.critiques.length) {
-                setDisplayedCritiques(prev => [...prev, result.critiques[critiqueIndex]]);
-                critiqueIndex++;
-            } else {
-                clearInterval(intervalId);
-            }
-        }, 2000); // Display a new critique every 2 seconds
-        return () => clearInterval(intervalId);
+      setDisplayedCritiques([]);
+      let critiqueIndex = 0;
+      const intervalId = setInterval(() => {
+        if (critiqueIndex < result.critiques.length) {
+          setDisplayedCritiques(prev => [...prev, result.critiques[critiqueIndex]]);
+          critiqueIndex++;
+        } else {
+          clearInterval(intervalId);
+        }
+      }, 2000); // Display a new critique every 2 seconds
+      return () => clearInterval(intervalId);
     }
   }, [result]);
 
@@ -133,7 +142,7 @@ export default function CruciblePage() {
 
     setIsLoading(false);
   };
-  
+
   const executiveSummary = useTypewriter(result?.executiveSummary || '');
 
   return (
@@ -162,21 +171,56 @@ export default function CruciblePage() {
                   disabled={isLoading}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Select Adversaries (Red Team)</Label>
-                <div className="space-y-3 p-3 bg-muted/50 rounded-lg max-h-60 overflow-y-auto">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-bold opacity-70">Adversary Personas (The Red Team)</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-[10px] font-black uppercase tracking-tighter px-2"
+                      onClick={() => setSelectedPersonas(ADVERSARY_PERSONAS)}
+                      disabled={isLoading}
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-[10px] font-black uppercase tracking-tighter px-2 text-destructive"
+                      onClick={() => setSelectedPersonas([])}
+                      disabled={isLoading}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-1 p-1 bg-muted/20 border rounded-xl max-h-[400px] overflow-y-auto scrollbar-hide">
                   {ADVERSARY_PERSONAS.map((persona) => (
-                    <div key={persona.id} className="flex items-center space-x-3">
+                    <div
+                      key={persona.id}
+                      className={cn(
+                        "flex items-center space-x-3 p-2.5 rounded-lg transition-all cursor-pointer hover:bg-muted/40",
+                        selectedPersonas.some(p => p.id === persona.id) ? "bg-muted shadow-sm ring-1 ring-border" : "opacity-60 grayscale-[0.5]"
+                      )}
+                      onClick={() => handlePersonaToggle(persona)}
+                    >
                       <Checkbox
                         id={`${id}-${persona.id}`}
                         checked={selectedPersonas.some(p => p.id === persona.id)}
                         onCheckedChange={() => handlePersonaToggle(persona)}
                         disabled={isLoading}
+                        className="pointer-events-none"
                       />
-                      <Label htmlFor={`${id}-${persona.id}`} className="flex-1 cursor-pointer">
-                        <span className="font-semibold">{persona.name}</span>
-                        <p className="text-xs text-muted-foreground">{persona.description}</p>
-                      </Label>
+                      <div className="flex-1 min-w-0">
+                        <Label htmlFor={`${id}-${persona.id}`} className="flex flex-col cursor-pointer pointer-events-none">
+                          <span className="font-bold text-sm tracking-tight">{persona.name}</span>
+                          <span className="text-[10px] leading-tight text-muted-foreground truncate">{persona.description}</span>
+                        </Label>
+                      </div>
+                      {persona.icon && <persona.icon className={cn("h-4 w-4 shrink-0", selectedPersonas.some(p => p.id === persona.id) ? "text-primary" : "text-muted-foreground/30")} />}
                     </div>
                   ))}
                 </div>
@@ -196,41 +240,41 @@ export default function CruciblePage() {
             </div>
           )}
 
-            {result && (
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="font-headline text-2xl">Executive Summary</CardTitle>
-                    <CardDescription>A high-level overview of the potential risks and blind spots in your plan.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="prose dark:prose-invert max-w-none">
-                    <p>{executiveSummary}</p>
-                  </CardContent>
-                </Card>
+          {result && (
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-headline text-2xl">Executive Summary</CardTitle>
+                  <CardDescription>A high-level overview of the potential risks and blind spots in your plan.</CardDescription>
+                </CardHeader>
+                <CardContent className="prose dark:prose-invert max-w-none">
+                  <p>{executiveSummary}</p>
+                </CardContent>
+              </Card>
 
-                <div>
-                    <h2 className="font-headline text-xl font-bold mb-4">Adversary Critiques</h2>
-                    <div className="space-y-4">
-                        <AnimatePresence>
-                        {displayedCritiques.map((critique) => (
-                             <motion.div
-                                key={critique.personaName}
-                                initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                transition={{ duration: 0.5 }}
-                             >
-                                <CritiqueCard critique={critique} />
-                             </motion.div>
-                        ))}
-                        </AnimatePresence>
-                    </div>
+              <div>
+                <h2 className="font-headline text-xl font-bold mb-4">Adversary Critiques</h2>
+                <div className="space-y-4">
+                  <AnimatePresence>
+                    {displayedCritiques.map((critique) => (
+                      <motion.div
+                        key={critique.personaName}
+                        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <CritiqueCard critique={critique} />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
           {!isLoading && !result && (
             <div className="text-center py-24 border-2 border-dashed rounded-lg">
-                <ShieldHalf className="mx-auto h-12 w-12 text-muted-foreground" />
+              <ShieldHalf className="mx-auto h-12 w-12 text-muted-foreground" />
               <p className="mt-4 text-muted-foreground">Your simulation results will appear here.</p>
             </div>
           )}

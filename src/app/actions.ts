@@ -210,30 +210,39 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     const selectedPersonas = ADVERSARY_PERSONAS.filter(p => input.personas.includes(p.id));
     const personaDescriptions = selectedPersonas.map(p => `${p.name}: ${p.description}`).join('\n');
 
-    const prompt = `You are a Red Team facilitator conducting a brutal critique session.
-
-Plan to Critique: "${input.plan}"
-
-Adversary Personas:
-${personaDescriptions}
-
-Generate harsh but realistic critiques from EACH persona in JSON format:
-{
-  "executiveSummary": "High-level summary of critical risks...",
-  "critiques": [
+    const prompt = `You are a Red Team facilitator conducting a high-stakes, brutal simulation of a business or technical plan.
+    
+    Plan to Critique: "${input.plan}"
+    
+    Adversary Personas (The Red Team):
+    ${personaDescriptions}
+    
+    Your goal is to conduct a TRUE simulation of how this plan would fail in the real world. Do not provide generic feedback.
+    
+    For EACH persona, you must:
+    1. Adopt their personality and expertise fully.
+    2. Provide a "Brutal Prediction" of exactly how they would block, outcompete, or witness the failure of this plan.
+    3. Identify 3 specific "Critical Vulnerabilities".
+    4. Estimate a "Probability of Failure" (0-100%) from their perspective.
+    
+    Generate the response in JSON format:
     {
-      "personaName": "Persona Name",
-      "keyConcerns": ["Concern 1", "Concern 2", "Concern 3"],
-      "analysis": "Detailed paragraph explaining flaws and risks from this persona's perspective..."
+      "executiveSummary": "A high-level synthesis of critical risks, market shifts, and the overall 'Verdict' on feasibility with a combined risk score...",
+      "critiques": [
+        {
+          "personaName": "Persona Name",
+          "keyConcerns": ["Concern 1", "Concern 2", "Concern 3"],
+          "analysis": "A deep, ruthless 1-2 paragraph analysis. Include a 'PREDICTION' section describing a specific failure scenario (e.g., 'By Q3 2026, the regulatory hawk will...'). Be specific, citing potential market conditions, technical debt, or human behavior.",
+          "riskScore": 85
+        }
+      ]
     }
-  ]
-}
-
-Rules:
-- Be ruthless and specific
-- Identify real business/technical/ethical risks
-- Each critique should be 3-5 sentences
-- Return ONLY valid JSON`;
+    
+    Rules:
+    - BE RUTHLESS. This is The Crucible. 
+    - PREDICT the future. Use your vast knowledge to simulate real-world reactions.
+    - Be specific with technical, financial, or ethical terminology.
+    - Return ONLY valid JSON.`;
 
     const result = await callGroqWithJSON<CrucibleOutput>(prompt);
     return { success: true, data: result };
