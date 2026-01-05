@@ -39,7 +39,7 @@ async function callGroqWithJSON<T>(prompt: string, systemPrompt?: string): Promi
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'meta-llama/llama-4-maverick-17b-128e-instruct',
+      model: 'openai/gpt-oss-120b',
       messages: messages,
       temperature: 0.7,
       response_format: { type: 'json_object' }
@@ -63,7 +63,7 @@ async function callGroqWithJSON<T>(prompt: string, systemPrompt?: string): Promi
 }
 
 // Regular text completion (for askAi)
-async function callGroqText(messages: Array<{ role: string; content: string }>): Promise<string> {
+async function callGroqText(messages: Array<{ role: string; content: string }>, modelId: string = 'openai/gpt-oss-120b'): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
@@ -77,7 +77,7 @@ async function callGroqText(messages: Array<{ role: string; content: string }>):
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'meta-llama/llama-4-maverick-17b-128e-instruct',
+      model: modelId,
       messages: messages,
       temperature: 0.7
     })
@@ -120,11 +120,18 @@ ${REALITY_SHARDS[mode] || FALLBACK_REALITY_SHARD}`;
       { role: 'user', content: query }
     ];
 
-    const answer = await callGroqText(messages);
+    let modelId = 'openai/gpt-oss-120b';
+    if (mode === 'AI Knowledge (Bigger)') {
+      modelId = 'meta-llama/llama-3.1-405b-instruct';
+    } else if (mode === 'AI Knowledge (Smarter)') {
+      modelId = 'openai/gpt-oss-120b';
+    }
+
+    const answer = await callGroqText(messages, modelId);
 
     // For CodeX mode, return componentCode
     if (mode === 'CodeX') {
-      return { componentCode: answer, reasoning: 'Generated code based on your requirements' };
+      return { componentCode: answer, reasoning: `Generated code using ${modelId}` };
     }
 
     return { answer };
