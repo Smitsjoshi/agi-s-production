@@ -122,7 +122,7 @@ ${REALITY_SHARDS[mode] || FALLBACK_REALITY_SHARD}`;
 
     let modelId = 'openai/gpt-oss-120b';
     if (mode === 'AGI-S S-2') {
-      modelId = 'llama-4-maverick-17b-128e';
+      modelId = 'meta-llama/llama-4-maverick-17b-128e-instruct';
     } else if (mode === 'AGI-S S-1') {
       modelId = 'openai/gpt-oss-120b';
     }
