@@ -92,28 +92,6 @@ async function callGroqText(messages: Array<{ role: string; content: string }>, 
   return data.choices[0]?.message?.content || '';
 }
 
-// Fallback "Jugad" using Pollinations for 405B intelligence
-async function callPollinations(messages: Array<{ role: string; content: string }>): Promise<string> {
-  // We use the OpenAI compatible endpoint for Pollinations
-  const response = await fetch('https://text.pollinations.ai/openai/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      messages: messages,
-      model: 'llama', // Maps to Llama 3.1 405B on Pollinations
-      stream: false
-    })
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Pollinations API Error: ${response.status} ${errorText}`);
-  }
-
-  const data = await response.json();
-  return data.choices[0]?.message?.content || '';
-}
-
 export async function askAi(
   query: string,
   mode: AiMode,
@@ -142,16 +120,14 @@ ${REALITY_SHARDS[mode] || FALLBACK_REALITY_SHARD}`;
       { role: 'user', content: query }
     ];
 
-    let answer = '';
-
+    let modelId = 'openai/gpt-oss-120b';
     if (mode === 'AGI-S S-2') {
-      // Direct high-performance 405B engine (Global Stable Source)
-      answer = await callPollinations(messages);
-    } else {
-      // S-1 and others default to the sharp 120B logic engine
-      const modelId = mode === 'AGI-S S-1' ? 'openai/gpt-oss-120b' : 'openai/gpt-oss-120b';
-      answer = await callGroqText(messages, modelId);
+      modelId = 'llama-4-maverick-17b-128e';
+    } else if (mode === 'AGI-S S-1') {
+      modelId = 'openai/gpt-oss-120b';
     }
+
+    const answer = await callGroqText(messages, modelId);
 
     // For CodeX mode, return componentCode
     if (mode === 'CodeX') {

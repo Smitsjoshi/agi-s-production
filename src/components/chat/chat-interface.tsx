@@ -20,7 +20,7 @@ import { useSpeechToText } from '@/hooks/use-speech-to-text';
 
 const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: string, isPersona?: boolean }> = {
   'AGI-S S-1': { icon: Cpu, description: '120 Billion parameters.' },
-  'AGI-S S-2': { icon: BrainCircuit, description: '405 Billion parameters.' },
+  'AGI-S S-2': { icon: BrainCircuit, description: '400 Billion parameters.' },
   'CodeX': { icon: Code, description: 'An elite 10x developer and pair programmer.' },
   'Academic Research': { icon: Microscope, description: 'Search academic sources.' },
   'Deep Dive': { icon: FlaskConical, description: 'In-depth, multi-source analysis.' },
