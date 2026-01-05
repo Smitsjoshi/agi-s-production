@@ -57,14 +57,18 @@ const CodeBlock = ({ language, value }: { language: string; value: string }) => 
 
 // Enhanced markdown renderer
 const EnhancedMarkdown = ({ content = '' }: { content: string }) => {
+  // Replace <br> and <br/> with actual newlines to fix formatting issues
+  const processedContent = content.replace(/<br\s*\/?>/gi, '\n');
+
   return (
     <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-7 prose-p:mb-4 prose-headings:mt-6 prose-headings:mb-3 prose-li:my-1">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
         components={{
-          code({ node, inline, className, children, ...props }) {
+          code({ node, className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || '');
+            const inline = !className?.includes('language-');
             const value = String(children).replace(/\n$/, '');
 
             return !inline && match ? (
@@ -76,7 +80,7 @@ const EnhancedMarkdown = ({ content = '' }: { content: string }) => {
             );
           },
           p({ children }) {
-            return <p className="mb-4 leading-7">{children}</p>;
+            return <p className="mb-4 leading-7 text-foreground/90">{children}</p>;
           },
           ul({ children }) {
             return <ul className="my-4 ml-6 list-disc space-y-2">{children}</ul>;
@@ -123,7 +127,7 @@ const EnhancedMarkdown = ({ content = '' }: { content: string }) => {
           }
         }}
       >
-        {content}
+        {processedContent}
       </ReactMarkdown>
     </div>
   );
@@ -163,16 +167,21 @@ export function ChatMessageDisplay({
 
   if (message.role === 'user') {
     return (
-      <div className="flex items-start gap-4 relative z-10 justify-end">
-        <div className="flex-1 rounded-lg bg-primary text-primary-foreground p-4 max-w-2xl">
-          <p className="whitespace-pre-wrap">{message.content}</p>
+      <motion.div
+        className="flex items-start gap-4 relative z-10 justify-end"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="flex-1 rounded-2xl bg-muted/80 backdrop-blur-sm border border-border/50 p-4 max-w-2xl shadow-sm">
+          <p className="whitespace-pre-wrap text-foreground/90 leading-relaxed font-medium">{message.content}</p>
         </div>
-        <Avatar>
-          <AvatarFallback>
-            <User />
+        <Avatar className="mt-1 shadow-md border-2 border-primary/20">
+          <AvatarFallback className="bg-primary/10 text-primary">
+            <User className="h-4 w-4" />
           </AvatarFallback>
         </Avatar>
-      </div>
+      </motion.div>
     );
   }
 

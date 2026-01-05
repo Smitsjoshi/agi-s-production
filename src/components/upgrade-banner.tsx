@@ -14,9 +14,9 @@ export function UpgradeBanner() {
   const { user } = useSession();
 
   useEffect(() => {
-    if (user?.pages.includes('all')) {
-        setIsVisible(false);
-        return;
+    if (user?.pages?.includes('all')) {
+      setIsVisible(false);
+      return;
     }
 
     fetchAndActivate(remoteConfig)
@@ -37,29 +37,45 @@ export function UpgradeBanner() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-          className="fixed bottom-4 right-4 z-50"
+          initial={{ y: 100, opacity: 0, scale: 0.9 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: 50, opacity: 0, scale: 0.95 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+          className="fixed bottom-6 right-6 z-50 group"
         >
-          <div className="p-4 rounded-lg shadow-2xl bg-gradient-to-r from-primary to-chart-4 text-primary-foreground max-w-sm">
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] transition-all hover:shadow-[0_0_60px_-12px_rgba(255,255,255,0.1)] max-w-[320px]">
+            {/* Background Glow */}
+            <div className="absolute -top-24 -right-24 h-48 w-48 bg-primary/20 blur-[80px] group-hover:bg-primary/30 transition-colors" />
+
             <button
               onClick={handleDismiss}
-              className="absolute top-2 right-2 p-1 rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-colors"
+              className="absolute top-3 right-3 p-1.5 rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-all z-10"
               aria-label="Dismiss"
             >
-              <X size={16} />
+              <X size={14} />
             </button>
-            <div className="flex items-center gap-4">
-              <Sparkles size={40} className="flex-shrink-0 animate-pulse" />
-              <div>
-                <h3 className="font-bold font-headline">Unlock the Full Power of AGI-S</h3>
-                <p className="text-sm opacity-90 mt-1">Access Crucible simulations, unlimited video generation, and collaborative workspaces.</p>
-                <Button asChild variant="secondary" size="sm" className="mt-3 bg-white text-primary hover:bg-white/90">
-                  <Link href="/pro">Upgrade Now</Link>
-                </Button>
+
+            <div className="relative z-10 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-primary/10 border border-primary/20">
+                  <Sparkles size={20} className="text-primary animate-pulse" />
+                </div>
+                <h3 className="font-semibold text-white tracking-tight">AGI-S Elite</h3>
               </div>
+
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium text-white/90">Ascend to Professional Tier</p>
+                <p className="text-xs leading-relaxed text-white/50">
+                  Unlock autonomous agents, deep research modes, and prioritized ultra-fast inference.
+                </p>
+              </div>
+
+              <Button
+                asChild
+                className="w-full bg-white text-black hover:bg-white/90 shadow-[0_10px_20px_-10px_rgba(255,255,255,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] font-bold"
+              >
+                <Link href="/pro">Upgrade Excellence</Link>
+              </Button>
             </div>
           </div>
         </motion.div>
