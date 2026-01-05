@@ -46,8 +46,75 @@ import { askAi } from '@/app/actions';
 import { cn } from '@/lib/utils';
 import { Loader2, Play } from 'lucide-react';
 
-const initialNodes: Node<CustomNodeData>[] = [];
-const initialEdges: Edge[] = [];
+const initialNodes: Node<CustomNodeData>[] = [
+    {
+        id: '1',
+        type: 'custom',
+        data: {
+            icon: Play,
+            title: 'Manual Trigger',
+            description: 'Starts the AI Agency flow.',
+            isTrigger: true,
+            config: { prompt: "Target Task: Research top AI automations for 2026 and build a landing page." }
+        },
+        position: { x: 50, y: 150 },
+    },
+    {
+        id: '2',
+        type: 'custom',
+        data: {
+            icon: Search,
+            title: 'Deep Research Agent',
+            description: 'Performs web intelligence gathering.',
+            config: { prompt: "Identify the top 5 emerging AI automation tools and their key advantages for businesses." }
+        },
+        position: { x: 400, y: 50 },
+    },
+    {
+        id: '3',
+        type: 'custom',
+        data: {
+            icon: PenSquare,
+            title: 'Prompt Engineer',
+            description: 'Converts research into actionable prompts.',
+            config: { prompt: "Based on the research, write a high-converting marketing prompt for a landing page." }
+        },
+        position: { x: 400, y: 250 },
+    },
+    {
+        id: '4',
+        type: 'custom',
+        data: {
+            icon: Code,
+            title: 'CodeX (Generate Website)',
+            description: 'Generates functional web components.',
+            config: { prompt: "Build a sleek, dark-mode landing page using the generated marketing content." }
+        },
+        position: { x: 750, y: 150 },
+    },
+    {
+        id: '5',
+        type: 'custom',
+        data: {
+            icon: Slack,
+            title: 'Slack Update',
+            description: 'Notifies the team of completion.',
+            config: {
+                url: "https://hooks.slack.com/services/REPLACE_WITH_YOUR_WEBHOOK",
+                prompt: "Workflow Complete: Website generated for 2026 AI tools."
+            }
+        },
+        position: { x: 1100, y: 150 },
+    },
+];
+
+const initialEdges: Edge[] = [
+    { id: 'e1-2', source: '1', target: '2', animated: true, type: 'smoothstep' },
+    { id: 'e1-3', source: '1', target: '3', animated: true, type: 'smoothstep' },
+    { id: 'e2-4', source: '2', target: '4', animated: true, type: 'smoothstep' },
+    { id: 'e3-4', source: '3', target: '4', animated: true, type: 'smoothstep' },
+    { id: 'e4-5', source: '4', target: '5', animated: true, type: 'smoothstep' }
+];
 
 const nodeTypes = {
     custom: CustomNode,
@@ -63,114 +130,26 @@ type NodePaletteItem = {
 const paletteNodes: Record<string, NodePaletteItem[]> = {
     "Triggers": [
         { icon: Play, title: "Manual Trigger", description: "Start workflow manually.", isTrigger: true },
+        { icon: Webhook, title: "Incoming Webhook", description: "Trigger via external API call.", isTrigger: true },
         { icon: Clock, title: "Schedule", description: "Trigger workflow at a specific time.", isTrigger: true },
-        { icon: Webhook, title: "Webhook", description: "Start workflow when a webhook is called.", isTrigger: true },
-        { icon: Mail, title: "Email Trigger", description: "Start workflow on new email.", isTrigger: true },
-        { icon: GitCommit, title: "New Git Commit", description: "Trigger on new commit to a repository.", isTrigger: true },
-        { icon: Database, title: "New DB Row", description: "Trigger when a new row is added to a table.", isTrigger: true },
-        { icon: ShoppingCart, title: "New Purchase", description: "Trigger on a new e-commerce purchase.", isTrigger: true },
-        { icon: UserPlus, title: "New User", description: "Trigger when a new user signs up.", isTrigger: true },
-        { icon: FileUp, title: "File Uploaded", description: "Trigger when a file is uploaded to storage.", isTrigger: true },
     ],
-    "AGI-S Core": [
-        { icon: Bot, title: "AI Knowledge", description: "Use the main AI chat function." },
-        { icon: Code, title: "Generate with CodeX", description: "Create a UI component with AI." },
-        { icon: Cpu, title: "Analyze with Canvas", description: "Run a goal-oriented web agent." },
-        { icon: BookCopy, title: "Deep Dive Analysis", description: "Get in-depth analysis on a topic." },
-        { icon: BookCheck, title: "Analyze with Synthesis", description: "Analyze a dataset with AI." },
-        { icon: ShieldHalf, title: "Critique with Crucible", description: "Red Team a strategy with AI personas." },
-        { icon: Star, title: "Generate with Cosmos", description: "Create a fictional world." },
-        { icon: BookOpen, title: "Generate with Catalyst", description: "Create a personalized learning path." },
+    "Intelligence & Research": [
+        { icon: Search, title: "Deep Research Agent", description: "Search and analyze web data autonomously." },
+        { icon: Bot, title: "AI Knowledge (S-2)", description: "High-speed reasoning and processing." },
+        { icon: PenSquare, title: "Prompt Engineer", description: "Convert input data into optimized prompts." },
+        { icon: Code, title: "CodeX (Generate Website)", description: "Generate functional code or full UI components." },
     ],
-    "Advanced AI & Machine Learning": [
-        { icon: BrainCircuit, title: "Train Model", description: "Train a custom machine learning model." },
-        { icon: Bot, title: "Sentiment Analysis", description: "Analyze the sentiment of a text." },
-        { icon: Eye, title: "Image Recognition", description: "Identify objects and text in images." },
-        { icon: Mic, title: "Speech-to-Text", description: "Transcribe audio to text." },
-        { icon: MessageSquare, title: "Summarize with AI", description: "Summarize a long piece of text." },
-        { icon: Share2, title: "Topic Modeling", description: "Identify topics in a corpus of text." },
-        { icon: Users, title: "Customer Churn Prediction", description: "Predict if a customer will churn." },
-        { icon: Filter, title: "Spam Detection", description: "Detect spam in emails or messages." },
-        { icon: ArrowRightLeft, title: "Language Translation", description: "Translate text from one language to another." },
+    "Automated Integrations": [
+        { icon: MessageCircle, title: "WhatsApp Integration", description: "Send alerts to WhatsApp via Webhook." },
+        { icon: Slack, title: "Slack Update", description: "Post results to a Slack channel." },
+        { icon: Database, title: "CRM Sync", description: "Update customer records via API." },
+        { icon: Download, title: "HTTP Request", description: "Make a custom API call (GET/POST)." },
+        { icon: Send, title: "Discord Alert", description: "Send a message to a Discord server." },
     ],
-    "Development & DevOps": [
-        { icon: GitCommit, title: "Git Commit", description: "Commit changes to a Git repository." },
-        { icon: GitMerge, title: "Git Merge", description: "Merge a branch into another." },
-        { icon: GitPullRequest, title: "Create Pull Request", description: "Create a pull request on GitHub/GitLab." },
-        { icon: Server, title: "Deploy to Server", description: "Deploy an application to a server." },
-        { icon: Rocket, title: "Run CI/CD Pipeline", description: "Trigger a CI/CD pipeline." },
-        { icon: Bug, title: "Create Issue", description: "Create an issue in a bug tracker." },
-        { icon: TestTube, title: "Run Tests", description: "Run unit tests or integration tests." },
-        { icon: Terminal, title: "Run Shell Command", description: "Execute a shell command on a server." },
-    ],
-    "Cloud Services (AWS, GCP, Azure)": [
-        { icon: Cloud, title: "AWS Lambda", description: "Invoke an AWS Lambda function." },
-        { icon: Upload, title: "AWS S3 Upload", description: "Upload a file to an AWS S3 bucket." },
-        { icon: Cloud, title: "GCP Cloud Function", description: "Invoke a Google Cloud Function." },
-        { icon: Upload, title: "GCP Cloud Storage Upload", description: "Upload a file to GCS." },
-        { icon: Cloud, title: "Azure Function", description: "Invoke an Azure Function." },
-        { icon: Upload, title: "Azure Blob Storage Upload", description: "Upload a file to Azure Blob Storage." },
-        { icon: Database, title: "AWS RDS Query", description: "Run a query on an AWS RDS database." },
-        { icon: Database, title: "GCP Cloud SQL Query", description: "Run a query on a GCP Cloud SQL database." },
-    ],
-    "E-commerce (Shopify, Stripe, etc.)": [
-        { icon: ShoppingCart, title: "Get Shopify Products", description: "Get a list of products from Shopify." },
-        { icon: Users, title: "Get Shopify Customers", description: "Get a list of customers from Shopify." },
-        { icon: DollarSign, title: "Create Stripe Charge", description: "Create a charge in Stripe." },
-        { icon: CreditCard, title: "Get Stripe Customer", description: "Get a customer from Stripe." },
-        { icon: Package, title: "Fulfill Shopify Order", description: "Fulfill an order in Shopify." },
-        { icon: Milestone, title: "Create Shopify Discount", description: "Create a discount code in Shopify." },
-    ],
-    "Marketing & Sales (Salesforce, HubSpot, etc.)": [
-        { icon: UserPlus, title: "Create Salesforce Lead", description: "Create a new lead in Salesforce." },
-        { icon: BookUser, title: "Get HubSpot Contact", description: "Get a contact from HubSpot." },
-        { icon: Mail, title: "Send Mailchimp Campaign", description: "Send a campaign from Mailchimp." },
-        { icon: BarChart, title: "Get Google Analytics Report", description: "Get a report from Google Analytics." },
-        { icon: Users, title: "Add Contact to HubSpot List", description: "Add a contact to a list in HubSpot." },
-        { icon: Landmark, title: "Update Salesforce Opportunity", description: "Update an opportunity in Salesforce." },
-    ],
-    "Web Agent": [
-        { icon: Link2, title: "Go to URL", description: "Navigate to a specific web page." },
-        { icon: MousePointer, title: "Click Element", description: "Click on a link, button, or element." },
-        { icon: Type, title: "Type Text", description: "Input text into a form field." },
-        { icon: Eye, title: "Extract Data", description: "Extract text or data from an element." },
-        { icon: Search, title: "Web Search", description: "Perform a web search." },
-        { icon: Camera, title: "Take Screenshot", description: "Capture a screenshot of the current page." },
-        { icon: FileJson, title: "Scrape Website", description: "Scrape data from a website." },
-        { icon: Code, title: "Execute Javascript", description: "Execute Javascript on the current page." },
-    ],
-    "Logic & Control": [
-        { icon: GitBranch, title: "If/Else", description: "Branch workflow based on a condition." },
-        { icon: Shuffle, title: "Switch", description: "Route to different branches based on value." },
-        { icon: Filter, title: "Filter Data", description: "Continue only if data meets criteria." },
-        { icon: Repeat, title: "Loop Over Items", description: "Execute steps for each item in a list." },
-        { icon: Combine, title: "Merge", description: "Merge multiple branches into one." },
-        { icon: Clock, title: "Wait", description: "Pause the workflow for a set time." },
-        { icon: Terminal, title: "Execute Code", description: "Run a JavaScript or Python snippet." },
-        { icon: Zap, title: "End Workflow", description: "Stop the workflow execution." },
-        { icon: AlertCircle, title: "Error Handling", description: "Catch and handle errors in the workflow." },
-        { icon: ToggleLeft, title: "Boolean Logic", description: "Perform AND/OR/NOT operations." },
-    ],
-    "Data Handling": [
-        { icon: Variable, title: "Set Variable", description: "Create or update a variable." },
-        { icon: PenSquare, title: "Edit Fields", description: "Add, edit, or remove fields from data." },
-        { icon: ArrowRightLeft, title: "Convert Data", description: "Change data format (e.g., JSON to CSV)." },
-        { icon: FileJson, title: "Parse JSON", description: "Extract data from a JSON object." },
-        { icon: Table, title: "Create Table", description: "Construct a table from data." },
-        { icon: FileText, title: "Create Text", description: "Compose or format a block of text." },
-        { icon: Code2, title: "Format Code", description: "Format code in a specific language." },
-        { icon: Braces, title: "Create JSON", description: "Create a JSON object from scratch." },
-    ],
-    "Integrations": [
-        { icon: Slack, title: "Send Slack Message", description: "Post a message to a Slack channel." },
-        { icon: Send, title: "Send Discord Message", description: "Post a message to a Discord channel." },
-        { icon: AtSign, title: "Send Email", description: "Send an email via SMTP or a service." },
-        { icon: BookUser, title: "Google Sheets", description: "Read or write to a Google Sheet." },
-        { icon: Database, title: "Airtable", description: "Read or write to an Airtable base." },
-        { icon: Milestone, title: "Notion", description: "Create or update a Notion page/database." },
-        { icon: Download, title: "HTTP Request", description: "Make an API call to any service." },
-        { icon: GitCommit, title: "GitHub", description: "Interact with the GitHub API." },
-        { icon: MessageCircle, title: "Twilio", description: "Send SMS messages via Twilio." },
+    "Operations & Hosting": [
+        { icon: Globe, title: "Domain Purchase", description: "Execute domain search and registration steps." },
+        { icon: Server, title: "Cloud Hosting", description: "Deploy code to cloud infrastructure." },
+        { icon: Package, title: "Trial Fulfillment", description: "Manage trial offers and customer groups." },
     ],
 };
 
@@ -273,25 +252,52 @@ export function ReactFlowWrapper() {
                     const inputContext = parentResults.join('\n\n---\n\n');
 
                     let result = '';
+                    const prompt = node.data.config?.prompt || '';
+                    const url = node.data.config?.url || '';
 
-                    // MOCK OR REAL EXECUTION
-                    if (node.data.title.includes('AI') || node.data.title.includes('Analysis') || node.data.title.includes('CodeX')) {
+                    // AGENTIC EXECUTION
+                    if (node.data.title.includes('Request') || node.data.title.includes('Slack') || node.data.title.includes('Discord') || node.data.title.includes('Webhook') || node.data.title.includes('Send') || node.data.title.includes('WhatsApp')) {
+                        // REAL HTTP INTEGRATION
+                        if (!url) {
+                            throw new Error("Target URL/Webhook is required for this action.");
+                        }
+
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                content: `${prompt}\n\nData from previous steps:\n${inputContext || 'None'}`,
+                                node: node.data.title,
+                                timestamp: new Date().toISOString()
+                            })
+                        });
+
+                        if (!response.ok) throw new Error(`HTTP Error: ${response.statusText}`);
+                        result = `Successfully executed ${node.data.title} to ${url}.`;
+                    }
+                    else if (node.data.title.includes('Research') || node.data.title.includes('Analysis') || node.data.title.includes('AI') || node.data.title.includes('CodeX') || node.data.title.includes('Synthesis') || node.data.title.includes('Crucible')) {
                         // ACTUAL AI CALL
+                        const isCode = node.data.title.includes('CodeX');
+                        const isResearch = node.data.title.includes('Research') || node.data.title.includes('Analysis');
+
                         const aiResponse = await askAi(
-                            `PROCESS WORKFLOW STEP:
+                            `${isCode ? 'GENERATE CODE/WEBSITE:' : isResearch ? 'DEEP RESEARCH AGENT:' : 'PROCESS WORKFLOW STEP:'}
                      Node: ${node.data.title}
-                     Description: ${node.data.description}
-                     Previous Step Context: ${inputContext || 'None (Trigger)'}`,
-                            'AGI-S S-2', // Default to smarter/faster model for workflows
+                     User Instruction: ${prompt || node.data.description}
+                     Previous Context: ${inputContext || 'None'}
+                     
+                     ${isResearch ? 'Perform a comprehensive deep-dive. Provide verified facts, links, and structured insights.' : ''}
+                     ${isCode ? 'Ensure the output is valid, functional code or a complete web component.' : ''}`,
+                            'AGI-S S-2',
                             []
                         );
                         result = (aiResponse as any).content || (aiResponse as any).componentCode || JSON.stringify(aiResponse);
                     } else if (node.data.isTrigger) {
-                        result = `Trigger activated: ${node.data.title}`;
+                        result = `Trigger activated: ${node.data.title}. Input: ${prompt || 'Manual'}`;
                     } else {
-                        // Fallback simulation
-                        await new Promise(r => setTimeout(r, 1500));
-                        result = `Succesfully processed ${node.data.title}`;
+                        // Fallback logic
+                        await new Promise(r => setTimeout(r, 1000));
+                        result = `Processed ${node.data.title}${prompt ? `: ${prompt}` : ''}`;
                     }
 
                     nodeResults[node.id] = result;
