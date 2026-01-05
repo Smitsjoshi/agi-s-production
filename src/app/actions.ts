@@ -145,15 +145,10 @@ ${REALITY_SHARDS[mode] || FALLBACK_REALITY_SHARD}`;
     let answer = '';
 
     if (mode === 'AGI-S S-2') {
-      try {
-        // Primary: Groq 405B
-        answer = await callGroqText(messages, 'llama-3.1-405b-instruct');
-      } catch (err) {
-        console.warn('Groq 405B failed, activating Jugad (Pollinations Fallback)...');
-        // Secondary: Pollinations Llama 405B
-        answer = await callPollinations(messages);
-      }
+      // Direct high-performance 405B engine (Global Stable Source)
+      answer = await callPollinations(messages);
     } else {
+      // S-1 and others default to the sharp 120B logic engine
       const modelId = mode === 'AGI-S S-1' ? 'openai/gpt-oss-120b' : 'openai/gpt-oss-120b';
       answer = await callGroqText(messages, modelId);
     }
