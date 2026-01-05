@@ -19,7 +19,7 @@ import { Logo } from '../logo';
 import { useSpeechToText } from '@/hooks/use-speech-to-text';
 
 const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: string, isPersona?: boolean }> = {
-  'AI Knowledge (Bigger)': { icon: BrainCircuit, description: 'Powered by GPT (120B+ parameters).' },
+  'AI Knowledge (Bigger)': { icon: BrainCircuit, description: 'Powered by Llama 3.1 (405B parameters).' },
   'AI Knowledge (Smarter)': { icon: Cpu, description: 'Optimized via GPT-OSS for superior logic.' },
   'CodeX': { icon: Code, description: 'An elite 10x developer and pair programmer.' },
   'Academic Research': { icon: Microscope, description: 'Search academic sources.' },

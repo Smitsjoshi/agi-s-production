@@ -122,7 +122,7 @@ ${REALITY_SHARDS[mode] || FALLBACK_REALITY_SHARD}`;
 
     let modelId = 'openai/gpt-oss-120b';
     if (mode === 'AI Knowledge (Bigger)') {
-      modelId = 'meta-llama/llama-3.1-405b-instruct';
+      modelId = 'llama-3.1-405b-instruct';
     } else if (mode === 'AI Knowledge (Smarter)') {
       modelId = 'openai/gpt-oss-120b';
     }
