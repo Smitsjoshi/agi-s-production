@@ -205,17 +205,19 @@ export default function CruciblePage() {
                         "flex items-center space-x-3 p-2.5 rounded-lg transition-all cursor-pointer hover:bg-muted/40",
                         selectedPersonas.some(p => p.id === persona.id) ? "bg-muted shadow-sm ring-1 ring-border" : "opacity-60 grayscale-[0.5]"
                       )}
-                      onClick={() => handlePersonaToggle(persona)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePersonaToggle(persona);
+                      }}
                     >
                       <Checkbox
                         id={`${id}-${persona.id}`}
                         checked={selectedPersonas.some(p => p.id === persona.id)}
-                        onCheckedChange={() => handlePersonaToggle(persona)}
                         disabled={isLoading}
                         className="pointer-events-none"
                       />
-                      <div className="flex-1 min-w-0">
-                        <Label htmlFor={`${id}-${persona.id}`} className="flex flex-col cursor-pointer pointer-events-none">
+                      <div className="flex-1 min-w-0 pointer-events-none">
+                        <Label htmlFor={`${id}-${persona.id}`} className="flex flex-col cursor-pointer">
                           <span className="font-bold text-sm tracking-tight">{persona.name}</span>
                           <span className="text-[10px] leading-tight text-muted-foreground truncate">{persona.description}</span>
                         </Label>
