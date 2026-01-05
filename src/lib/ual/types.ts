@@ -10,3 +10,8 @@ export interface Action {
   }[];
   execute: (args: any) => Promise<any>;
 }
+
+export interface ActionStep {
+  action: Action;
+  args: any;
+}

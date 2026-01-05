@@ -162,10 +162,32 @@ export async function createAgentAction(data: { name: string; persona: string; k
   return { success: true };
 }
 
+
+import pdf from 'pdf-parse';
+
+// ... (imports remain)
+
 export async function generateSynthesisAction(input: SynthesisInput): Promise<SynthesisOutput> {
   try {
-    const sourcesSummary = input.files.map(f => `File: ${f.name} (Type: ${f.dataType})`).join('\n');
-    const sourcesData = input.files.map(f => `--- START FILE: ${f.name} ---\n${f.data}\n--- END FILE: ${f.name} ---`).join('\n\n');
+    const processedFiles = await Promise.all(input.files.map(async (f) => {
+      let content = f.data;
+      if (f.dataType === 'pdf') {
+        try {
+          // Remove data URL prefix if present (e.g., "data:application/pdf;base64,")
+          const base64Data = f.data.replace(/^data:application\/pdf;base64,/, "");
+          const buffer = Buffer.from(base64Data, 'base64');
+          const pdfData = await pdf(buffer);
+          content = pdfData.text;
+        } catch (pdfError) {
+          console.error(`Failed to parse PDF ${f.name}:`, pdfError);
+          content = "[Error: Failed to parse PDF content. The file might be corrupted or password protected.]";
+        }
+      }
+      return { ...f, data: content };
+    }));
+
+    const sourcesSummary = processedFiles.map(f => `File: ${f.name} (Type: ${f.dataType})`).join('\n');
+    const sourcesData = processedFiles.map(f => `--- START FILE: ${f.name} ---\n${f.data}\n--- END FILE: ${f.name} ---`).join('\n\n');
 
     const prompt = `You are a Senior Intelligence Analyst and Principal Data Scientist. Your task is to perform deep-synthesis and extraction from multiple data sources.
     

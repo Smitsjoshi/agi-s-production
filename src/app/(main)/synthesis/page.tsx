@@ -36,7 +36,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 type FileState = {
   id: string;
   name: string;
-  dataType: 'csv' | 'json';
+  dataType: 'csv' | 'json' | 'pdf';
   data: string;
 };
 
@@ -74,9 +74,9 @@ export default function SynthesisPage() {
   }, [files]);
 
   const processFile = (fileToProcess: File) => {
-    const dataType = fileToProcess.name.endsWith('.csv') ? 'csv' : fileToProcess.name.endsWith('.json') ? 'json' : null;
+    const dataType = fileToProcess.name.endsWith('.csv') ? 'csv' : fileToProcess.name.endsWith('.json') ? 'json' : fileToProcess.name.endsWith('.pdf') ? 'pdf' : null;
     if (!dataType) {
-      toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a CSV or JSON file.' });
+      toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a CSV, JSON, or PDF file.' });
       return;
     }
 
@@ -92,13 +92,18 @@ export default function SynthesisPage() {
       const newFile: FileState = {
         id: nanoid(),
         name: fileToProcess.name,
-        dataType: dataType as 'csv' | 'json',
+        dataType: dataType as 'csv' | 'json' | 'pdf',
         data: fileContent,
       };
       setFiles(prev => [...prev, newFile]);
       toast({ title: 'Source Added', description: `${fileToProcess.name} is ready for analysis.` });
     };
-    reader.readAsText(fileToProcess);
+
+    if (dataType === 'pdf') {
+      reader.readAsDataURL(fileToProcess);
+    } else {
+      reader.readAsText(fileToProcess);
+    }
   };
 
   const removeFile = (id: string) => {
@@ -239,7 +244,7 @@ export default function SynthesisPage() {
               const file = e.target.files?.[0];
               if (file) processFile(file);
             }}
-            accept=".csv,.json"
+            accept=".csv,.json,.pdf"
           />
         </div>
         <ScrollArea className="flex-1 p-4">
@@ -256,7 +261,7 @@ export default function SynthesisPage() {
                     "h-8 w-8 rounded flex items-center justify-center",
                     file.dataType === 'csv' ? "bg-emerald-500/10 text-emerald-500" : "bg-blue-500/10 text-blue-500"
                   )}>
-                    {file.dataType === 'csv' ? <FileSpreadsheet className="h-4 w-4" /> : <FileJson className="h-4 w-4" />}
+                    {file.dataType === 'csv' ? <FileSpreadsheet className="h-4 w-4" /> : file.dataType === 'json' ? <FileJson className="h-4 w-4" /> : <BookCheck className="h-4 w-4" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate">{file.name}</p>
