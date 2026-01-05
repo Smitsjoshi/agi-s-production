@@ -24,8 +24,8 @@ const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: st
   'CodeX': { icon: Code, description: 'An elite 10x developer and pair programmer.' },
   'Academic Research': { icon: Microscope, description: 'Search academic sources.' },
   'Deep Dive': { icon: FlaskConical, description: 'In-depth, multi-source analysis.' },
-  'Canvas': { icon: Cpu, description: 'Your goal-oriented autonomous web agent.' },
-  'Blueprint': { icon: Workflow, description: 'Deconstructs goals into actionable plans.' },
+  'Cosmos': { icon: Star, description: 'Generate entire fictional universes.' },
+  'Catalyst': { icon: BookOpen, description: 'Personalized learning paths.' },
   // Personas
   'The Strategist': { icon: Briefcase, description: 'A seasoned MBA and startup consultant.', isPersona: true },
   'The Globetrotter': { icon: Globe, description: 'An elite travel concierge for detailed itineraries.', isPersona: true },
@@ -36,13 +36,14 @@ const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: st
   'The Forecaster': { icon: TrendingUp, description: 'A trend analyst and data-driven futurist.', isPersona: true },
   'Comparison Analyst': { icon: GitCompareArrows, description: 'An unbiased evaluator for side-by-side comparisons.', isPersona: true },
   'The Ethicist': { icon: Scale, description: 'Analyzes complex moral and ethical dilemmas.', isPersona: true },
-  'Synthesis': { icon: Code, description: 'Placeholder' }, // Added to satisfy type
-  'Crucible': { icon: Code, description: 'Placeholder' }, // Added to satisfy type
-  'Cosmos': { icon: Star, description: 'Generate entire fictional universes.' },
-  'Catalyst': { icon: BookOpen, description: 'Personalized learning paths.' },
+  'Synthesis': { icon: Code, description: 'Data integration and synthesis.' },
+  'Crucible': { icon: Code, description: 'Idea testing and red-teaming.' },
+  // Hidden from UI but required by type
+  'Canvas': { icon: Cpu, description: 'External Page' },
+  'Blueprint': { icon: Workflow, description: 'External Page' },
 };
 
-const MAIN_AI_MODES = ['AGI-S S-1', 'AGI-S S-2', 'CodeX', 'Academic Research', 'Deep Dive', 'Canvas', 'Blueprint'] as AiMode[];
+const MAIN_AI_MODES = ['AGI-S S-1', 'AGI-S S-2', 'CodeX', 'Academic Research', 'Deep Dive'] as AiMode[];
 const PERSONAS = Object.keys(AI_MODE_DETAILS).filter(key => AI_MODE_DETAILS[key as AiMode].isPersona) as AiMode[];
 
 interface ChatInterfaceProps {
@@ -215,47 +216,6 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
       // Use the captured values for the API call
       // Pass the *updated* messages array logic (current prev + userMessage) is handled by the backend/action usually requesting full history.
       const messagesForApi = [...messages, userMessage];
-
-      // UNIVERSAL ACTION LAYER (UAL) INTEGRATION
-      if (mode === 'Canvas') {
-        const { UALAgentLoop } = await import('@/lib/ual/ual-agent-loop'); // Dynamic import
-        const assistantMsgId = generateId();
-
-        // Create initial placeholder message
-        const initialAssistantMsg: ChatMessage = {
-          id: assistantMsgId,
-          role: 'assistant',
-          content: 'Initialize Autonomous Web Agent...',
-          agentSteps: [],
-        };
-
-        setMessages((prev: ChatMessage[]) => [...prev, initialAssistantMsg]);
-
-        const loop = new UALAgentLoop();
-        await loop.run(currentInput, (step) => {
-          setMessages((prev: ChatMessage[]) => {
-            const newMsgs = [...prev];
-            const msgIndex = newMsgs.findIndex(m => m.id === assistantMsgId);
-            if (msgIndex !== -1) {
-              const msg = { ...newMsgs[msgIndex] };
-              msg.agentSteps = [...(msg.agentSteps || []), step];
-
-              // Update main content based on state
-              if (step.type === 'completed') {
-                msg.content = step.message;
-              } else if (step.type === 'failed') {
-                msg.content = `**Task Failed**: ${step.message}`;
-              } else {
-                msg.content = step.message; // Detailed status as main content during execution
-              }
-              newMsgs[msgIndex] = msg;
-            }
-            return newMsgs;
-          });
-        });
-
-        return; // Exit normally after loop finishes
-      }
 
       // STANDARD AI CHAT
       const result = await askAi(currentInput, mode, messagesForApi, currentFile || undefined);
