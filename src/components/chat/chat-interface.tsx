@@ -19,8 +19,8 @@ import { Logo } from '../logo';
 import { useSpeechToText } from '@/hooks/use-speech-to-text';
 
 const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: string, isPersona?: boolean }> = {
-  'AGI-S S-1': { icon: Cpu, description: '120 Billion parameters.' },
-  'AGI-S S-2': { icon: BrainCircuit, description: '400 Billion parameters.' },
+  'AGI-S S-1': { icon: Cpu, description: 'The Bigger Persona. 120B parameters for deep reasoning and complex logic.' },
+  'AGI-S S-2': { icon: BrainCircuit, description: 'The Smarter Persona. 17B parameters for ultra-fast, sharp coding and precision.' },
   'CodeX': { icon: Code, description: 'An elite 10x developer and pair programmer.' },
   'Academic Research': { icon: Microscope, description: 'Search academic sources.' },
   'Deep Dive': { icon: FlaskConical, description: 'In-depth, multi-source analysis.' },
