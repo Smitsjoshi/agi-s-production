@@ -56,8 +56,8 @@ const CritiqueCard = ({ critique }: { critique: CrucibleCritique }) => {
             <CardTitle className="text-lg font-bold">{critique.personaName}</CardTitle>
             <div className="flex items-center gap-2">
               <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Risk Level</span>
-              <Badge variant={critique.riskScore > 75 ? "destructive" : critique.riskScore > 40 ? "secondary" : "default"} className="font-mono">
-                {critique.riskScore}%
+              <Badge variant={(critique.riskScore ?? 0) > 75 ? "destructive" : (critique.riskScore ?? 0) > 40 ? "secondary" : "default"} className="font-mono">
+                {critique.riskScore ?? 0}%
               </Badge>
             </div>
           </div>
