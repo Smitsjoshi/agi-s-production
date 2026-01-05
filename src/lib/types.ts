@@ -252,20 +252,26 @@ export type CatalystInput = z.infer<typeof CatalystInputSchema>;
 export const CatalystOutputSchema = z.object({
     title: z.string().describe("The title of the learning path."),
     description: z.string().describe("A short description of what the user will learn."),
+    estimatedTime: z.string().describe("Estimated total time to complete, e.g., '10 hours'."),
+    difficulty: z.enum(['Beginner', 'Intermediate', 'Advanced']).describe("The difficulty level of the course."),
+    prerequisites: z.array(z.string()).describe("A list of knowledge or skills needed before starting."),
+    keyTakeaways: z.array(z.string()).describe("Top 3-5 things the learner will master."),
     modules: z.array(z.object({
         title: z.string().describe("The title of the learning module."),
+        description: z.string().describe("Brief overview of this module."),
         concepts: z.array(z.object({
             name: z.string().describe("The name of a specific concept."),
             explanation: z.string().describe("A clear explanation of the concept."),
             resources: z.array(z.object({
                 title: z.string().describe("Title of the resource."),
                 url: z.string().url().describe("URL to the resource."),
-                type: z.enum(['Article', 'Video', 'Book', 'Course']).describe("The type of the resource."),
+                type: z.enum(['Article', 'Video', 'Book', 'Course', 'Interactive Lab']).describe("The type of the resource."),
             })).describe("A list of curated resources to learn this concept."),
         })).describe("Concepts covered in this module."),
         project: z.object({
             title: z.string().describe("Title of a practical project for this module."),
             description: z.string().describe("Description of what the project entails."),
+            steps: z.array(z.string()).optional().describe("Step-by-step instructions for the project."),
         }).describe("A hands-on project to apply the module's concepts."),
         quiz: z.array(z.object({
             question: z.string().describe("A multiple-choice question."),
@@ -273,6 +279,16 @@ export const CatalystOutputSchema = z.object({
             correctAnswer: z.string().describe("The correct answer from the options."),
         })).describe("A short quiz to test understanding of the module."),
     })).describe("An array of learning modules that make up the curriculum."),
+    finalExam: z.array(z.object({
+        question: z.string().describe("An advanced final exam question."),
+        options: z.array(z.string()).describe("An array of possible answers."),
+        correctAnswer: z.string().describe("The correct answer from the options."),
+    })).optional().describe("A comprehensive final assessment."),
+    glossary: z.array(z.object({
+        term: z.string().describe("Key term used in the course."),
+        definition: z.string().describe("Definition of the term."),
+    })).optional().describe("Definitions for technical terms used."),
+    studyTips: z.array(z.string()).optional().describe("Effective strategies for learning this specific topic."),
 });
 export type CatalystOutput = z.infer<typeof CatalystOutputSchema>;
 

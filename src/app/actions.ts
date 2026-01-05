@@ -255,47 +255,55 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
 
 export async function generateCatalystAction(input: CatalystInput): Promise<{ success: boolean; data?: CatalystOutput; error?: string; }> {
   try {
-    const prompt = `You are an expert Instructional Designer creating a learning curriculum.
-
-Learning Goal: "${input.goal}"
-
-Generate a structured learning path in JSON format:
-{
-  "title": "Learning Path Title",
-  "description": "What the learner will achieve...",
-  "modules": [
+    const prompt = `You are a Senior Academic Dean & Expert Instructional Designer. Your task is to design a "Super Educator" curriculum that provides a master-level learning path.
+    
+    Learning Goal: "${input.goal}"
+    
+    Generate a comprehensive, deeply structured learning curriculum in JSON format:
     {
-      "title": "Module 1 Title",
-      "concepts": [
+      "title": "A Prestigious Title for the Curriculum",
+      "description": "A high-level overview of the transformation the learner will undergo.",
+      "estimatedTime": "Estimated total hours/weeks to mastery",
+      "difficulty": "Beginner" | "Intermediate" | "Advanced",
+      "prerequisites": ["List existing knowledge required"],
+      "keyTakeaways": ["Specific skills mastered by the end"],
+      "modules": [
         {
-          "name": "Concept Name",
-          "explanation": "Clear explanation...",
-          "resources": [
-            {"title": "Resource Title", "url": "https://example.com", "type": "Article"}
+          "title": "Module Name",
+          "description": "Short module abstract",
+          "concepts": [
+            {
+              "name": "Concept",
+              "explanation": "Deep, clear pedagogical explanation",
+              "resources": [
+                {"title": "Resource Name", "url": "https://...", "type": "Video" | "Article" | "Interactive Lab"}
+              ]
+            }
+          ],
+          "project": {
+            "title": "Project Name",
+            "description": "The 'Final Boss' challenge for this module",
+            "steps": ["Step 1", "Step 2", "..."]
+          },
+          "quiz": [
+            {"question": "Pedagogical question", "options": ["A", "B", "C", "D"], "correctAnswer": "A"}
           ]
         }
       ],
-      "project": {
-        "title": "Hands-on Project",
-        "description": "What to build..."
-      },
-      "quiz": [
-        {
-          "question": "Question text?",
-          "options": ["A", "B", "C", "D"],
-          "correctAnswer": "A"
-        }
-      ]
+      "finalExam": [
+        {"question": "Comprehensive course-wide question", "options": ["A", "B", "C", "D"], "correctAnswer": "A"}
+      ],
+      "glossary": [
+        {"term": "Technical Term", "definition": "Clear definition"}
+      ],
+      "studyTips": ["How to master THIS specific topic efficiently"]
     }
-  ]
-}
-
-Rules:
-- Create 2-3 modules
-- Each module has 2-3 concepts
-- Include real URLs to quality resources
-- Make projects practical
-- Return ONLY valid JSON`;
+    
+    Rules:
+    - Create exactly 3 modules for this preview.
+    - Be academically rigorous but accessible.
+    - Provide REAL or HIGH-PROBABILITY URLs for resources (Youtube, Wikipedia, Documentation).
+    - Return ONLY valid JSON.`;
 
     const result = await callGroqWithJSON<CatalystOutput>(prompt);
     return { success: true, data: result };
