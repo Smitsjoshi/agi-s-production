@@ -3,8 +3,8 @@ import type { LucideIcon } from 'lucide-react';
 import type { AgentStep } from './universal-action-layer';
 
 export type AiMode =
-    | 'AI Knowledge (Bigger)'
-    | 'AI Knowledge (Smarter)'
+    | 'AGI-S S-1'
+    | 'AGI-S S-2'
     | 'Academic Research'
     | 'Deep Dive'
     | 'Canvas'

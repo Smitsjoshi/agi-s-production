@@ -121,9 +121,9 @@ ${REALITY_SHARDS[mode] || FALLBACK_REALITY_SHARD}`;
     ];
 
     let modelId = 'openai/gpt-oss-120b';
-    if (mode === 'AI Knowledge (Bigger)') {
+    if (mode === 'AGI-S S-2') {
       modelId = 'llama-3.1-405b-instruct';
-    } else if (mode === 'AI Knowledge (Smarter)') {
+    } else if (mode === 'AGI-S S-1') {
       modelId = 'openai/gpt-oss-120b';
     }
 

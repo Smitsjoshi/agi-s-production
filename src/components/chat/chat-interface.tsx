@@ -19,8 +19,8 @@ import { Logo } from '../logo';
 import { useSpeechToText } from '@/hooks/use-speech-to-text';
 
 const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: string, isPersona?: boolean }> = {
-  'AI Knowledge (Bigger)': { icon: BrainCircuit, description: 'Powered by Llama 3.1 (405B parameters).' },
-  'AI Knowledge (Smarter)': { icon: Cpu, description: 'Optimized via GPT-OSS for superior logic.' },
+  'AGI-S S-1': { icon: Cpu, description: '120 Billion parameters.' },
+  'AGI-S S-2': { icon: BrainCircuit, description: '405 Billion parameters.' },
   'CodeX': { icon: Code, description: 'An elite 10x developer and pair programmer.' },
   'Academic Research': { icon: Microscope, description: 'Search academic sources.' },
   'Deep Dive': { icon: FlaskConical, description: 'In-depth, multi-source analysis.' },
@@ -42,7 +42,7 @@ const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: st
   'Catalyst': { icon: BookOpen, description: 'Personalized learning paths.' },
 };
 
-const MAIN_AI_MODES = ['AI Knowledge (Bigger)', 'AI Knowledge (Smarter)', 'CodeX', 'Academic Research', 'Deep Dive', 'Canvas', 'Blueprint'] as AiMode[];
+const MAIN_AI_MODES = ['AGI-S S-1', 'AGI-S S-2', 'CodeX', 'Academic Research', 'Deep Dive', 'Canvas', 'Blueprint'] as AiMode[];
 const PERSONAS = Object.keys(AI_MODE_DETAILS).filter(key => AI_MODE_DETAILS[key as AiMode].isPersona) as AiMode[];
 
 interface ChatInterfaceProps {
@@ -54,7 +54,7 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
   const storageKey = agentId ? `chat-history-${agentId}` : 'chat-history';
   const [messages, setMessages] = useLocalStorage<ChatMessage[]>(storageKey, []);
   const [input, setInput] = useState('');
-  const [mode, setMode] = useState<AiMode>('AI Knowledge (Smarter)');
+  const [mode, setMode] = useState<AiMode>('AGI-S S-1');
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<{ name: string; type: 'image' | 'pdf'; data: string } | null>(null);
   const [isClient, setIsClient] = useState(false);
