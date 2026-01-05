@@ -12,7 +12,7 @@ const nextConfig = {
   },
 
 
-  serverExternalPackages: ['genkit', 'genkitx-openai', '@google/generative-ai', 'grpc', '@grpc/grpc-js', 'protobufjs', '@sparticuz/chromium-min'],
+  serverExternalPackages: ['genkit', 'genkitx-openai', '@google/generative-ai', 'grpc', '@grpc/grpc-js', 'protobufjs', '@sparticuz/chromium-min', 'pdf-parse'],
   images: {
     remotePatterns: [
       {

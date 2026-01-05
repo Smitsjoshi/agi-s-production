@@ -1,7 +1,7 @@
 'use server';
 
 import type {
-  AiMode, SynthesisOutput, CrucibleOutput, CrucibleInput, CatalystOutput, CatalystInput,
+  AiMode, SynthesisOutput, SynthesisInput, CrucibleOutput, CrucibleInput, CatalystOutput, CatalystInput,
   ContinuumInput, ContinuumOutput, AetherInput, AetherOutput, CosmosInput, CosmosOutput
 } from '@/lib/types';
 import { ADVERSARY_PERSONAS } from '@/lib/personas';
@@ -164,7 +164,7 @@ export async function createAgentAction(data: { name: string; persona: string; k
 
 
 // import pdf from 'pdf-parse'; // types not compatible with default import in strict mode
-const pdf = require('pdf-parse');
+// const pdf = require('pdf-parse'); // Moved inside function for safety
 
 // ... (imports remain)
 
@@ -174,6 +174,9 @@ export async function generateSynthesisAction(input: SynthesisInput): Promise<{ 
       let content = f.data;
       if (f.dataType === 'pdf') {
         try {
+          // Dynamic require to prevent top-level build/runtime failures
+          const pdf = require('pdf-parse');
+
           // Remove data URL prefix if present (e.g., "data:application/pdf;base64,")
           const base64Data = f.data.replace(/^data:application\/pdf;base64,/, "");
           const buffer = Buffer.from(base64Data, 'base64');
