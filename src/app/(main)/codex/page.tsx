@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
     Loader2, Wand2, FileDown, Clipboard, Code, Play,
     RotateCcw, Save, History, Smartphone, Tablet, Monitor,
-    Maximize2, Copy, Check, Sparkles, MessageSquare, Settings2
+    Maximize2, Copy, Check, Sparkles, MessageSquare, Settings2, ShieldHalf
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { askAi } from '@/app/actions';
@@ -82,6 +82,7 @@ interface SavedCode {
 }
 
 export default function CodeXPage() {
+    const [showDisclaimer, setShowDisclaimer] = useState(true);
     const [prompt, setPrompt] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [code, setCode] = useState('');
@@ -289,6 +290,48 @@ export default function CodeXPage() {
 
     return (
         <ErrorBoundary>
+            <AnimatePresence>
+                {showDisclaimer && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-md p-4 text-center"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="max-w-md w-full bg-card border border-border p-8 rounded-2xl shadow-2xl relative"
+                        >
+                            <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-yellow-500/10 p-4 rounded-full border border-yellow-500/20">
+                                <ShieldHalf className="h-10 w-10 text-yellow-500" />
+                            </div>
+
+                            <h2 className="text-2xl font-headline font-bold mb-4 mt-4">CodeX: Experimental Mode</h2>
+                            <div className="space-y-4 text-muted-foreground text-sm leading-relaxed mb-8">
+                                <p>
+                                    Welcome to the AGI-S CodeX Beta. This environment is highly experimental and may behave unexpectedly.
+                                </p>
+                                <div className="bg-muted/50 p-3 rounded-lg border border-border/50 text-foreground font-medium">
+                                    ⚠️ IMPORTANT: Use this only for generating frontend components (HTML/CSS/JS). Do not attempt to generate large-scale backend systems.
+                                </div>
+                                <p>
+                                    Live Preview is currently optimized for single-file components. Complex multi-file architectures may not render correctly in the current preview engine.
+                                </p>
+                            </div>
+
+                            <Button
+                                onClick={() => setShowDisclaimer(false)}
+                                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-6 text-lg font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                                I Understand, Let's Build
+                            </Button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <div className="flex h-[calc(100vh-6rem)] gap-4">
                 {/* Left Panel: Prompt + Code Editor */}
                 <div className="flex w-1/2 flex-col gap-4">
