@@ -163,7 +163,8 @@ export async function createAgentAction(data: { name: string; persona: string; k
 }
 
 
-import pdf from 'pdf-parse';
+// import pdf from 'pdf-parse'; // types not compatible with default import in strict mode
+const pdf = require('pdf-parse');
 
 // ... (imports remain)
 
