@@ -261,11 +261,23 @@ export default function CodeXPage() {
 
     // Update preview when code changes
     useEffect(() => {
-        if (iframeRef.current && (language === 'html' || language === 'react')) {
+        if (iframeRef.current && (language === 'html' || language === 'react' || language === 'javascript')) {
             const doc = iframeRef.current.contentDocument;
             if (doc) {
+                // Robust extraction: find code within backticks or use the whole string if clean
+                const codeBlockRegex = /```(?:\w+)?\s*([\s\S]*?)\s*```/g;
+                let previewCode = code;
+                const matches = [...code.matchAll(codeBlockRegex)];
+
+                if (matches.length > 0) {
+                    previewCode = matches.map(m => m[1].trim()).join('\n\n');
+                } else {
+                    // Strip bold labels if any
+                    previewCode = code.replace(/\*\*[^*]+\*\*/g, '').replace(/```/g, '').trim();
+                }
+
                 doc.open();
-                doc.write(code);
+                doc.write(previewCode);
                 doc.close();
             }
         }
@@ -549,7 +561,7 @@ export default function CodeXPage() {
                                     <iframe
                                         ref={iframeRef}
                                         className="w-full h-full bg-white rounded border"
-                                        sandbox="allow-scripts"
+                                        sandbox="allow-scripts allow-forms allow-same-origin"
                                         title="Preview"
                                     />
                                 </motion.div>

@@ -129,9 +129,19 @@ ${REALITY_SHARDS[mode] || FALLBACK_REALITY_SHARD}`;
 
     const answer = await callGroqText(messages, modelId);
 
-    // For CodeX mode, return componentCode
+    // For CodeX mode, return cleaned componentCode
     if (mode === 'CodeX') {
-      return { componentCode: answer, reasoning: `Generated code using AGI-S S-Series Engine` };
+      const extractCode = (text: string) => {
+        const codeBlockRegex = /```(?:\w+)?\s*([\s\S]*?)\s*```/g;
+        const matches = [...text.matchAll(codeBlockRegex)];
+        if (matches.length > 0) {
+          return matches.map(m => m[1].trim()).join('\n\n');
+        }
+        return text.replace(/\*\*[^*]+\*\*/g, '').replace(/```/g, '').trim();
+      };
+
+      const cleanedCode = extractCode(answer);
+      return { componentCode: cleanedCode, reasoning: `Generated code using AGI-S S-Series Engine` };
     }
 
     return { answer };
