@@ -26,7 +26,10 @@ export const metadata: Metadata = {
   title: "AGI-S",
   description: "The AGI-S Application",
   icons: {
-    icon: "/icon.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "32x32" },
+    ],
     apple: "/icon.png",
   },
 };
