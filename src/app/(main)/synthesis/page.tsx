@@ -129,20 +129,24 @@ export default function SynthesisPage() {
         }))
       };
 
-      const result: SynthesisOutput = await generateSynthesisAction(synthesisInput);
+      const result = await generateSynthesisAction(synthesisInput);
+
+      if (!result.success || !result.data) {
+        throw new Error(result.error || 'Unknown synthesis error');
+      }
 
       const assistantMessage: ChatMessage = {
         id: nanoid(),
         role: 'assistant',
         content: '',
-        synthesisBlocks: result.content,
+        synthesisBlocks: result.data.content,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-      setActiveAnalysis(result);
-    } catch (error) {
+      setActiveAnalysis(result.data);
+    } catch (error: any) {
       console.error(error);
-      toast({ variant: 'destructive', title: 'Intelligence Error', description: 'Failed to cross-reference data sources.' });
+      toast({ variant: 'destructive', title: 'Intelligence Error', description: error.message || 'Failed to cross-reference data sources.' });
     } finally {
       setIsLoading(false);
     }

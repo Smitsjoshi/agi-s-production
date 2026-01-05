@@ -168,7 +168,7 @@ const pdf = require('pdf-parse');
 
 // ... (imports remain)
 
-export async function generateSynthesisAction(input: SynthesisInput): Promise<SynthesisOutput> {
+export async function generateSynthesisAction(input: SynthesisInput): Promise<{ success: boolean; data?: SynthesisOutput; error?: string; }> {
   try {
     const processedFiles = await Promise.all(input.files.map(async (f) => {
       let content = f.data;
@@ -179,9 +179,10 @@ export async function generateSynthesisAction(input: SynthesisInput): Promise<Sy
           const buffer = Buffer.from(base64Data, 'base64');
           const pdfData = await pdf(buffer);
           content = pdfData.text;
-        } catch (pdfError) {
+        } catch (pdfError: any) {
           console.error(`Failed to parse PDF ${f.name}:`, pdfError);
-          content = "[Error: Failed to parse PDF content. The file might be corrupted or password protected.]";
+          // Return the error in the content for the AI to see, but don't fail the whole request
+          content = `[ERROR Parsing PDF: ${pdfError.message || 'Unknown error'}]`;
         }
       }
       return { ...f, data: content };
@@ -228,11 +229,11 @@ export async function generateSynthesisAction(input: SynthesisInput): Promise<Sy
     - Return ONLY valid JSON.`;
 
     const result = await callGroqWithJSON<SynthesisOutput>(prompt);
-    return result;
+    return { success: true, data: result };
 
   } catch (e: any) {
     console.error("Synthesis Action Error:", e);
-    throw new Error(e.message);
+    return { success: false, error: e.message };
   }
 }
 
