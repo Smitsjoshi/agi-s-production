@@ -115,7 +115,10 @@ CONTEXT:
 ${REALITY_SHARDS[mode] || FALLBACK_REALITY_SHARD}`;
 
     const messages = [
-      { role: 'system', content: systemContent },
+      {
+        role: 'system',
+        content: `${systemContent}${mode === 'CodeX' && options?.language ? `\n\nTARGET LANGUAGE: ${options.language}\nYou MUST strictly adhere to ${options.language} syntax. If ${options.language} is HTML/CSS/JS, use Vanilla standards only.` : ''}`
+      },
       ...chatHistory.map((m: any) => ({ role: m.role || 'user', content: m.content || '' })),
       { role: 'user', content: query }
     ];

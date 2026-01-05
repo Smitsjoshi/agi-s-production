@@ -142,7 +142,7 @@ export default function CodeXPage() {
                 fullPrompt = `Current code:\n\`\`\`${language}\n${code}\n\`\`\`\n\nUser request: ${currentPrompt}`;
             }
 
-            const response = await askAi(fullPrompt, 'CodeX', []);
+            const response = await askAi(fullPrompt, 'CodeX', [], undefined, { language });
 
             if (response?.componentCode) {
                 const newCode = response.componentCode;
