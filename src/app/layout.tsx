@@ -25,6 +25,10 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "AGI-S",
   description: "The AGI-S Application",
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({
