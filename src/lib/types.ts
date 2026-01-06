@@ -150,14 +150,14 @@ export const SynthesisInputSchema = z.object({
     query: z.string().describe('The user\'s question or instruction about the data.'),
     files: z.array(z.object({
         name: z.string().describe('The filename.'),
-        dataType: z.enum(['csv', 'json', 'pdf']).describe('The format of the file.'),
+        dataType: z.enum(['csv', 'json', 'pdf', 'image']).describe('The format of the file.'),
         data: z.string().describe('The raw content of the file.')
     })).describe('An array of uploaded data sources to synthesize.')
 });
 export type SynthesisInput = z.infer<typeof SynthesisInputSchema>;
 
 // NotebookLM Source Types
-export type SourceType = 'pdf' | 'youtube' | 'web' | 'text' | 'csv' | 'json';
+export type SourceType = 'pdf' | 'youtube' | 'web' | 'text' | 'csv' | 'json' | 'image';
 
 export interface Source {
     id: string;

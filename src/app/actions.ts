@@ -64,6 +64,39 @@ async function callGroqWithJSON<T>(prompt: string, systemPrompt?: string): Promi
   }
 }
 
+/**
+ * Helper for Multimodal / Vision calls
+ */
+async function callGroqVision(prompt: string, base64Image: string): Promise<string> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new Error("GROQ_API_KEY is not set");
+
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'llama-3.2-11b-vision-preview',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: base64Image } }
+          ]
+        }
+      ],
+      temperature: 0.3
+    })
+  });
+
+  if (!response.ok) throw new Error(`Groq Vision Error: ${response.status}`);
+  const data = await response.json();
+  return data.choices[0]?.message?.content || "";
+}
+
 // Regular text completion (for askAi)
 async function callGroqText(messages: Array<{ role: string; content: string }>, modelId: string = 'openai/gpt-oss-120b'): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
@@ -260,49 +293,58 @@ export async function generateSynthesisAction(input: SynthesisInput): Promise<{ 
   try {
     const { query, files } = input;
 
-    // Process files (PDF, CSV, JSON)
-    const processedFiles = await Promise.all(files.map(async (file) => {
-      let content = file.data;
-      if (file.dataType === 'pdf') {
+    // Process files (PDF, CSV, JSON, Image)
+    const processedFiles = await Promise.all(input.files.map(async (f: any) => {
+      let content = f.data;
+      if (f.dataType === 'pdf') {
         try {
           const pkg = require('pdf-parse');
-          // Handle both v1 (function) and v2 (class) export styles
           const pdfParser = typeof pkg === 'function' ? pkg : (pkg.PDFParse || pkg.default);
-
-          const base64Data = file.data.includes(',') ? file.data.split(',')[1] : file.data;
+          const base64Data = f.data.includes(',') ? f.data.split(',')[1] : f.data;
           const buffer = Buffer.from(base64Data, 'base64');
 
           if (typeof pdfParser === 'function') {
             const data = await pdfParser(buffer);
             content = data.text;
           } else if (pdfParser) {
-            // v2 style
             const uint8Array = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
             const instance = new pdfParser(uint8Array);
             const data = await instance.getText();
             content = data.text;
-          } else {
-            throw new Error("PDF parser in incompatible format");
           }
-        } catch (pdfErr: any) {
-          console.error(`PDF parse error for ${file.name}:`, pdfErr);
-          content = `[ERROR: Failed to extract text from this PDF. This might be a scanned image or encrypted. Details: ${pdfErr.message}]`;
+        } catch (err: any) {
+          console.error(`PDF parse error for ${f.name}:`, err);
+          content = `[ERROR: PDF Parsing Failed]`;
+        }
+      } else if (f.dataType === 'image') {
+        try {
+          // Use Vision to extract text/diagrams
+          content = await callGroqVision(
+            "Extract ALL text, identify diagrams, explain charts, and describe any visual information in this image in extreme detail for a researcher.",
+            f.data
+          );
+        } catch (err: any) {
+          console.error("Vision error:", err);
+          content = `[ERROR: Image Vision Analysis Failed]`;
         }
       }
-      return { name: file.name, content };
+      return { name: f.name, content };
     }));
 
     const sourcesSummary = processedFiles.map(f => `Source: ${f.name}\nContent: ${f.content.substring(0, 5000)}...`).join('\n\n');
 
-    const prompt = `Perform a high-fidelity, comprehensive multi-source synthesis for the query: "${query}"
+    const prompt = `Perform an ADVANCED, high-fidelity, comprehensive multi-source synthesis for the query: "${query}"
     
-    You must provide an EXHAUSTIVE, detailed answer (at least 600-800 words if context allows) using ONLY the provided sources. 
+    You are an Elite Intelligence Analyst. You must provide an EXHAUSTIVE, deeply technical answer (minimum 800-1200 words) using the provided sources. 
+    If a source appears to have extraction issues (noted as [ERROR] or very short), use "Structural Inference" to deduce its likely content based on its filename and surrounding context.
+    
     Format your response as a series of structured blocks. 
     
     Rules:
     1. NEVER use HTML tags or raw markdown headers like # or ## inside the JSON strings.
     2. Use 'text', 'table', and 'chart' block types.
-    3. Cite sources by name: [Source: name.pdf]
+    3. Cite sources explicitly: [Source: name.pdf, Page/Section X]
+    4. Be impressive. Use sophisticated analytical frameworks (e.g., SWOT, First Principles, PESTLE) if applicable.
     
     Sources Content:
     ${sourcesSummary}
@@ -331,16 +373,21 @@ export async function generateSynthesisAction(input: SynthesisInput): Promise<{ 
 export async function generateCriticalAnalysisAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: Report; error?: string }> {
   try {
     const context = sources.map(s => s.content.substring(0, 5000)).join('\n\n');
-    const prompt = `Perform a CRITICAL analysis of these sources. Identify biases, gaps in data, contradictions between sources, and underlying assumptions.
+    const prompt = `Perform a DENSE, ELITE-LEVEL CRITICAL analysis of these sources. 
+    Identify hidden biases, systemic gaps in data, cross-source contradictions, underlying logical fallacies, and ethical implications.
+    
+    The report must be extremely detailed (minimum 1000 words).
     
     Output as JSON:
     {
-      "title": "Critical Intelligence Assessment",
-      "executiveSummary": "...",
+      "title": "Elite-Level Critical Intelligence Assessment",
+      "executiveSummary": "A high-level strategic overview (BLUF)...",
       "sections": [
-        { "heading": "Analysis Perspective", "content": "..." },
-        { "heading": "Identified Biases", "content": "..." },
-        { "heading": "Cross-Source Contradictions", "content": "..." }
+        { "heading": "Structural Analysis & Data Integrity", "content": "..." },
+        { "heading": "Inherent Biases & Perspectives", "content": "..." },
+        { "heading": "Cross-Source Synthesis & Contradictions", "content": "..." },
+        { "heading": "Risk Assessment & Future Implications", "content": "..." },
+        { "heading": "Strategic Recommendations", "content": "..." }
       ]
     }`;
     const result = await callGroqWithJSON<Report>(prompt);
@@ -356,15 +403,20 @@ export async function generateCriticalAnalysisAction(sources: { name: string; co
 export async function generateExecutiveSummaryAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: Report; error?: string }> {
   try {
     const context = sources.map(s => s.content.substring(0, 8000)).join('\n\n');
-    const prompt = `Create a high-level Executive Summary (1-page equivalent) for a busy leader. Focus on the 'Bottom Line Up Front' (BLUF).
+    const prompt = `Create a DEFINTIVE Executive Summary for a global leader or CXO. 
+    Focus on 'Bottom Line Up Front' (BLUF), Strategic Value, and Actionable Intelligence.
+    
+    The summary must be highly detailed and authoritative (minimum 800 words).
     
     Output as JSON:
     {
-      "title": "Executive Summary",
-      "executiveSummary": "...",
+      "title": "Strategy & Executive Synthesis",
+      "executiveSummary": "Deep high-level summary covering all core pillars...",
       "sections": [
-        { "heading": "Strategic Implications", "content": "..." },
-        { "heading": "Key Recommendations", "content": "..." }
+        { "heading": "Strategic Implications & Market Positioning", "content": "..." },
+        { "heading": "Core Value Drivers & Key Findings", "content": "..." },
+        { "heading": "Critical Risks & Mitigations", "content": "..." },
+        { "heading": "Top 5 Strategic Recommendations", "content": "..." }
       ]
     }`;
     const result = await callGroqWithJSON<Report>(prompt);
@@ -428,7 +480,8 @@ export async function generateMindMapAction(sources: { name: string; content: st
   try {
     const context = sources.map(s => s.content.substring(0, 3000)).join('\n\n');
 
-    const prompt = `Extract a hierarchical topic structure for a mind map from these sources.
+    const prompt = `Extract a COMPLEX, deep hierarchical topic structure for an expert-level mind map.
+    Go deep—aim for 4-5 levels of nested hierarchy. Identify intricate connections, secondary drivers, and nuanced details.
     
     Sources:
     ${context}
@@ -436,11 +489,20 @@ export async function generateMindMapAction(sources: { name: string; content: st
     Output as JSON:
     {
       "rootNode": {
-        "label": "Main Topic",
-        "description": "Short summary",
+        "label": "Master Intelligence Hub",
+        "description": "Exhaustive core synthesis",
         "level": 0,
         "children": [
-          { "label": "Subtopic", "description": "...", "level": 1, "children": [] }
+          { 
+            "label": "Primary Pillar 1", 
+            "description": "...", 
+            "level": 1, 
+            "children": [
+              { "label": "Secondary Subtopic", "description": "...", "level": 2, "children": [
+                 { "label": "Tertiary Detail", "description": "...", "level": 3, "children": [] }
+              ]}
+            ] 
+          }
         ]
       }
     }`;

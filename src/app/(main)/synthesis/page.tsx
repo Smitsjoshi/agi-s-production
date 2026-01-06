@@ -84,6 +84,16 @@ export default function SynthesisPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Lock body scroll when overlay is active
+  useEffect(() => {
+    if (studioResult) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [studioResult]);
+
   // Add source handlers
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -93,7 +103,8 @@ export default function SynthesisPage() {
     reader.onload = async (event) => {
       const content = event.target?.result as string;
       const type: SourceType = file.name.endsWith('.pdf') ? 'pdf' :
-        file.name.endsWith('.csv') ? 'csv' : 'json';
+        file.name.endsWith('.csv') ? 'csv' :
+          (file.name.endsWith('.png') || file.name.endsWith('.jpg') || file.name.endsWith('.jpeg')) ? 'image' : 'json';
 
       const newSource: Source = {
         id: nanoid(),
@@ -107,7 +118,7 @@ export default function SynthesisPage() {
       toast({ title: 'Source Added', description: `${file.name} added successfully` });
     };
 
-    if (file.name.endsWith('.pdf')) {
+    if (file.name.endsWith('.pdf') || file.type.startsWith('image/')) {
       reader.readAsDataURL(file);
     } else {
       reader.readAsText(file);
@@ -199,12 +210,14 @@ export default function SynthesisPage() {
 
     const droppedFiles = Array.from(e.dataTransfer.files);
     for (const file of droppedFiles) {
-      if (file.name.endsWith('.pdf') || file.name.endsWith('.csv') || file.name.endsWith('.json')) {
+      if (file.name.endsWith('.pdf') || file.name.endsWith('.csv') || file.name.endsWith('.json') || file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (event) => {
           const content = event.target?.result as string;
-          const type: SourceType = file.name.endsWith('.pdf') ? 'pdf' :
-            file.name.endsWith('.csv') ? 'csv' : 'json';
+          let type: SourceType = 'json';
+          if (file.name.endsWith('.pdf')) type = 'pdf';
+          else if (file.name.endsWith('.csv')) type = 'csv';
+          else if (file.type.startsWith('image/')) type = 'image';
 
           setSources(prev => [...prev, {
             id: nanoid(),
@@ -216,7 +229,7 @@ export default function SynthesisPage() {
           toast({ title: 'File Dropped', description: `${file.name} added successfully` });
         };
 
-        if (file.name.endsWith('.pdf')) {
+        if (file.name.endsWith('.pdf') || file.type.startsWith('image/')) {
           reader.readAsDataURL(file);
         } else {
           reader.readAsText(file);
@@ -329,6 +342,7 @@ export default function SynthesisPage() {
   const getSourceIcon = (type: SourceType) => {
     switch (type) {
       case 'pdf': return <FileText className="h-4 w-4" />;
+      case 'image': return <Film className="h-4 w-4" />; // Using Film for now or can use another icon
       case 'youtube': return <Video className="h-4 w-4" />;
       case 'web': return <Globe className="h-4 w-4" />;
       default: return <FileText className="h-4 w-4" />;
@@ -336,7 +350,7 @@ export default function SynthesisPage() {
   };
 
   return (
-    <div className="h-screen flex bg-background overflow-hidden">
+    <div className="h-[calc(100vh-64px)] flex bg-background overflow-hidden relative">
       {/* LEFT SIDEBAR - Sources */}
       <div
         className={cn(
@@ -453,6 +467,7 @@ export default function SynthesisPage() {
                     <div className={cn(
                       "p-2 rounded",
                       source.type === 'pdf' && "bg-red-500/10 text-red-500",
+                      source.type === 'image' && "bg-orange-500/10 text-orange-500",
                       source.type === 'youtube' && "bg-blue-500/10 text-blue-500",
                       source.type === 'web' && "bg-green-500/10 text-green-500"
                     )}>
@@ -532,7 +547,8 @@ export default function SynthesisPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 md:p-8"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 md:p-8"
+            onWheel={(e) => e.stopPropagation()}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
