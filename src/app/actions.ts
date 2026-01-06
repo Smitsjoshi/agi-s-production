@@ -264,10 +264,30 @@ export async function generateSynthesisAction(input: SynthesisInput): Promise<{ 
     const processedFiles = await Promise.all(files.map(async (file) => {
       let content = file.data;
       if (file.dataType === 'pdf') {
-        const pkg = require('pdf-parse');
-        const buffer = Buffer.from(file.data.split(',')[1], 'base64');
-        const data = await pkg(buffer);
-        content = data.text;
+        try {
+          const pkg = require('pdf-parse');
+          // Handle both v1 (function) and v2 (class) export styles
+          const pdfParser = typeof pkg === 'function' ? pkg : (pkg.PDFParse || pkg.default);
+
+          const base64Data = file.data.includes(',') ? file.data.split(',')[1] : file.data;
+          const buffer = Buffer.from(base64Data, 'base64');
+
+          if (typeof pdfParser === 'function') {
+            const data = await pdfParser(buffer);
+            content = data.text;
+          } else if (pdfParser) {
+            // v2 style
+            const uint8Array = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+            const instance = new pdfParser(uint8Array);
+            const data = await instance.getText();
+            content = data.text;
+          } else {
+            throw new Error("PDF parser in incompatible format");
+          }
+        } catch (pdfErr: any) {
+          console.error(`PDF parse error for ${file.name}:`, pdfErr);
+          content = `[ERROR: Failed to extract text from this PDF. This might be a scanned image or encrypted. Details: ${pdfErr.message}]`;
+        }
       }
       return { name: file.name, content };
     }));

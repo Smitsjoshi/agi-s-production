@@ -75,6 +75,7 @@ export default function SynthesisPage() {
     data: any;
   } | null>(null);
   const [isGenerating, setIsGenerating] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -180,6 +181,48 @@ export default function SynthesisPage() {
 
   const removeSource = (id: string) => {
     setSources(prev => prev.filter(s => s.id !== id));
+  };
+
+  // Drag and drop handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    for (const file of droppedFiles) {
+      if (file.name.endsWith('.pdf') || file.name.endsWith('.csv') || file.name.endsWith('.json')) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const content = event.target?.result as string;
+          const type: SourceType = file.name.endsWith('.pdf') ? 'pdf' :
+            file.name.endsWith('.csv') ? 'csv' : 'json';
+
+          setSources(prev => [...prev, {
+            id: nanoid(),
+            type,
+            name: file.name,
+            content,
+            addedAt: new Date()
+          }]);
+          toast({ title: 'File Dropped', description: `${file.name} added successfully` });
+        };
+
+        if (file.name.endsWith('.pdf')) {
+          reader.readAsDataURL(file);
+        } else {
+          reader.readAsText(file);
+        }
+      }
+    }
   };
 
   // Chat handler
@@ -295,7 +338,15 @@ export default function SynthesisPage() {
   return (
     <div className="h-screen flex bg-background overflow-hidden">
       {/* LEFT SIDEBAR - Sources */}
-      <div className="w-[300px] border-r flex flex-col min-h-0 bg-muted/20 backdrop-blur-sm">
+      <div
+        className={cn(
+          "w-[300px] border-r flex flex-col min-h-0 bg-muted/20 backdrop-blur-sm transition-colors duration-200",
+          isDragging && "bg-primary/5 ring-2 ring-primary/50 ring-inset"
+        )}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <div className="p-4 border-b">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold">Sources</h2>
@@ -499,8 +550,10 @@ export default function SynthesisPage() {
                 </Button>
               </div>
 
-              <ScrollArea className="flex-1 p-6">
-                <StudioResultDisplay result={studioResult} />
+              <ScrollArea className="flex-1">
+                <div className="p-6">
+                  <StudioResultDisplay result={studioResult} />
+                </div>
               </ScrollArea>
 
               <div className="p-4 border-t bg-muted/30 flex justify-end gap-2">
@@ -649,8 +702,19 @@ function StudioResultDisplay({ result }: { result: { type: string, data: any } }
                   size="lg"
                   className="rounded-full px-8 bg-primary hover:scale-105 transition-transform"
                   onClick={() => {
+                    window.speechSynthesis.cancel();
                     const utter = new SpeechSynthesisUtterance(data.script);
-                    utter.rate = 0.9;
+                    const voices = window.speechSynthesis.getVoices();
+                    // Prioritize premium/natural voices
+                    const premiumVoice = voices.find(v =>
+                      v.name.includes("Google") ||
+                      v.name.includes("Natural") ||
+                      v.name.includes("Samantha") ||
+                      v.name.includes("Premium")
+                    ) || voices[0];
+
+                    if (premiumVoice) utter.voice = premiumVoice;
+                    utter.rate = 0.95;
                     utter.pitch = 1.0;
                     window.speechSynthesis.speak(utter);
                   }}
@@ -666,17 +730,19 @@ function StudioResultDisplay({ result }: { result: { type: string, data: any } }
                   Stop
                 </Button>
               </div>
-              <p className="text-[10px] text-muted-foreground italic">Note: Using browser-native synthesis for low-latency feedback</p>
+              <p className="text-[10px] text-muted-foreground italic">Note: Using premium system synthesis for human-like focus</p>
             </div>
           </Card>
           <div className="space-y-4">
-            <h4 className="font-bold text-lg flex items-center gap-2 text-primary/80">
+            <h4 className="font-bold text-lg flex items-center gap-2 text-primary/80 px-1">
               <FileText className="h-5 w-5" />
               Intelligence Transcript
             </h4>
-            <div className="p-6 border rounded-xl bg-card/60 backdrop-blur-sm whitespace-pre-wrap leading-relaxed text-sm shadow-inner italic text-muted-foreground border-primary/10">
-              {data.script}
-            </div>
+            <ScrollArea className="max-h-[350px] rounded-xl border border-primary/10 bg-card/60 backdrop-blur-sm shadow-inner">
+              <div className="p-6 whitespace-pre-wrap leading-relaxed text-sm italic text-muted-foreground">
+                {data.script}
+              </div>
+            </ScrollArea>
           </div>
         </div>
       );
