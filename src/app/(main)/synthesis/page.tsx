@@ -350,7 +350,7 @@ export default function SynthesisPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-64px)] flex bg-background overflow-hidden relative">
+    <div className="h-[calc(100vh-160px)] flex bg-background overflow-hidden relative rounded-xl border shadow-2xl">
       {/* LEFT SIDEBAR - Sources */}
       <div
         className={cn(
@@ -566,11 +566,13 @@ export default function SynthesisPage() {
                 </Button>
               </div>
 
-              <ScrollArea className="flex-1">
-                <div className="p-6">
-                  <StudioResultDisplay result={studioResult} />
-                </div>
-              </ScrollArea>
+              <div className="flex-1 min-h-0 relative">
+                <ScrollArea className="h-full w-full">
+                  <div className="p-8">
+                    <StudioResultDisplay result={studioResult} />
+                  </div>
+                </ScrollArea>
+              </div>
 
               <div className="p-4 border-t bg-muted/30 flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setStudioResult(null)}>Close</Button>

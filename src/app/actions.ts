@@ -295,7 +295,7 @@ export async function generateSynthesisAction(input: SynthesisInput): Promise<{ 
 
     // Process files (PDF, CSV, JSON, Image)
     const processedFiles = await Promise.all(input.files.map(async (f: any) => {
-      let content = f.data;
+      let content = ""; // DEFAULT TO EMPTY TO PREVENT BINARY LEAK
       if (f.dataType === 'pdf') {
         try {
           const pkg = require('pdf-parse');
@@ -305,16 +305,16 @@ export async function generateSynthesisAction(input: SynthesisInput): Promise<{ 
 
           if (typeof pdfParser === 'function') {
             const data = await pdfParser(buffer);
-            content = data.text;
+            content = data.text || "[WARNING: PDF successfully parsed but no text was found. This is likely a scanned image. Please upload an image version for OCR analysis.]";
           } else if (pdfParser) {
             const uint8Array = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
             const instance = new pdfParser(uint8Array);
             const data = await instance.getText();
-            content = data.text;
+            content = data.text || "[WARNING: PDF successfully parsed but no text was found. This is likely a scanned image. Please upload an image version for OCR analysis.]";
           }
         } catch (err: any) {
           console.error(`PDF parse error for ${f.name}:`, err);
-          content = `[ERROR: PDF Parsing Failed]`;
+          content = `[ERROR: PDF Parsing Failed. The document might be encrypted or corrupted.]`;
         }
       } else if (f.dataType === 'image') {
         try {
@@ -336,7 +336,7 @@ export async function generateSynthesisAction(input: SynthesisInput): Promise<{ 
     const prompt = `Perform an ADVANCED, high-fidelity, comprehensive multi-source synthesis for the query: "${query}"
     
     You are an Elite Intelligence Analyst. You must provide an EXHAUSTIVE, deeply technical answer (minimum 800-1200 words) using the provided sources. 
-    If a source appears to have extraction issues (noted as [ERROR] or very short), use "Structural Inference" to deduce its likely content based on its filename and surrounding context.
+    If a source appears to have extraction issues (noted as [WARNING] or [ERROR] or is empty), EXPLICITLY state this in your response and do NOT hallucinate content for that source.
     
     Format your response as a series of structured blocks. 
     
@@ -375,6 +375,8 @@ export async function generateCriticalAnalysisAction(sources: { name: string; co
     const context = sources.map(s => s.content.substring(0, 5000)).join('\n\n');
     const prompt = `Perform a DENSE, ELITE-LEVEL CRITICAL analysis of these sources. 
     Identify hidden biases, systemic gaps in data, cross-source contradictions, underlying logical fallacies, and ethical implications.
+    
+    IMPORTANT: If the source content is empty or contains warnings about extraction failure, do NOT invent data. Instead, analyze the failure itself and what intelligence might be missing.
     
     The report must be extremely detailed (minimum 1000 words).
     
