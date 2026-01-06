@@ -254,26 +254,125 @@ export async function scrapeWebPage(url: string): Promise<{ success: boolean; da
 // ============================================
 
 /**
+ * Perform multi-source synthesis with high detail
+ */
+export async function generateSynthesisAction(input: SynthesisInput): Promise<{ success: boolean; data?: SynthesisOutput; error?: string }> {
+  try {
+    const { query, files } = input;
+
+    // Process files (PDF, CSV, JSON)
+    const processedFiles = await Promise.all(files.map(async (file) => {
+      let content = file.data;
+      if (file.dataType === 'pdf') {
+        const pkg = require('pdf-parse');
+        const buffer = Buffer.from(file.data.split(',')[1], 'base64');
+        const data = await pkg(buffer);
+        content = data.text;
+      }
+      return { name: file.name, content };
+    }));
+
+    const sourcesSummary = processedFiles.map(f => `Source: ${f.name}\nContent: ${f.content.substring(0, 5000)}...`).join('\n\n');
+
+    const prompt = `Perform a high-fidelity, comprehensive multi-source synthesis for the query: "${query}"
+    
+    You must provide an EXHAUSTIVE, detailed answer (at least 600-800 words if context allows) using ONLY the provided sources. 
+    Format your response as a series of structured blocks. 
+    
+    Rules:
+    1. NEVER use HTML tags or raw markdown headers like # or ## inside the JSON strings.
+    2. Use 'text', 'table', and 'chart' block types.
+    3. Cite sources by name: [Source: name.pdf]
+    
+    Sources Content:
+    ${sourcesSummary}
+    
+    Output as JSON:
+    {
+      "content": [
+        { "type": "text", "content": "..." },
+        { "type": "table", "headers": ["Header 1", "Header 2"], "rows": [["Cell 1", "Cell 2"]] }
+      ],
+      "suggestedQuestions": ["Question 1", "Question 2"],
+      "confidenceScore": 0.98
+    }`;
+
+    const result = await callGroqWithJSON<SynthesisOutput>(prompt);
+    return { success: true, data: result };
+  } catch (error: any) {
+    console.error('Synthesis error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Generate a Critical Analysis report
+ */
+export async function generateCriticalAnalysisAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: Report; error?: string }> {
+  try {
+    const context = sources.map(s => s.content.substring(0, 5000)).join('\n\n');
+    const prompt = `Perform a CRITICAL analysis of these sources. Identify biases, gaps in data, contradictions between sources, and underlying assumptions.
+    
+    Output as JSON:
+    {
+      "title": "Critical Intelligence Assessment",
+      "executiveSummary": "...",
+      "sections": [
+        { "heading": "Analysis Perspective", "content": "..." },
+        { "heading": "Identified Biases", "content": "..." },
+        { "heading": "Cross-Source Contradictions", "content": "..." }
+      ]
+    }`;
+    const result = await callGroqWithJSON<Report>(prompt);
+    return { success: true, data: { ...result, id: nanoid(), createdAt: new Date() } };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Generate an Executive Summary
+ */
+export async function generateExecutiveSummaryAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: Report; error?: string }> {
+  try {
+    const context = sources.map(s => s.content.substring(0, 8000)).join('\n\n');
+    const prompt = `Create a high-level Executive Summary (1-page equivalent) for a busy leader. Focus on the 'Bottom Line Up Front' (BLUF).
+    
+    Output as JSON:
+    {
+      "title": "Executive Summary",
+      "executiveSummary": "...",
+      "sections": [
+        { "heading": "Strategic Implications", "content": "..." },
+        { "heading": "Key Recommendations", "content": "..." }
+      ]
+    }`;
+    const result = await callGroqWithJSON<Report>(prompt);
+    return { success: true, data: { ...result, id: nanoid(), createdAt: new Date() } };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Generate a podcast-style Audio Overview script and audio
  */
 export async function generateAudioOverviewAction(sources: { name: string; content: string }[]): Promise<{ success: boolean; data?: AudioOverview; error?: string }> {
   try {
     const context = sources.map(s => `Source: ${s.name}\nContent: ${s.content.substring(0, 5000)}...`).join('\n\n');
 
-    const prompt = `You are a professional podcast scriptwriter. Create a natural, engaging conversation script between two experts (Jordan and Taylor) discussing the provided sources.
+    const prompt = `You are Jordan and Taylor, professional podcasters known for deep, nuanced synthesis. 
+    Create a natural, engaging conversation script discussing the provided sources.
     
-    The conversation should:
-    1. Summarize the key findings across all sources.
-    2. Be conversational, pithy, and insightful.
-    3. Include natural reactions ("Wow", "Interesting point Taylor").
-    4. Last about 5 minutes in reading time.
+    The conversation should be HIGHLY DETAILED and last about 10 minutes (reading time).
+    Avoid superficial summaries. Dig into the "Why" and "So What".
     
     Sources:
     ${context}
     
-    Output the script as a structured JSON object with an array of dialogue turns:
+    Output as JSON:
     {
-      "script": "Full text script...",
+      "script": "Jordan: [Full script with speaker labels...]",
       "dialogue": [
         { "speaker": "Jordan", "text": "..." },
         { "speaker": "Taylor", "text": "..." }
@@ -282,18 +381,13 @@ export async function generateAudioOverviewAction(sources: { name: string; conte
 
     const result = await callGroqWithJSON<{ script: string; dialogue: any[] }>(prompt);
 
-    // For real audio, we'd call a TTS API here. 
-    // Using a reliable public TTS URL or Pollinations for now as a "Real AI" placeholder for the audio file itself
-    // In a production app, this would be an ElevenLabs or OpenAI TTS call.
-    const audioUrl = `https://pollinations.ai/p/audio-overview-${nanoid()}?prompt=${encodeURIComponent(result.script.substring(0, 100))}`;
-
     return {
       success: true,
       data: {
         id: nanoid(),
         script: result.script,
-        audioUrl: audioUrl,
-        duration: 300,
+        audioUrl: "#voice-api-active",
+        duration: 600,
         speakers: [
           { name: 'Jordan', voice: 'Male' },
           { name: 'Taylor', voice: 'Female' }
@@ -601,84 +695,6 @@ export async function generateVideoOverviewAction(sources: { name: string; conte
 // import pdf from 'pdf-parse'; // types not compatible with default import in strict mode
 // const pdf = require('pdf-parse'); // Moved inside function for safety
 
-export async function generateSynthesisAction(input: SynthesisInput): Promise<{ success: boolean; data?: SynthesisOutput; error?: string; }> {
-  try {
-    const processedFiles = await Promise.all(input.files.map(async (f: any) => {
-      let content = f.data;
-      if (f.dataType === 'pdf') {
-        try {
-          // Dynamic require to prevent top-level build/runtime failures
-          // pdf-parse v2 specific handling
-          const pkg = require('pdf-parse');
-          const { PDFParse } = pkg; // v2 export style
-
-          // Remove data URL prefix if present (e.g., "data:application/pdf;base64,")
-          const base64Data = f.data.replace(/^data:application\/pdf;base64,/, "");
-          const buffer = Buffer.from(base64Data, 'base64');
-
-          // v2 requires Uint8Array, not Buffer
-          const uint8Array = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-
-          const instance = new PDFParse(uint8Array);
-          const pdfData = await instance.getText();
-          content = pdfData.text;
-        } catch (pdfError: any) {
-          console.error(`Failed to parse PDF ${f.name}:`, pdfError);
-          // Return the error in the content for the AI to see, but don't fail the whole request
-          content = `[ERROR Parsing PDF: ${pdfError.message || 'Unknown error'}]`;
-        }
-      }
-      return { ...f, data: content };
-    }));
-
-    const sourcesSummary = processedFiles.map((f: any) => `File: ${f.name} (Type: ${f.dataType})`).join('\n');
-    const sourcesData = processedFiles.map((f: any) => `--- START FILE: ${f.name} ---\n${f.data}\n--- END FILE: ${f.name} ---`).join('\n\n');
-
-    const prompt = `You are a Senior Intelligence Analyst and Principal Data Scientist. Your task is to perform deep-synthesis and extraction from multiple data sources.
-    
-    Current Sources:
-    ${sourcesSummary}
-    
-    Objective: "${input.query}"
-    
-    Data Content:
-    ${sourcesData}
-    
-    Instructions:
-    1. CROSS-REFERENCE: Look for connections, contradictions, or trends across ALL provided files.
-    2. EXTRACT: Pull specific figures, dates, and entities.
-    3. VISUALIZE: Choose the best chart types (bar, line, or pie) to represent quantitative relationships found in the data.
-    4. CITE: Every major claim MUST include a citation pointing to the specific file and row/key.
-    5. FORMAT: Return a valid JSON object matching the SynthesisOutput structure.
-    
-    JSON Structure to return:
-    {
-      "title": "A technical title for this analysis",
-      "keyInsights": ["Insight 1 with specific data point", "Insight 2 highlighting a cross-source trend"],
-      "content": [
-        { "type": "text", "content": "Detailed breakdown..." },
-        { "type": "chart", "title": "Quantitative Breakdown", "chartType": "bar", "data": [{"name": "Category", "value": 100}] },
-        { "type": "table", "title": "Detailed Data View", "headers": ["Col1", "Col2"], "rows": [["Val1", "Val2"]] }
-      ],
-      "suggestedQuestions": ["Specific analytical follow-up 1", "Deeper dive question 2"],
-      "citations": [
-        { "source": "filename.csv", "reference": "Row 42: Value X" }
-      ]
-    }
-    
-    Rules:
-    - Be rigorous. If data is missing, note it.
-    - Charts must have a 'name' field for the X-axis/label.
-    - Return ONLY valid JSON.`;
-
-    const result = await callGroqWithJSON<SynthesisOutput>(prompt);
-    return { success: true, data: result };
-
-  } catch (e: any) {
-    console.error("Synthesis Action Error:", e);
-    return { success: false, error: e.message };
-  }
-}
 
 export async function generateCrucibleAction(input: CrucibleInput): Promise<{ success: boolean; data?: CrucibleOutput; error?: string; }> {
   try {

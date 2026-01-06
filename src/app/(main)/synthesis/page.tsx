@@ -23,8 +23,12 @@ import {
   generateQuizAction,
   generateInfographicAction,
   generateSlideDeckAction,
-  generateReportAction
+  generateReportAction,
+  generateCriticalAnalysisAction,
+  generateExecutiveSummaryAction
 } from '@/app/actions';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import type {
   ChatMessage,
   SynthesisOutput,
@@ -43,6 +47,17 @@ import { nanoid } from 'nanoid';
 import { ChatMessageDisplay } from '@/components/chat/chat-message';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+
+const EnhancedMarkdown = ({ content = '' }: { content: string }) => {
+  const processedContent = content.replace(/<br\s*\/?>/gi, '\n');
+  return (
+    <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:mb-4">
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        {processedContent}
+      </ReactMarkdown>
+    </div>
+  );
+};
 
 export default function SynthesisPage() {
   const { toast } = useToast();
@@ -247,6 +262,12 @@ export default function SynthesisPage() {
         case 'Reports':
           result = await generateReportAction(sourcePayload);
           break;
+        case 'Critical Analysis':
+          result = await generateCriticalAnalysisAction(sourcePayload);
+          break;
+        case 'Executive Summary':
+          result = await generateExecutiveSummaryAction(sourcePayload);
+          break;
       }
 
       if (result && result.success) {
@@ -272,9 +293,9 @@ export default function SynthesisPage() {
   };
 
   return (
-    <div className="h-screen flex bg-background">
+    <div className="h-screen flex bg-background overflow-hidden">
       {/* LEFT SIDEBAR - Sources */}
-      <div className="w-[300px] border-r flex flex-col">
+      <div className="w-[300px] border-r flex flex-col min-h-0 bg-muted/20 backdrop-blur-sm">
         <div className="p-4 border-b">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-semibold">Sources</h2>
@@ -407,7 +428,7 @@ export default function SynthesisPage() {
       </div>
 
       {/* CENTER - Chat */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0 bg-card/5">
         {sources.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center max-w-md">
@@ -492,7 +513,7 @@ export default function SynthesisPage() {
       </AnimatePresence>
 
       {/* RIGHT SIDEBAR - Studio */}
-      <div className="w-[320px] border-l flex flex-col bg-muted/30">
+      <div className="w-[320px] border-l flex flex-col min-h-0 bg-muted/30 backdrop-blur-sm shadow-inner">
         <div className="p-4 border-b">
           <h2 className="font-semibold">Studio</h2>
           <p className="text-xs text-muted-foreground mt-1">AI-powered tools</p>
@@ -574,6 +595,20 @@ export default function SynthesisPage() {
                 disabled={sources.length === 0 || !!isGenerating}
                 loading={isGenerating === 'Slide Deck'}
               />
+              <StudioCard
+                icon={<BookOpen className="h-4 w-4" />}
+                title="Critique"
+                onClick={() => handleStudioFeature('Critical Analysis')}
+                disabled={sources.length === 0 || !!isGenerating}
+                loading={isGenerating === 'Critical Analysis'}
+              />
+              <StudioCard
+                icon={<FileText className="h-4 w-4" />}
+                title="Summary"
+                onClick={() => handleStudioFeature('Executive Summary')}
+                disabled={sources.length === 0 || !!isGenerating}
+                loading={isGenerating === 'Executive Summary'}
+              />
             </div>
 
             {/* Add Note Button */}
@@ -596,24 +631,50 @@ function StudioResultDisplay({ result }: { result: { type: string, data: any } }
     case 'Audio Overview':
       return (
         <div className="space-y-6">
-          <Card className="p-6 bg-muted/30 text-center">
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Mic className="h-8 w-8 text-primary" />
+          <Card className="p-8 bg-gradient-to-br from-primary/5 to-purple-500/5 text-center border-primary/20 shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-4 opacity-5">
+              <Mic className="h-32 w-32" />
+            </div>
+            <div className="flex flex-col items-center gap-6 relative z-10 transition-all duration-700">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
+                <Mic className="h-10 w-10 text-primary-foreground" />
               </div>
-              <div>
-                <h3 className="font-bold text-xl mb-1">Deep Dive Podcast</h3>
-                <p className="text-sm text-muted-foreground">Featuring Jordan & Taylor</p>
+              <div className="space-y-1">
+                <h3 className="font-bold text-2xl tracking-tight">Living Discussion</h3>
+                <p className="text-sm text-muted-foreground font-medium uppercase tracking-widest opacity-80">Jordan & Taylor Synthesis</p>
               </div>
-              <audio controls className="w-full mt-4" src={data.audioUrl} />
+
+              <div className="flex items-center gap-4 w-full justify-center mt-2">
+                <Button
+                  size="lg"
+                  className="rounded-full px-8 bg-primary hover:scale-105 transition-transform"
+                  onClick={() => {
+                    const utter = new SpeechSynthesisUtterance(data.script);
+                    utter.rate = 0.9;
+                    utter.pitch = 1.0;
+                    window.speechSynthesis.speak(utter);
+                  }}
+                >
+                  <Plus className="h-5 w-5 mr-2 rotate-45" /> Start Discussion
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="rounded-full px-8"
+                  onClick={() => window.speechSynthesis.cancel()}
+                >
+                  Stop
+                </Button>
+              </div>
+              <p className="text-[10px] text-muted-foreground italic">Note: Using browser-native synthesis for low-latency feedback</p>
             </div>
           </Card>
           <div className="space-y-4">
-            <h4 className="font-bold text-lg flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              Transcript
+            <h4 className="font-bold text-lg flex items-center gap-2 text-primary/80">
+              <FileText className="h-5 w-5" />
+              Intelligence Transcript
             </h4>
-            <div className="p-4 border rounded-lg bg-card whitespace-pre-wrap leading-relaxed text-sm">
+            <div className="p-6 border rounded-xl bg-card/60 backdrop-blur-sm whitespace-pre-wrap leading-relaxed text-sm shadow-inner italic text-muted-foreground border-primary/10">
               {data.script}
             </div>
           </div>
@@ -688,20 +749,33 @@ function StudioResultDisplay({ result }: { result: { type: string, data: any } }
         </div>
       );
 
+    case 'Critical Analysis':
+    case 'Executive Summary':
     case 'Reports':
       return (
-        <div className="prose prose-sm dark:prose-invert max-w-none">
-          <h1 className="text-3xl font-bold mb-4">{data.title}</h1>
-          <section className="mb-8 p-4 bg-primary/5 border rounded-lg">
-            <h2 className="text-xl font-bold mb-2">Executive Summary</h2>
-            <p>{data.executiveSummary}</p>
+        <div className="prose prose-sm dark:prose-invert max-w-none animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h1 className="text-4xl font-extrabold mb-6 bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">{data.title}</h1>
+          <section className="mb-10 p-8 bg-primary/5 border border-primary/10 rounded-2xl shadow-inner">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Key Insight Summary
+            </h2>
+            <p className="text-lg leading-relaxed text-foreground/80">{data.executiveSummary}</p>
           </section>
-          {data.sections.map((section: any, i: number) => (
-            <section key={i} className="mb-6">
-              <h3 className="text-lg font-bold mb-2">{section.heading}</h3>
-              <p className="whitespace-pre-wrap">{section.content}</p>
-            </section>
-          ))}
+          <div className="space-y-12">
+            {data.sections.map((section: any, i: number) => (
+              <section key={i} className="group transition-all duration-300">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="h-1px flex-1 bg-gradient-to-r from-primary/20 to-transparent" />
+                  <h3 className="text-2xl font-bold whitespace-nowrap">{section.heading}</h3>
+                  <div className="h-1px flex-1 bg-gradient-to-l from-primary/20 to-transparent" />
+                </div>
+                <div className="p-4 rounded-xl border border-transparent group-hover:bg-primary/5 group-hover:border-primary/5 transition-all">
+                  <EnhancedMarkdown content={section.content} />
+                </div>
+              </section>
+            ))}
+          </div>
         </div>
       );
 
