@@ -354,6 +354,7 @@ export const CrucibleCritiqueSchema = z.object({
     keyConcerns: z.array(z.string()).describe('A list of 2-3 short bullet points highlighting the main concerns from this persona\'s perspective.'),
     analysis: z.string().describe('A detailed, paragraph-form analysis from the persona\'s point of view, explaining their reasoning and identifying specific flaws or risks.'),
     riskScore: z.number().min(0).max(100).describe('A numerical score representing the severity of the risk identified by this persona (0-100).'),
+    strategicPivot: z.string().optional().describe('Actionable solutions and strategic recommendations to overcome the identified risks and succeed in the market.'),
 });
 export type CrucibleCritique = z.infer<typeof CrucibleCritiqueSchema>;
 

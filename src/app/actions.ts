@@ -785,40 +785,39 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     const selectedPersonas = ADVERSARY_PERSONAS.filter(p => input.personas.includes(p.id));
     const personaDescriptions = selectedPersonas.map(p => `${p.name}: ${p.description}`).join('\n');
 
-    const prompt = `You are a Lead Red Team Strategist facilitating a high-stakes, brutal simulation of a business or technical plan.
+    const prompt = `You are a Senior Strategic Advisory Lead facilitating a high-stakes investigation into a business or technical blueprint.
     
-    PLAN TO CRITIQUE: "${input.plan}"
+    BLUEPRINT: "${input.plan}"
     
-    ADVERSARY PERSONAS IN THE ROOM:
+    ADVERSARY COUNCIL:
     ${personaDescriptions}
     
-    YOUR MISSION: Conduct a HIGH-FIDELITY, ruthless simulation of how this plan crashes and burns in the real world. 
+    MISSION: Perform a high-fidelity "Inversion Analysis." Instead of just finding flaws, you must identify the "Critical Success Path" by first exposing the most lethal vulnerabilities.
     
-    CRITICAL INSTRUCTIONS:
-    1. Adopt EACH persona with 100% conviction. Speak from their unique expertise.
-    2. Focus on "SYSTEMIC FAILURE" - How do these personas interact to create a catastrophic collapse?
-    3. Be specific. Cite hypothetical market conditions, competitor movements (e.g., "Apple releases a native feature that..."), or specific technical debt (e.g., "The Redis cluster will bottleneck because...").
-    4. Provide a "BRUTAL PREDICTION" - A specific dated event in the future where this plan fails.
-    5. Identify 3 unique "VULNERABILITY VECTORS" per persona.
-    6. Ensure NO DUPLICATIONS between personas. If the CFO talks about budget, the Hacker shouldn't focus on the same budget hole unless it's a security budget issue.
+    FORMATTING & QUALITY RULES (CRITICAL):
+    1. USE CLEAN, PROFESSIONAL ENGLISH. Avoid garbled text, made-up tech jargon, or hallucinations.
+    2. BE CRITICALLY CONSTRUCTIVE. The tone should be authoritative and "real," not just "harsh."
+    3. NO DUPLICATIONS. Each persona must focus on a unique vector.
+    4. Provide a concrete STRATEGIC PIVOT for every risk identified.
+    5. THE RISK RADAR: In the executive summary, include a "Risk Radar Briefing" that lists the top 3 categorical threats (e.g., Financial, Adoption, Technical).
     
-    OUTPUT FORMAT (JSON ONLY):
+    OUTPUT SCHEMA (JSON ONLY):
     {
-      "executiveSummary": "A high-level strategic intelligence assessment synthesizing the collective feedback into a 'Final Verdict' (GO/NO-GO). Include an 'Aggregated Risk Radar' summary.",
+      "executiveSummary": "A definitive 2-paragraph strategic brief. Paragraph 1: The 'Final Verdict' on market viability. Paragraph 2: The 'Risk Radar Briefing' summarizing the 3 most lethal vectors across all personas. NO GARBLED TEXT.",
       "critiques": [
         {
-          "personaName": "EXACT Persona Name from the list above",
-          "keyConcerns": ["Specific, non-generic concern 1", "Specific, non-generic concern 2", "Specific, non-generic concern 3"],
-          "analysis": "A deep, professional 1-2 paragraph autopsy of the plan. Start with a 'FAILURE SCENARIO' (e.g., 'Scenario: The Q4 Liquidity Trap...'). Use technical and industry-specific terminology. No fluff.",
-          "riskScore": 0-100 (Where 100 is certain failure)
+          "personaName": "Persona Name",
+          "keyConcerns": ["Concise concern 1", "Concise concern 2"],
+          "analysis": "A sophisticated analytical autopsy (150-200 words). Use industry-standard terminology (e.g., 'CAC/LTV imbalance', 'Technical Debt Escalation', 'Regulatory Bottleneck'). Identify a specific 'Failure Scenario'.",
+          "riskScore": 0-100,
+          "strategicPivot": "Provide a detailed, actionable solution (3-4 sentences) on EXACTLY how to modify the plan to neutralize this persona's specific concerns and succeed in the market."
         }
       ]
     }
     
     Rules:
-    - Return ONLY valid JSON.
-    - Be authoritative, cold, and insightful.
-    - If the plan is "perfect," find the "Black Swan" event that ruins it anyway.`;
+    - RETURN ONLY VALID JSON.
+    - PROOFREAD the output for spelling and logical coherence.`;
 
     const result = await callGroqWithJSON<CrucibleOutput>(prompt);
     return { success: true, data: result };
