@@ -366,60 +366,93 @@ export default function CruciblePage() {
                 <div className="p-6 rounded-2xl bg-muted/30 border border-primary/5 backdrop-blur-xl relative overflow-hidden group">
                   <div className="absolute -right-20 -top-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors duration-700" />
                   <div className="relative z-10 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-black uppercase tracking-[0.2em] text-foreground/80">The Council</h3>
-                      <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-black">
-                        {selectedPersonas.length} / {ADVERSARY_PERSONAS.length}
-                      </Badge>
+                    <div className="flex items-center justify-between border-b border-primary/10 pb-4">
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-black uppercase tracking-[0.2em] text-foreground/90">Command Council</h3>
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Adversary Deployment</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedPersonas(ADVERSARY_PERSONAS)}
+                          className="h-8 px-2 text-[10px] font-black uppercase tracking-widest hover:bg-primary/10 hover:text-primary transition-all"
+                        >
+                          Mobilize All
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedPersonas([])}
+                          className="h-8 px-2 text-[10px] font-black uppercase tracking-widest hover:bg-destructive/10 hover:text-destructive transition-all"
+                        >
+                          Stand Down
+                        </Button>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 max-h-[700px] overflow-y-auto pr-3 custom-scrollbar">
+                    <div className="grid grid-cols-1 gap-3 max-h-[720px] overflow-y-auto pr-3 custom-scrollbar">
                       {ADVERSARY_PERSONAS.map((persona) => {
                         const isSelected = selectedPersonas.some(p => p.id === persona.id);
                         return (
                           <motion.button
                             key={persona.id}
-                            whileHover={{ y: -2, x: 4 }}
+                            whileHover={{ scale: 1.01, x: 4 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => togglePersona(persona)}
                             className={cn(
-                              "relative flex flex-col items-start gap-3 p-5 rounded-2xl border transition-all duration-300 group/btn text-left",
+                              "relative flex flex-col items-start gap-3 p-5 rounded-2xl border transition-all duration-500 group/btn text-left overflow-hidden",
                               isSelected
-                                ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(var(--primary),0.05)] ring-1 ring-primary/20"
-                                : "bg-background/40 border-primary/5 hover:border-primary/30 hover:bg-background/60"
+                                ? "bg-primary/10 border-primary/40 shadow-[0_0_20px_rgba(var(--primary),0.05)] ring-1 ring-primary/20"
+                                : "bg-background/20 border-white/5 hover:border-primary/20 hover:bg-background/40"
                             )}
                           >
-                            <div className="flex items-center gap-4 w-full">
+                            {isSelected && (
+                              <div className="absolute top-0 right-0 p-2 opacity-10">
+                                <ShieldAlert className="h-12 w-12 text-primary" />
+                              </div>
+                            )}
+
+                            <div className="flex items-center gap-4 w-full relative z-10">
                               <div className={cn(
-                                "p-2.5 rounded-xl transition-all duration-300 shadow-inner",
-                                isSelected ? "bg-primary text-primary-foreground scale-110" : "bg-muted text-muted-foreground group-hover/btn:text-primary group-hover/btn:bg-primary/5"
+                                "p-2.5 rounded-xl transition-all duration-500 shadow-xl",
+                                isSelected
+                                  ? "bg-primary text-primary-foreground shadow-primary/20 scale-110"
+                                  : "bg-muted/50 text-muted-foreground group-hover/btn:text-primary group-hover/btn:bg-primary/5"
                               )}>
                                 <persona.icon className="h-5 w-5" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <span className={cn(
-                                  "text-[12px] font-black leading-tight uppercase tracking-widest block transition-colors",
-                                  isSelected ? "text-primary" : "text-foreground/70"
-                                )}>
-                                  {persona.name.replace('The ', '')}
-                                </span>
-                                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter opacity-70">
-                                  Expert Analyst
+                                <div className="flex items-center justify-between">
+                                  <span className={cn(
+                                    "text-[12px] font-black leading-tight uppercase tracking-widest block transition-all",
+                                    isSelected ? "text-primary translate-x-1" : "text-foreground/70"
+                                  )}>
+                                    {persona.name.replace('The ', '')}
+                                  </span>
+                                  {isSelected && (
+                                    <Badge variant="outline" className="text-[8px] font-black uppercase border-primary/20 bg-primary/5 text-primary animate-pulse">
+                                      Active
+                                    </Badge>
+                                  )}
+                                </div>
+                                <span className="text-[9px] text-muted-foreground/60 font-bold uppercase tracking-tighter">
+                                  Expert Vector Analysis
                                 </span>
                               </div>
                             </div>
 
                             <p className={cn(
-                              "text-xs leading-relaxed transition-colors mt-1 font-medium",
-                              isSelected ? "text-foreground/90" : "text-muted-foreground/60 group-hover/btn:text-muted-foreground/90"
+                              "text-[11px] leading-relaxed transition-all mt-1 font-medium relative z-10",
+                              isSelected ? "text-foreground/90" : "text-muted-foreground/50 group-hover/btn:text-muted-foreground/80"
                             )}>
                               {persona.description}
                             </p>
 
                             {isSelected && (
                               <motion.div
-                                layoutId="check-icon"
-                                className="absolute top-4 right-4 h-5 w-5 rounded-full bg-primary flex items-center justify-center border-2 border-background shadow-lg"
+                                layoutId="check-bubble"
+                                className="absolute -bottom-1 -right-1 h-6 w-6 rounded-tl-xl bg-primary flex items-center justify-center shadow-lg"
                               >
                                 <Check className="h-3 w-3 text-primary-foreground stroke-[3px]" />
                               </motion.div>

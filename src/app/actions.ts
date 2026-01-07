@@ -22,7 +22,7 @@ try {
 }
 
 // Helper function for Groq API calls with JSON mode
-async function callGroqWithJSON<T>(prompt: string, systemPrompt?: string): Promise<T> {
+async function callGroqWithJSON<T>(prompt: string, systemPrompt?: string, temperature: number = 0.7): Promise<T> {
   const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
@@ -43,7 +43,7 @@ async function callGroqWithJSON<T>(prompt: string, systemPrompt?: string): Promi
     body: JSON.stringify({
       model: 'openai/gpt-oss-120b',
       messages: messages,
-      temperature: 0.7,
+      temperature: temperature,
       response_format: { type: 'json_object' }
     })
   });
@@ -801,32 +801,32 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     4. Provide a concrete STRATEGIC PIVOT for every risk identified.
     5. THE RISK RADAR: In the executive summary, include a "Risk Radar Briefing" that lists the top 3 categorical threats.
     
-    ORTHOGRAPHY & SYNTAX HARDENING:
-    - DO NOT use markdown formatting (no **, no ##, no __, no \`) anywhere inside the JSON.
-    - DO NOT use non-standard characters.
-    - DO NOT repeat characters within words unless it's standard English spelling.
+    ORTHOGRAPHY & SYNTAX HARDENING (STRICTEST):
+    - DO NOT use any markdown formatting (no **, no ##, no __, no \`) in the output.
+    - NO DOUBLE CHARACTERS unless strictly required by English (e.g., "better" is okay, "beetter" or "beettter" is FORBIDDEN).
+    - If you hallucinate repeated characters or "glitch" text, the simulation is a FAILURE.
     - ALL OUTPUT MUST BE IN PERFECT BUSINESS ENGLISH.
     - THE RESPONSE MUST BE PURE JSON ONLY. NO PREAMBLE, NO POSTSCRIPT.
     
     OUTPUT SCHEMA (JSON ONLY):
     {
-      "executiveSummary": "A definitive 2-paragraph strategic brief. Paragraph 1: The 'Final Verdict' on market viability. Paragraph 2: The 'Risk Radar Briefing' summarizing the 3 most lethal vectors across all personas. NO Hallucinations.",
+      "executiveSummary": "A definitive 2-paragraph strategic brief. Paragraph 1: Final Verdict. Paragraph 2: The Risk Radar Briefing. NO Hallucinations.",
       "critiques": [
         {
           "personaName": "Persona Name",
-          "keyConcerns": ["Concise concern 1", "Concise concern 2"],
-          "analysis": "A sophisticated analytical autopsy (150-200 words). Use industry-standard terminology. Identify a specific 'Failure Scenario'.",
+          "keyConcerns": ["Concern 1", "Concern 2"],
+          "analysis": "A sophisticated analytical autopsy (150-200 words). Use industry-standard terminology. Identify a Failure Scenario.",
           "riskScore": 0-100,
-          "strategicPivot": "Provide a detailed, actionable solution (3-4 sentences) on EXACTLY how to modify the plan to neutralize this persona's specific concerns."
+          "strategicPivot": "A detailed, actionable solution (3-4 sentences)."
         }
       ]
     }
     
     Rules:
     - RETURN ONLY VALID JSON.
-    - PROOFREAD the entire JSON structure for character glitches, spelling, and accidental markdown markers before returning.`;
+    - PROOFREAD output as a final step. If it looks like "glitch" text, rewrite it to be professional.`;
 
-    const result = await callGroqWithJSON<CrucibleOutput>(prompt);
+    const result = await callGroqWithJSON<CrucibleOutput>(prompt, undefined, 0.1);
     return { success: true, data: result };
 
   } catch (e: any) {
