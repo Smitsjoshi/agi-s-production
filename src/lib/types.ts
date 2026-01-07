@@ -333,7 +333,8 @@ export type SynthesisOutput = z.infer<typeof SynthesisOutputSchema>;
 export const AdversaryPersonaIdSchema = z.enum([
     "cfo", "competitor_ceo", "ethicist", "customer", "engineer", "legal",
     "hacker", "visionary", "environmentalist", "logistician", "detective", "disruptor",
-    "talent", "pr", "data", "growth"
+    "talent", "pr", "data", "growth",
+    "ux", "debt", "community", "hardware"
 ]);
 export type AdversaryPersonaId = z.infer<typeof AdversaryPersonaIdSchema>;
 

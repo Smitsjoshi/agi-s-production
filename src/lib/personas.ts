@@ -1,4 +1,4 @@
-import { DollarSign, Scale, Users, HardHat, Briefcase, Microscope, Cpu, GitCommit, Search, Code, BarChart2, Brush, ShieldAlert, Zap, Globe, Gauge, Fingerprint, Rocket, UserPlus, Megaphone, Database, TrendingUp } from 'lucide-react';
+import { DollarSign, Scale, Users, HardHat, Briefcase, Microscope, Cpu, GitCommit, Search, Code, BarChart2, Brush, ShieldAlert, Zap, Globe, Gauge, Fingerprint, Rocket, UserPlus, Megaphone, Database, TrendingUp, MousePointer2, Wallet, MessageSquare, Box } from 'lucide-react';
 import type { AdversaryPersona } from './types';
 
 export const ADVERSARY_PERSONAS: AdversaryPersona[] = [
@@ -97,6 +97,30 @@ export const ADVERSARY_PERSONAS: AdversaryPersona[] = [
         name: 'The Growth Hacker',
         description: 'Exposes unsustainable customer acquisition costs, churn loops, and the "Viral Dead-ends" in your scaling strategy.',
         icon: TrendingUp,
+    },
+    {
+        id: 'ux',
+        name: 'The UX Minimalist',
+        description: 'Targets feature bloat, cognitive load, and the "Complexity Trap" that alienates non-technical users.',
+        icon: MousePointer2,
+    },
+    {
+        id: 'debt',
+        name: 'The Debt Collector',
+        description: 'Exposes hidden technical, financial, and organizational debt that will compound and stall future development.',
+        icon: Wallet,
+    },
+    {
+        id: 'community',
+        name: 'The Community Moderator',
+        description: 'Analyzes platform safety, potential for toxic sub-cultures, and the risks of uncontrolled decentralized governance.',
+        icon: MessageSquare,
+    },
+    {
+        id: 'hardware',
+        name: 'The Hardware Realist',
+        description: 'Critiques the plan based on physical world constraints, semiconductor availability, and thermal/power limitations.',
+        icon: Box,
     },
 ];
 

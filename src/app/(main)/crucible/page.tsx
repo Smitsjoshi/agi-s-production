@@ -373,45 +373,56 @@ export default function CruciblePage() {
                       </Badge>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="grid grid-cols-1 gap-4 max-h-[700px] overflow-y-auto pr-3 custom-scrollbar">
                       {ADVERSARY_PERSONAS.map((persona) => {
                         const isSelected = selectedPersonas.some(p => p.id === persona.id);
                         return (
                           <motion.button
                             key={persona.id}
-                            whileHover={{ y: -2 }}
-                            whileTap={{ scale: 0.96 }}
+                            whileHover={{ y: -2, x: 4 }}
+                            whileTap={{ scale: 0.98 }}
                             onClick={() => togglePersona(persona)}
                             className={cn(
-                              "relative flex flex-col items-center gap-3 p-4 rounded-xl border transition-all duration-300 group/btn text-left h-full",
+                              "relative flex flex-col items-start gap-3 p-5 rounded-2xl border transition-all duration-300 group/btn text-left",
                               isSelected
-                                ? "bg-primary/10 border-primary shadow-lg shadow-primary/10"
-                                : "bg-background/40 border-muted-foreground/10 hover:border-primary/40 hover:bg-background/80"
+                                ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(var(--primary),0.05)] ring-1 ring-primary/20"
+                                : "bg-background/40 border-primary/5 hover:border-primary/30 hover:bg-background/60"
                             )}
                           >
-                            <div className="flex items-center self-start gap-4">
+                            <div className="flex items-center gap-4 w-full">
                               <div className={cn(
-                                "p-2 rounded-lg transition-colors shrink-0",
-                                isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover/btn:text-primary"
+                                "p-2.5 rounded-xl transition-all duration-300 shadow-inner",
+                                isSelected ? "bg-primary text-primary-foreground scale-110" : "bg-muted text-muted-foreground group-hover/btn:text-primary group-hover/btn:bg-primary/5"
                               )}>
-                                <persona.icon className="h-4 w-4" />
+                                <persona.icon className="h-5 w-5" />
                               </div>
-                              <span className={cn(
-                                "text-[11px] font-black leading-tight uppercase tracking-wider",
-                                isSelected ? "text-primary" : "text-muted-foreground/70"
-                              )}>
-                                {persona.name.replace('The ', '')}
-                              </span>
+                              <div className="flex-1 min-w-0">
+                                <span className={cn(
+                                  "text-[12px] font-black leading-tight uppercase tracking-widest block transition-colors",
+                                  isSelected ? "text-primary" : "text-foreground/70"
+                                )}>
+                                  {persona.name.replace('The ', '')}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter opacity-70">
+                                  Expert Analyst
+                                </span>
+                              </div>
                             </div>
 
-                            <p className="text-[10px] text-muted-foreground/60 leading-tight line-clamp-2 mt-1 px-1">
+                            <p className={cn(
+                              "text-xs leading-relaxed transition-colors mt-1 font-medium",
+                              isSelected ? "text-foreground/90" : "text-muted-foreground/60 group-hover/btn:text-muted-foreground/90"
+                            )}>
                               {persona.description}
                             </p>
 
                             {isSelected && (
-                              <div className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-primary flex items-center justify-center border-2 border-background shadow-sm">
-                                <Check className="h-2 w-2 text-primary-foreground" />
-                              </div>
+                              <motion.div
+                                layoutId="check-icon"
+                                className="absolute top-4 right-4 h-5 w-5 rounded-full bg-primary flex items-center justify-center border-2 border-background shadow-lg"
+                              >
+                                <Check className="h-3 w-3 text-primary-foreground stroke-[3px]" />
+                              </motion.div>
                             )}
                           </motion.button>
                         );

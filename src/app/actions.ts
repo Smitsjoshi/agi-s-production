@@ -801,10 +801,12 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     4. Provide a concrete STRATEGIC PIVOT for every risk identified.
     5. THE RISK RADAR: In the executive summary, include a "Risk Radar Briefing" that lists the top 3 categorical threats.
     
-    ORTHOGRAPHY HARDENING:
+    ORTHOGRAPHY & SYNTAX HARDENING:
+    - DO NOT use markdown formatting (no **, no ##, no __, no \`) anywhere inside the JSON.
     - DO NOT use non-standard characters.
     - DO NOT repeat characters within words unless it's standard English spelling.
     - ALL OUTPUT MUST BE IN PERFECT BUSINESS ENGLISH.
+    - THE RESPONSE MUST BE PURE JSON ONLY. NO PREAMBLE, NO POSTSCRIPT.
     
     OUTPUT SCHEMA (JSON ONLY):
     {
@@ -822,7 +824,7 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     
     Rules:
     - RETURN ONLY VALID JSON.
-    - PROOFREAD the entire JSON structure for character glitches and spelling before returning.`;
+    - PROOFREAD the entire JSON structure for character glitches, spelling, and accidental markdown markers before returning.`;
 
     const result = await callGroqWithJSON<CrucibleOutput>(prompt);
     return { success: true, data: result };
