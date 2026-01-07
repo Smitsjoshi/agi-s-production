@@ -1,5 +1,9 @@
 'use server';
 
+import {
+  CrucibleOutputSchema,
+  AdversaryPersonaIdSchema
+} from '@/lib/types';
 import type {
   AiMode, SynthesisOutput, SynthesisInput, CrucibleOutput, CrucibleInput, CatalystOutput, CatalystInput,
   ContinuumInput, ContinuumOutput, AetherInput, AetherOutput, CosmosInput, CosmosOutput,
@@ -827,11 +831,19 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     - PROOFREAD output as a final step. If it looks like "glitch" text, rewrite it to be professional.`;
 
     const result = await callGroqWithJSON<CrucibleOutput>(prompt, undefined, 0.1);
-    return { success: true, data: result };
+
+    // Validate output structure to prevent frontend crashes
+    const validation = CrucibleOutputSchema.safeParse(result);
+    if (!validation.success) {
+      console.error('Crucible Validation Failed:', validation.error);
+      throw new Error('The Intelligence Council returned a malformed assessment. Please try again.');
+    }
+
+    return { success: true, data: validation.data };
 
   } catch (e: any) {
-    console.error("Crucible Error:", e);
-    return { success: false, error: e.message };
+    console.error('Crucible Simulation Error:', e);
+    return { success: false, error: e.message || 'The Red Team failed to converge.' };
   }
 }
 

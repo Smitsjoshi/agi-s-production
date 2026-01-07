@@ -204,11 +204,11 @@ export default function CruciblePage() {
   const id = useId();
 
   useEffect(() => {
-    if (result) {
+    if (result && result.critiques) {
       setDisplayedCritiques([]);
       let critiqueIndex = 0;
       const intervalId = setInterval(() => {
-        if (critiqueIndex < result.critiques.length) {
+        if (critiqueIndex < (result?.critiques?.length || 0)) {
           setDisplayedCritiques(prev => [...prev, result.critiques[critiqueIndex]]);
           critiqueIndex++;
         } else {
@@ -248,29 +248,39 @@ export default function CruciblePage() {
     }
 
     setIsLoading(true);
-    setResult(null);
+    // DO NOT reset result here to avoid early unmount before new result arrives
     setDisplayedCritiques([]);
 
-    const response = await generateCrucibleAction({
-      plan,
-      personas: selectedPersonas.map(p => p.id),
-    });
+    try {
+      const response = await generateCrucibleAction({
+        plan,
+        personas: selectedPersonas.map(p => p.id),
+      });
 
-    if (response.success && response.data) {
-      setResult(response.data);
-    } else {
+      if (response.success && response.data) {
+        setResult(response.data);
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Simulation Failure',
+          description: response.error || 'The Red Team failed to converge. Please re-run the simulation.',
+        });
+      }
+    } catch (err) {
       toast({
         variant: 'destructive',
-        title: 'Simulation Failure',
-        description: response.error || 'The Red Team failed to converge. Please re-run the simulation.',
+        title: 'Unexpected Crash',
+        description: 'A structural error occurred. Please refresh the page.',
       });
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const executiveSummary = useTypewriter(result?.executiveSummary || '', 10);
-  const avgRiskScore = result ? Math.round(result.critiques.reduce((acc, curr) => acc + (curr.riskScore || 0), 0) / result.critiques.length) : 0;
+  const avgRiskScore = (result && result.critiques && result.critiques.length > 0)
+    ? Math.round(result.critiques.reduce((acc, curr) => acc + (curr.riskScore || 0), 0) / result.critiques.length)
+    : 0;
 
   const headerSection = (
     <div className="relative z-10 space-y-4 mb-8">
