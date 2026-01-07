@@ -373,7 +373,7 @@ export default function CruciblePage() {
                       </Badge>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                       {ADVERSARY_PERSONAS.map((persona) => {
                         const isSelected = selectedPersonas.some(p => p.id === persona.id);
                         return (
@@ -383,24 +383,31 @@ export default function CruciblePage() {
                             whileTap={{ scale: 0.96 }}
                             onClick={() => togglePersona(persona)}
                             className={cn(
-                              "relative flex flex-col items-center gap-3 p-4 rounded-xl border transition-all duration-300 group/btn",
+                              "relative flex flex-col items-center gap-3 p-4 rounded-xl border transition-all duration-300 group/btn text-left h-full",
                               isSelected
                                 ? "bg-primary/10 border-primary shadow-lg shadow-primary/10"
                                 : "bg-background/40 border-muted-foreground/10 hover:border-primary/40 hover:bg-background/80"
                             )}
                           >
-                            <div className={cn(
-                              "p-2 rounded-lg transition-colors",
-                              isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover/btn:text-primary"
-                            )}>
-                              <persona.icon className="h-4 w-4" />
+                            <div className="flex items-center self-start gap-4">
+                              <div className={cn(
+                                "p-2 rounded-lg transition-colors shrink-0",
+                                isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover/btn:text-primary"
+                              )}>
+                                <persona.icon className="h-4 w-4" />
+                              </div>
+                              <span className={cn(
+                                "text-[11px] font-black leading-tight uppercase tracking-wider",
+                                isSelected ? "text-primary" : "text-muted-foreground/70"
+                              )}>
+                                {persona.name.replace('The ', '')}
+                              </span>
                             </div>
-                            <span className={cn(
-                              "text-[10px] font-bold text-center leading-tight uppercase tracking-wider",
-                              isSelected ? "text-primary" : "text-muted-foreground/70"
-                            )}>
-                              {persona.name.replace('The ', '')}
-                            </span>
+
+                            <p className="text-[10px] text-muted-foreground/60 leading-tight line-clamp-2 mt-1 px-1">
+                              {persona.description}
+                            </p>
+
                             {isSelected && (
                               <div className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-primary flex items-center justify-center border-2 border-background shadow-sm">
                                 <Check className="h-2 w-2 text-primary-foreground" />

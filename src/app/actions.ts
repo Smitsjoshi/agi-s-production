@@ -795,29 +795,34 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     MISSION: Perform a high-fidelity "Inversion Analysis." Instead of just finding flaws, you must identify the "Critical Success Path" by first exposing the most lethal vulnerabilities.
     
     FORMATTING & QUALITY RULES (CRITICAL):
-    1. USE CLEAN, PROFESSIONAL ENGLISH. Avoid garbled text, made-up tech jargon, or hallucinations.
+    1. ZERO-TOLERANCE FOR SPELLING ERRORS. Use clean, professional English. NO "glitch" hallucinations (e.g., repeating letters like "aaa" or "nnn").
     2. BE CRITICALLY CONSTRUCTIVE. The tone should be authoritative and "real," not just "harsh."
     3. NO DUPLICATIONS. Each persona must focus on a unique vector.
     4. Provide a concrete STRATEGIC PIVOT for every risk identified.
-    5. THE RISK RADAR: In the executive summary, include a "Risk Radar Briefing" that lists the top 3 categorical threats (e.g., Financial, Adoption, Technical).
+    5. THE RISK RADAR: In the executive summary, include a "Risk Radar Briefing" that lists the top 3 categorical threats.
+    
+    ORTHOGRAPHY HARDENING:
+    - DO NOT use non-standard characters.
+    - DO NOT repeat characters within words unless it's standard English spelling.
+    - ALL OUTPUT MUST BE IN PERFECT BUSINESS ENGLISH.
     
     OUTPUT SCHEMA (JSON ONLY):
     {
-      "executiveSummary": "A definitive 2-paragraph strategic brief. Paragraph 1: The 'Final Verdict' on market viability. Paragraph 2: The 'Risk Radar Briefing' summarizing the 3 most lethal vectors across all personas. NO GARBLED TEXT.",
+      "executiveSummary": "A definitive 2-paragraph strategic brief. Paragraph 1: The 'Final Verdict' on market viability. Paragraph 2: The 'Risk Radar Briefing' summarizing the 3 most lethal vectors across all personas. NO Hallucinations.",
       "critiques": [
         {
           "personaName": "Persona Name",
           "keyConcerns": ["Concise concern 1", "Concise concern 2"],
-          "analysis": "A sophisticated analytical autopsy (150-200 words). Use industry-standard terminology (e.g., 'CAC/LTV imbalance', 'Technical Debt Escalation', 'Regulatory Bottleneck'). Identify a specific 'Failure Scenario'.",
+          "analysis": "A sophisticated analytical autopsy (150-200 words). Use industry-standard terminology. Identify a specific 'Failure Scenario'.",
           "riskScore": 0-100,
-          "strategicPivot": "Provide a detailed, actionable solution (3-4 sentences) on EXACTLY how to modify the plan to neutralize this persona's specific concerns and succeed in the market."
+          "strategicPivot": "Provide a detailed, actionable solution (3-4 sentences) on EXACTLY how to modify the plan to neutralize this persona's specific concerns."
         }
       ]
     }
     
     Rules:
     - RETURN ONLY VALID JSON.
-    - PROOFREAD the output for spelling and logical coherence.`;
+    - PROOFREAD the entire JSON structure for character glitches and spelling before returning.`;
 
     const result = await callGroqWithJSON<CrucibleOutput>(prompt);
     return { success: true, data: result };

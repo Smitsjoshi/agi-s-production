@@ -1,4 +1,4 @@
-import { DollarSign, Scale, Users, HardHat, Briefcase, Microscope, Cpu, GitCommit, Search, Code, BarChart2, Brush, ShieldAlert, Zap, Globe, Gauge, Fingerprint, Rocket } from 'lucide-react';
+import { DollarSign, Scale, Users, HardHat, Briefcase, Microscope, Cpu, GitCommit, Search, Code, BarChart2, Brush, ShieldAlert, Zap, Globe, Gauge, Fingerprint, Rocket, UserPlus, Megaphone, Database, TrendingUp } from 'lucide-react';
 import type { AdversaryPersona } from './types';
 
 export const ADVERSARY_PERSONAS: AdversaryPersona[] = [
@@ -73,6 +73,30 @@ export const ADVERSARY_PERSONAS: AdversaryPersona[] = [
         name: 'The Market Catalyst',
         description: 'Challenges the plan for being too conservative, identifying where you lack radical innovation or true strategic aggression.',
         icon: Rocket,
+    },
+    {
+        id: 'talent',
+        name: 'The Talent Architect',
+        description: 'Identifies risks related to team burnout, hiring bottlenecks, specialized skill scarcity, and cultural fragmentation.',
+        icon: UserPlus,
+    },
+    {
+        id: 'pr',
+        name: 'The PR Spin Doctor',
+        description: 'Forensics on narrative failures, media hostility, and brand dilution that could undermine market perception.',
+        icon: Megaphone,
+    },
+    {
+        id: 'data',
+        name: 'The Data Sovereign',
+        description: 'Critiques data ownership models, privacy leakage risks, and algorithmic bias that could lead to systemic failure.',
+        icon: Database,
+    },
+    {
+        id: 'growth',
+        name: 'The Growth Hacker',
+        description: 'Exposes unsustainable customer acquisition costs, churn loops, and the "Viral Dead-ends" in your scaling strategy.',
+        icon: TrendingUp,
     },
 ];
 

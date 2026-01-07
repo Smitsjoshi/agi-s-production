@@ -332,7 +332,8 @@ export type SynthesisOutput = z.infer<typeof SynthesisOutputSchema>;
 // Schemas for Crucible Flow
 export const AdversaryPersonaIdSchema = z.enum([
     "cfo", "competitor_ceo", "ethicist", "customer", "engineer", "legal",
-    "hacker", "visionary", "environmentalist", "logistician", "detective", "disruptor"
+    "hacker", "visionary", "environmentalist", "logistician", "detective", "disruptor",
+    "talent", "pr", "data", "growth"
 ]);
 export type AdversaryPersonaId = z.infer<typeof AdversaryPersonaIdSchema>;
 
