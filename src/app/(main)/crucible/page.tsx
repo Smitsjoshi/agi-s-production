@@ -96,7 +96,7 @@ export default function CruciblePage() {
         } else {
           clearInterval(intervalId);
         }
-      }, 2000); // Display a new critique every 2 seconds
+      }, 800); // Faster reveal for better UX
       return () => clearInterval(intervalId);
     }
   }, [result]);
@@ -118,8 +118,8 @@ export default function CruciblePage() {
     if (!plan.trim() || selectedPersonas.length === 0) {
       toast({
         variant: 'destructive',
-        title: 'Missing Information',
-        description: 'Please provide a plan and select at least one adversary persona.',
+        title: 'Intelligence Gap',
+        description: 'You must provide a plan and select your adversaries to begin the simulation.',
       });
       return;
     }
@@ -138,156 +138,258 @@ export default function CruciblePage() {
     } else {
       toast({
         variant: 'destructive',
-        title: 'Error during simulation',
-        description: response.error || 'The AI failed to generate a critique. Please try again.',
+        title: 'Simulation Failure',
+        description: response.error || 'The Red Team failed to converge. Please re-run the simulation.',
       });
     }
 
     setIsLoading(false);
   };
 
-  const executiveSummary = useTypewriter(result?.executiveSummary || '');
+  const executiveSummary = useTypewriter(result?.executiveSummary || '', 10);
+  const avgRiskScore = result ? Math.round(result.critiques.reduce((acc, curr) => acc + (curr.riskScore || 0), 0) / result.critiques.length) : 0;
 
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-8">
-      <div className="text-center">
-        <h1 className="font-headline text-4xl font-bold text-primary">Crucible</h1>
-        <p className="text-muted-foreground text-lg mt-2">The AI Red Team & Decision Simulator. Pressure-test your ideas.</p>
+    <div className="container mx-auto p-4 md:p-8 max-w-7xl animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 border-b pb-8">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="bg-primary/10 p-2 rounded-xl">
+              <ShieldHalf className="h-6 w-6 text-primary" />
+            </div>
+            <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest border-primary/20 bg-primary/5 text-primary">High Fidelity Simulation</Badge>
+          </div>
+          <h1 className="font-headline text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">Crucible</h1>
+          <p className="text-muted-foreground text-xl mt-3 max-w-2xl font-light leading-relaxed">
+            The AI Red Team & Decision Simulator. Pressure-test your strategy against the world&apos;s most ruthless digital adversaries.
+          </p>
+        </div>
+        <div className="flex gap-4">
+          {result && (
+            <Button variant="outline" onClick={() => { setPlan(''); setResult(null); setSelectedPersonas([]); }} className="rounded-full px-6">
+              Reset Engine
+            </Button>
+          )}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <Card className="lg:col-span-1 sticky top-24">
-          <CardHeader>
-            <CardTitle>Configuration</CardTitle>
-            <CardDescription>Define your plan and select your adversaries.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="plan-input">Your Plan or Idea</Label>
-                <Textarea
-                  id="plan-input"
-                  value={plan}
-                  onChange={(e) => setPlan(e.target.value)}
-                  placeholder="e.g., Launch a new productivity app targeting freelance developers with a subscription model..."
-                  className="min-h-[150px]"
-                  disabled={isLoading}
-                />
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-bold opacity-70">Adversary Personas (The Red Team)</Label>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-[10px] font-black uppercase tracking-tighter px-2"
-                      onClick={() => setSelectedPersonas(ADVERSARY_PERSONAS)}
-                      disabled={isLoading}
-                    >
-                      Select All
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-[10px] font-black uppercase tracking-tighter px-2 text-destructive"
-                      onClick={() => setSelectedPersonas([])}
-                      disabled={isLoading}
-                    >
-                      Clear
-                    </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Left Column: Configuration */}
+        <div className="lg:col-span-4 space-y-6">
+          <Card className="border-primary/10 shadow-xl shadow-primary/5 overflow-hidden">
+            <div className="h-1.5 w-full bg-gradient-to-r from-primary via-primary/50 to-primary" />
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-bold">Strategy Input</CardTitle>
+              <CardDescription>Detail your plan for the Red Team to dismantle.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="plan-input" className="text-xs font-black uppercase tracking-widest text-muted-foreground">The Blueprint</Label>
+                    <span className="text-[10px] text-muted-foreground font-mono">{plan.length} chars</span>
                   </div>
+                  <Textarea
+                    id="plan-input"
+                    value={plan}
+                    onChange={(e) => setPlan(e.target.value)}
+                    placeholder="e.g., 'Launch a decentralized compute network targeting AI researchers with a token-based incentive model...'"
+                    className="min-h-[200px] bg-muted/30 border-none focus-visible:ring-1 focus-visible:ring-primary/40 text-sm leading-relaxed resize-none transition-all"
+                    disabled={isLoading}
+                  />
                 </div>
-                <div className="space-y-1 p-1 bg-muted/20 border rounded-xl max-h-[400px] overflow-y-auto scrollbar-hide">
-                  {ADVERSARY_PERSONAS.map((persona) => {
-                    const isSelected = selectedPersonas.some(p => p.id === persona.id);
-                    return (
-                      <div
-                        key={persona.id}
-                        className={cn(
-                          "flex items-center space-x-3 p-2.5 rounded-lg transition-all cursor-pointer hover:bg-muted/40 group",
-                          isSelected ? "bg-muted shadow-sm ring-1 ring-border" : "opacity-60 grayscale-[0.5]"
-                        )}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePersonaToggle(persona.id);
-                        }}
-                      >
-                        {/* Presentational Checkbox */}
-                        <div className={cn(
-                          "h-4 w-4 shrink-0 rounded border transition-colors flex items-center justify-center",
-                          isSelected ? "bg-primary border-primary" : "border-primary/50"
-                        )}>
-                          {isSelected && <Check className="h-3 w-3 text-white" />}
-                        </div>
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-col">
-                            <span className="font-bold text-sm tracking-tight">{persona.name}</span>
-                            <span className="text-[10px] leading-tight text-muted-foreground truncate">{persona.description}</span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">The Red Team</Label>
+                    <div className="flex gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-[9px] font-bold uppercase tracking-tight px-2 hover:bg-primary/10"
+                        onClick={() => setSelectedPersonas(ADVERSARY_PERSONAS)}
+                        disabled={isLoading}
+                      >
+                        All
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-[9px] font-bold uppercase tracking-tight px-2 text-destructive hover:bg-destructive/10"
+                        onClick={() => setSelectedPersonas([])}
+                        disabled={isLoading}
+                      >
+                        None
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2 max-h-[450px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-primary/10 hover:scrollbar-thumb-primary/20">
+                    {ADVERSARY_PERSONAS.map((persona) => {
+                      const isSelected = selectedPersonas.some(p => p.id === persona.id);
+                      return (
+                        <div
+                          key={persona.id}
+                          className={cn(
+                            "group flex items-start gap-3 p-3 rounded-xl transition-all cursor-pointer border",
+                            isSelected
+                              ? "bg-primary/5 border-primary/30 shadow-sm"
+                              : "bg-transparent border-transparent hover:bg-muted/50 grayscale-[0.8] opacity-60 hover:opacity-100 hover:grayscale-0"
+                          )}
+                          onClick={() => handlePersonaToggle(persona.id)}
+                        >
+                          <div className={cn(
+                            "mt-0.5 h-4 w-4 shrink-0 rounded-full border transition-all flex items-center justify-center",
+                            isSelected ? "bg-primary border-primary shadow-lg shadow-primary/20" : "border-muted-foreground/30"
+                          )}>
+                            {isSelected && <Check className="h-2.5 w-2.5 text-white stroke-[4]" />}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-0.5">
+                              <span className="font-bold text-xs tracking-tight">{persona.name}</span>
+                              {persona.icon && <persona.icon className={cn("h-3 w-3", isSelected ? "text-primary" : "text-muted-foreground/30")} />}
+                            </div>
+                            <p className="text-[10px] leading-snug text-muted-foreground line-clamp-2">{persona.description}</p>
                           </div>
                         </div>
-                        {persona.icon && <persona.icon className={cn("h-4 w-4 shrink-0", isSelected ? "text-primary" : "text-muted-foreground/30")} />}
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-sm font-bold tracking-widest uppercase transition-all hover:scale-[1.01] active:scale-95 shadow-lg shadow-primary/20"
+                  disabled={isLoading || !plan.trim() || selectedPersonas.length === 0}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Mobilizing the Red Team...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4" />
+                      <span>Initiate Simulation</span>
+                    </div>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column: Intensity Output */}
+        <div className="lg:col-span-8 space-y-8 min-h-[600px]">
+          <AnimatePresence mode="wait">
+            {isLoading && !result ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.05 }}
+                className="flex flex-col items-center justify-center py-40 text-center space-y-6 bg-muted/10 rounded-3xl border-2 border-dashed"
+              >
+                <div className="relative">
+                  <div className="absolute inset-0 animate-ping bg-primary/20 rounded-full scale-150" />
+                  <div className="relative bg-background p-6 rounded-full border shadow-2xl">
+                    <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold tracking-tight">Constructing Adversarial Environment</h3>
+                  <p className="text-muted-foreground max-w-sm mx-auto text-sm leading-relaxed">
+                    The chosen personas are now forensically analyzing every weakness in your blueprint. Stand by for impact.
+                  </p>
+                </div>
+              </motion.div>
+            ) : result ? (
+              <motion.div
+                key="result"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-10"
+              >
+                {/* Executive Summary Card */}
+                <Card className="border-none shadow-2xl bg-gradient-to-br from-card to-background overflow-hidden">
+                  <div className="grid grid-cols-1 md:grid-cols-4">
+                    <div className="md:col-span-1 bg-muted/30 p-8 flex flex-col items-center justify-center border-r">
+                      <div className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-4">Risk Index</div>
+                      <div className="relative h-32 w-32">
+                        <svg viewBox="0 0 100 100" className="h-full w-full transform -rotate-90">
+                          <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" className="text-muted/20" />
+                          <motion.circle
+                            cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8"
+                            className={cn((avgRiskScore > 75 ? "text-destructive" : avgRiskScore > 40 ? "text-orange-500" : "text-primary"))}
+                            strokeDasharray="283"
+                            initial={{ strokeDashoffset: 283 }}
+                            animate={{ strokeDashoffset: 283 - (283 * avgRiskScore) / 100 }}
+                            transition={{ duration: 1.5, ease: "easeOut" }}
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className="text-3xl font-black">{avgRiskScore}%</span>
+                          <span className="text-[9px] uppercase font-bold tracking-tighter opacity-70">Critical</span>
+                        </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                    <div className="md:col-span-3 p-8">
+                      <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-bold font-headline">Intelligence Briefing</h2>
+                        <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 transition-colors">Strategic Assessment</Badge>
+                      </div>
+                      <div className="prose dark:prose-invert max-w-none">
+                        <p className="text-lg font-light leading-relaxed text-foreground/80 first-letter:text-4xl first-letter:font-bold first-letter:mr-1">
+                          {executiveSummary}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Critique Feed */}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4 px-2">
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">The Autopsy Reports</h3>
+                    <div className="h-px flex-1 bg-gradient-to-r from-muted to-transparent" />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-6">
+                    <AnimatePresence mode="popLayout">
+                      {displayedCritiques.map((critique) => (
+                        <motion.div
+                          key={critique.personaName}
+                          initial={{ opacity: 0, x: -20, scale: 0.98 }}
+                          animate={{ opacity: 1, x: 0, scale: 1 }}
+                          transition={{ type: "spring", damping: 20, stiffness: 100 }}
+                        >
+                          <CritiqueCard critique={critique} />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
                 </div>
-              </div>
-              <Button type="submit" className="w-full" disabled={isLoading || !plan.trim() || selectedPersonas.length === 0}>
-                {isLoading ? <Loader2 className="animate-spin" /> : <><Sparkles className="mr-2" />Run Simulation</>}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <div className="lg:col-span-2 space-y-8">
-          {isLoading && !result && (
-            <div className="text-center p-16">
-              <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-              <p className="mt-4 text-muted-foreground">The Red Team is assembling... Critiques are being generated.</p>
-            </div>
-          )}
-
-          {result && (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-headline text-2xl">Executive Summary</CardTitle>
-                  <CardDescription>A high-level overview of the potential risks and blind spots in your plan.</CardDescription>
-                </CardHeader>
-                <CardContent className="prose dark:prose-invert max-w-none">
-                  <p>{executiveSummary}</p>
-                </CardContent>
-              </Card>
-
-              <div>
-                <h2 className="font-headline text-xl font-bold mb-4">Adversary Critiques</h2>
-                <div className="space-y-4">
-                  <AnimatePresence>
-                    {displayedCritiques.map((critique) => (
-                      <motion.div
-                        key={critique.personaName}
-                        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <CritiqueCard critique={critique} />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center py-40 border-2 border-dashed rounded-3xl opacity-50 space-y-4"
+              >
+                <div className="p-4 rounded-full bg-muted">
+                  <ShieldHalf className="h-10 w-10 text-muted-foreground" />
                 </div>
-              </div>
-            </div>
-          )}
-
-          {!isLoading && !result && (
-            <div className="text-center py-24 border-2 border-dashed rounded-lg">
-              <ShieldHalf className="mx-auto h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-muted-foreground">Your simulation results will appear here.</p>
-            </div>
-          )}
+                <div className="text-center">
+                  <p className="text-sm font-bold uppercase tracking-widest mb-1">Engine Standby</p>
+                  <p className="text-xs text-muted-foreground">Input your strategy to begin simulation.</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

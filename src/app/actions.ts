@@ -785,39 +785,40 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     const selectedPersonas = ADVERSARY_PERSONAS.filter(p => input.personas.includes(p.id));
     const personaDescriptions = selectedPersonas.map(p => `${p.name}: ${p.description}`).join('\n');
 
-    const prompt = `You are a Red Team facilitator conducting a high-stakes, brutal simulation of a business or technical plan.
+    const prompt = `You are a Lead Red Team Strategist facilitating a high-stakes, brutal simulation of a business or technical plan.
     
-    Plan to Critique: "${input.plan}"
+    PLAN TO CRITIQUE: "${input.plan}"
     
-    Adversary Personas (The Red Team):
+    ADVERSARY PERSONAS IN THE ROOM:
     ${personaDescriptions}
     
-    Your goal is to conduct a TRUE simulation of how this plan would fail in the real world. Do not provide generic feedback.
+    YOUR MISSION: Conduct a HIGH-FIDELITY, ruthless simulation of how this plan crashes and burns in the real world. 
     
-    For EACH persona, you must:
-    1. Adopt their personality and expertise fully.
-    2. Provide a "Brutal Prediction" of exactly how they would block, outcompete, or witness the failure of this plan.
-    3. Identify 3 specific "Critical Vulnerabilities".
-    4. Estimate a "Probability of Failure" (0-100%) from their perspective.
+    CRITICAL INSTRUCTIONS:
+    1. Adopt EACH persona with 100% conviction. Speak from their unique expertise.
+    2. Focus on "SYSTEMIC FAILURE" - How do these personas interact to create a catastrophic collapse?
+    3. Be specific. Cite hypothetical market conditions, competitor movements (e.g., "Apple releases a native feature that..."), or specific technical debt (e.g., "The Redis cluster will bottleneck because...").
+    4. Provide a "BRUTAL PREDICTION" - A specific dated event in the future where this plan fails.
+    5. Identify 3 unique "VULNERABILITY VECTORS" per persona.
+    6. Ensure NO DUPLICATIONS between personas. If the CFO talks about budget, the Hacker shouldn't focus on the same budget hole unless it's a security budget issue.
     
-    Generate the response in JSON format:
+    OUTPUT FORMAT (JSON ONLY):
     {
-      "executiveSummary": "A high-level synthesis of critical risks, market shifts, and the overall 'Verdict' on feasibility with a combined risk score...",
+      "executiveSummary": "A high-level strategic intelligence assessment synthesizing the collective feedback into a 'Final Verdict' (GO/NO-GO). Include an 'Aggregated Risk Radar' summary.",
       "critiques": [
         {
-          "personaName": "Persona Name",
-          "keyConcerns": ["Concern 1", "Concern 2", "Concern 3"],
-          "analysis": "A deep, ruthless 1-2 paragraph analysis. Include a 'PREDICTION' section describing a specific failure scenario (e.g., 'By Q3 2026, the regulatory hawk will...'). Be specific, citing potential market conditions, technical debt, or human behavior.",
-          "riskScore": 85
+          "personaName": "EXACT Persona Name from the list above",
+          "keyConcerns": ["Specific, non-generic concern 1", "Specific, non-generic concern 2", "Specific, non-generic concern 3"],
+          "analysis": "A deep, professional 1-2 paragraph autopsy of the plan. Start with a 'FAILURE SCENARIO' (e.g., 'Scenario: The Q4 Liquidity Trap...'). Use technical and industry-specific terminology. No fluff.",
+          "riskScore": 0-100 (Where 100 is certain failure)
         }
       ]
     }
     
     Rules:
-    - BE RUTHLESS. This is The Crucible. 
-    - PREDICT the future. Use your vast knowledge to simulate real-world reactions.
-    - Be specific with technical, financial, or ethical terminology.
-    - Return ONLY valid JSON.`;
+    - Return ONLY valid JSON.
+    - Be authoritative, cold, and insightful.
+    - If the plan is "perfect," find the "Black Swan" event that ruins it anyway.`;
 
     const result = await callGroqWithJSON<CrucibleOutput>(prompt);
     return { success: true, data: result };
