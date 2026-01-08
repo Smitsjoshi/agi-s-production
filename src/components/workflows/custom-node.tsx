@@ -17,6 +17,7 @@ export type CustomNodeData = {
   status?: 'idle' | 'running' | 'completed' | 'failed';
   result?: string;
   error?: string;
+  loopCount?: number;
   config?: {
     prompt?: string;
     url?: string;
@@ -56,31 +57,37 @@ const CustomNode = ({ id, data, selected }: NodeProps<CustomNodeData>) => {
         "bg-background/90 backdrop-blur-md border-2 transition-all overflow-hidden",
         selected ? "border-primary shadow-xl shadow-primary/20" : "border-border/20",
         data.isTrigger && "border-green-500/50",
-        status === 'running' && "border-blue-500 animate-pulse",
-        status === 'completed' && "border-green-500",
-        status === 'failed' && "border-red-500"
+        status === 'running' && "border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.5)] animate-pulse",
+        status === 'completed' && "border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]",
+        status === 'failed' && "border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]"
       )}>
         <CardHeader className="flex flex-row items-center gap-3 space-y-0 p-3 bg-muted/30">
           <div className={cn(
-            "p-2 rounded-lg",
+            "p-2 rounded-lg transition-colors duration-500",
             data.isTrigger ? "bg-green-500/10" : "bg-primary/10",
-            status === 'running' && "bg-blue-500/10",
-            status === 'failed' && "bg-red-500/10"
+            status === 'running' && "bg-blue-500/20 scale-110",
+            status === 'completed' && "bg-emerald-500/20",
+            status === 'failed' && "bg-red-500/20"
           )}>
             {status === 'running' ? (
               <Loader2 className="h-6 w-6 text-blue-500 animate-spin" />
             ) : (
               <Icon className={cn(
-                "h-6 w-6",
+                "h-6 w-6 transition-colors duration-500",
                 data.isTrigger ? "text-green-500" : "text-primary",
+                status === 'completed' && "text-emerald-500",
                 status === 'failed' && "text-red-500"
               )} />
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-sm font-bold truncate">{data.title}</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-bold truncate">{data.title}</CardTitle>
+              <span className="text-[9px] font-mono text-muted-foreground opacity-50">#{id}</span>
+            </div>
+            {status === 'running' && <p className="text-[10px] text-blue-500 font-medium animate-pulse">Processing...</p>}
           </div>
-          {status === 'completed' && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+          {status === 'completed' && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
           {status === 'failed' && <AlertCircle className="h-4 w-4 text-red-500" />}
         </CardHeader>
 

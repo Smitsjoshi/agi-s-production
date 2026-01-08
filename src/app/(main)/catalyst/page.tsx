@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useId } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Loader2, Wand2, BookOpen, Book, Youtube, Newspaper, Check, X, Lightbulb, Sparkles, MessageCircle, GraduationCap, Award, Info, ListChecks, Trophy } from 'lucide-react';
+import { Loader2, Wand2, BookOpen, Book, Youtube, Newspaper, Check, X, Lightbulb, Sparkles, MessageCircle, GraduationCap, Award, Info, ListChecks, Trophy, User, Calendar, Clock, Link as LinkIcon, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { generateCatalystAction } from '@/app/actions';
+import { generateCatalystAction, askAi } from '@/app/actions';
 import type { CatalystOutput } from '@/lib/types';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -18,12 +18,24 @@ import { Progress } from "@/components/ui/progress";
 import { Badge as BadgeUI } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
+
+// --- TYPES ---
+type ChatMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+};
+
+// --- CONSTANTS ---
 const exampleGoals = [
   "Master Advanced Prompt Engineering for LLMs",
   "Principles of Quantum Computing",
   "Zero to Hero: Next.js 14 & Tailwind CSS",
   "Deep Dive into Behavioral Economics"
 ];
+
+// --- QUIZ COMPONENT ---
 const QuizComponent = ({ quizData, onComplete }: { quizData: { question: string, options: string[], correctAnswer: string }[], onComplete?: (score: number) => void }) => {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -52,7 +64,7 @@ const QuizComponent = ({ quizData, onComplete }: { quizData: { question: string,
               {q.options.map(opt => {
                 const isSelected = selectedAnswer === opt;
                 const isCorrectOption = q.correctAnswer === opt;
-                const radioId = `q${i}-opt-${opt.replace(/\s/g, '')}`;
+                const radioId = `q${i}-opt-${opt.replace(/[^a-zA-Z0-9]/g, '')}`;
 
                 let stateColor = "";
                 if (submitted) {
@@ -86,6 +98,114 @@ const QuizComponent = ({ quizData, onComplete }: { quizData: { question: string,
   );
 };
 
+// --- CHAT TUTOR COMPONENT ---
+const TutorChat = ({ context }: { context: string }) => {
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: 'assistant', content: "Hello! I am Dr. Catalyst, your personal tutor for this curriculum. Ask me anything about the modules, and I'll help you master the concepts.", timestamp: new Date() }
+  ]);
+  const [input, setInput] = useState("");
+  const [isThinking, setIsThinking] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages]);
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    const userMsg = input;
+    setInput("");
+    setMessages(prev => [...prev, { role: 'user', content: userMsg, timestamp: new Date() }]);
+    setIsThinking(true);
+
+    try {
+      const response = await askAi(
+        `You are Dr. Catalyst, an expert tutor.
+                 STRICT CONTEXT: You are teaching a student about: "${context}".
+                 User Question: "${userMsg}"
+                 
+                 Rules:
+                 1. Only answer questions related to the curriculum.
+                 2. If off-topic, politely redirect.
+                 3. Be encouraging and Socratic (ask guiding questions).
+                 4. Keep answers concise but insightful.`,
+        'AGI-S S-2',
+        messages.map(m => ({ role: m.role, content: m.content }))
+      );
+
+      const answer = (response as any).answer || "I apologize, I'm having trouble connecting to the knowledge base.";
+      setMessages(prev => [...prev, { role: 'assistant', content: answer, timestamp: new Date() }]);
+    } catch (e) {
+      setMessages(prev => [...prev, { role: 'assistant', content: "Connection error. Please try again.", timestamp: new Date() }]);
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
+  return (
+    <Card className="h-[600px] flex flex-col rounded-3xl border-2 border-primary/10 shadow-2xl overflow-hidden bg-background/50 backdrop-blur-3xl">
+      <CardHeader className="bg-primary/5 border-b border-primary/10 px-6 py-4">
+        <div className="flex items-center gap-4">
+          <Avatar className="h-12 w-12 border-2 border-primary shadow-lg ring-2 ring-primary/20">
+            <AvatarFallback className="bg-primary text-primary-foreground font-black">DR</AvatarFallback>
+          </Avatar>
+          <div>
+            <CardTitle className="text-lg font-black">Dr. Catalyst</CardTitle>
+            <CardDescription className="text-primary font-bold text-xs">AI Academic Tutor</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1 overflow-hidden p-0 relative">
+        <ScrollArea className="h-full p-4" ref={scrollRef}>
+          <div className="space-y-4">
+            {messages.map((m, i) => (
+              <div key={i} className={cn("flex gap-3 max-w-[85%]", m.role === 'user' ? "ml-auto flex-row-reverse" : "")}>
+                <Avatar className="h-8 w-8 shrink-0">
+                  <AvatarFallback className={cn("text-xs font-bold", m.role === 'user' ? "bg-muted text-foreground" : "bg-primary text-primary-foreground")}>
+                    {m.role === 'user' ? "ME" : "DR"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className={cn(
+                  "p-3 rounded-2xl text-sm leading-relaxed shadow-sm",
+                  m.role === 'user' ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-muted/80 rounded-tl-none border"
+                )}>
+                  {m.content}
+                </div>
+              </div>
+            ))}
+            {isThinking && (
+              <div className="flex gap-3 max-w-[85%]">
+                <Avatar className="h-8 w-8 shrink-0"><AvatarFallback className="bg-primary text-primary-foreground">DR</AvatarFallback></Avatar>
+                <div className="p-3 rounded-2xl bg-muted/80 rounded-tl-none border flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-xs text-muted-foreground animate-pulse">Thinking...</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </CardContent>
+      <CardFooter className="p-4 bg-background/80 border-t border-primary/5">
+        <form
+          className="flex w-full gap-2"
+          onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
+        >
+          <Input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            placeholder="Ask about the curriculum..."
+            className="rounded-full bg-muted/50 border-transparent focus:bg-background focus:border-primary/20"
+          />
+          <Button type="submit" size="icon" disabled={!input.trim() || isThinking} className="rounded-full h-10 w-10 shrink-0">
+            <MessageCircle className="h-5 w-5" />
+          </Button>
+        </form>
+      </CardFooter>
+    </Card>
+  );
+};
+
+// --- MAIN PAGE COMPONENT ---
 export default function CatalystPage() {
   const [goal, setGoal] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -126,6 +246,7 @@ export default function CatalystPage() {
       setCompletedQuizzes(next);
       const totalSteps = (result?.modules.length || 0) + 1; // Modules + Final Exam
       setProgress((next.size / totalSteps) * 100);
+      toast({ title: "Module Completed!", description: "Great job. Keep going!" });
     }
   };
 
@@ -259,21 +380,25 @@ export default function CatalystPage() {
             </div>
 
             <Tabs defaultValue="curriculum" className="space-y-8">
-              <TabsList className="grid w-full grid-cols-4 h-14 p-1 rounded-2xl bg-muted/30 border">
+              <TabsList className="grid w-full grid-cols-5 h-14 p-1 rounded-2xl bg-muted/30 border">
                 <TabsTrigger value="curriculum" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">
                   <BookOpen className="mr-2 h-4 w-4" /> Curriculum
                 </TabsTrigger>
-                <TabsTrigger value="final" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">
-                  <Award className="mr-2 h-4 w-4" /> Final Assessment
+                <TabsTrigger value="schedule" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">
+                  <Calendar className="mr-2 h-4 w-4" /> Schedule
                 </TabsTrigger>
-                <TabsTrigger value="glossary" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">
-                  <Info className="mr-2 h-4 w-4" /> Tool Glossary
+                <TabsTrigger value="library" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">
+                  <Book className="mr-2 h-4 w-4" /> Library
                 </TabsTrigger>
                 <TabsTrigger value="tutor" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">
                   <MessageCircle className="mr-2 h-4 w-4" /> AI Tutor
                 </TabsTrigger>
+                <TabsTrigger value="final" className="rounded-xl font-bold uppercase text-[10px] tracking-widest">
+                  <Award className="mr-2 h-4 w-4" /> Exam
+                </TabsTrigger>
               </TabsList>
 
+              {/* TAB: CURRICULUM */}
               <TabsContent value="curriculum" className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                   <div className="md:col-span-8">
@@ -374,6 +499,69 @@ export default function CatalystPage() {
                 </div>
               </TabsContent>
 
+              {/* TAB: SCHEDULE */}
+              <TabsContent value="schedule" className="max-w-4xl mx-auto">
+                <Card className="p-6 rounded-3xl border-2 border-primary/10 shadow-xl bg-card/80 backdrop-blur-xl">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 font-black text-2xl"><Calendar className="h-6 w-6 text-primary" /> Recommended Study Timeline</CardTitle>
+                    <CardDescription>A structured pace to master {result.title} in {result.estimatedTime}.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-0">
+                    <div className="relative border-l-2 border-primary/20 ml-6 space-y-8 py-4">
+                      {result.modules.map((m, i) => (
+                        <div key={i} className="relative pl-8">
+                          <div className="absolute -left-[9px] top-1 h-4 w-4 rounded-full bg-background border-4 border-primary shadow-sm" />
+                          <h4 className="font-bold text-lg">Week {i + 1}: {m.title}</h4>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1 mb-2">
+                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> ~2 Hours</span>
+                            <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" /> {m.concepts.length} Concepts</span>
+                          </div>
+                          <p className="text-sm opacity-80">{m.description}</p>
+                        </div>
+                      ))}
+                      <div className="relative pl-8">
+                        <div className="absolute -left-[9px] top-1 h-4 w-4 rounded-full bg-background border-4 border-green-500 shadow-sm animate-pulse" />
+                        <h4 className="font-bold text-lg text-green-500">Final Week: Mastery Exam</h4>
+                        <p className="text-sm opacity-80 mt-1">Review all material and complete the final assessment.</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* TAB: LIBRARY */}
+              <TabsContent value="library" className="max-w-5xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {result.modules.flatMap(m => m.concepts.flatMap(c => c.resources)).map((res, i) => {
+                    const Icon = res.type === 'Video' ? Youtube : res.type === 'Article' ? Newspaper : Book;
+                    return (
+                      <a key={i} href={res.url} target="_blank" rel="noopener noreferrer" className="group">
+                        <Card className="h-full hover:border-primary/50 transition-all hover:shadow-lg rounded-2xl overflow-hidden">
+                          <div className="h-2 bg-primary/20 group-hover:bg-primary transition-colors" />
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="p-3 rounded-xl bg-muted group-hover:bg-primary/10 transition-colors">
+                                <Icon className="h-6 w-6 text-primary" />
+                              </div>
+                              <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                            <h4 className="font-bold text-lg leading-tight mb-2 group-hover:text-primary transition-colors">{res.title}</h4>
+                            <div className="text-xs uppercase font-black tracking-widest text-muted-foreground">{res.type}</div>
+                          </CardContent>
+                        </Card>
+                      </a>
+                    )
+                  })}
+                </div>
+              </TabsContent>
+
+              {/* TAB: TUTOR */}
+              <TabsContent value="tutor">
+                <TutorChat context={`Title: ${result.title}. Description: ${result.description}. Overview: ${JSON.stringify(result.modules.map(m => m.title))}`} />
+              </TabsContent>
+
+
+              {/* TAB: FINAL EXAM */}
               <TabsContent value="final" className="max-w-3xl mx-auto py-12">
                 <div className="text-center mb-12">
                   <div className="inline-flex items-center justify-center p-6 rounded-[2.5rem] bg-amber-500/10 mb-8 border-4 border-amber-500/20 shadow-2xl">
@@ -393,40 +581,6 @@ export default function CatalystPage() {
                 )}
               </TabsContent>
 
-              <TabsContent value="glossary">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {result.glossary?.map((item, i) => (
-                    <Card key={i} className="p-6 bg-muted/20 border-primary/5 rounded-2xl hover:border-primary/20 transition-all shadow-sm">
-                      <h4 className="font-black text-primary text-xl mb-2">{item.term}</h4>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{item.definition}</p>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="tutor">
-                <Card className="max-w-4xl mx-auto h-[600px] flex flex-col rounded-3xl border-2 border-primary/10 shadow-2xl overflow-hidden">
-                  <CardHeader className="bg-primary/5 border-b border-primary/10 px-8 py-6">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-14 w-14 border-2 border-primary shadow-lg ring-4 ring-primary/20">
-                        <AvatarFallback className="bg-primary text-primary-foreground font-black text-xl">DC</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className="text-xl font-black">Academic Tutor: Dr. Catalyst</CardTitle>
-                        <CardDescription className="text-primary font-bold">Specialist in {result.title}</CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-1 p-8 text-center flex flex-col items-center justify-center space-y-4">
-                    <div className="p-6 bg-muted/30 rounded-full border-2 border-dashed border-primary/20">
-                      <MessageCircle className="h-12 w-12 text-primary opacity-30" />
-                    </div>
-                    <h3 className="text-2xl font-black">Interactive Session Restricted</h3>
-                    <p className="text-muted-foreground max-w-sm">Dr. Catalyst is currently processing your curriculum. Context-aware chat functionality will be active in the next simulation cycle.</p>
-                    <Button variant="secondary" className="rounded-xl font-bold">Request Priority Access</Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
             </Tabs>
 
             <div className="text-center pt-24 border-t border-primary/5 mt-20">
