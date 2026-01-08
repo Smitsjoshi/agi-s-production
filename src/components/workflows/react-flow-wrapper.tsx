@@ -146,7 +146,7 @@ const nodeTypes = {
 
 // --- MAIN COMPONENT ---
 
-export function ReactFlowWrapper() {
+const ReactFlowInner = () => {
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [isRunning, setIsRunning] = useState(false);
@@ -506,5 +506,13 @@ export function ReactFlowWrapper() {
                 </div>
             </div>
         </div>
+    );
+};
+
+export function ReactFlowWrapper() {
+    return (
+        <ReactFlowProvider>
+            <ReactFlowInner />
+        </ReactFlowProvider>
     );
 }
