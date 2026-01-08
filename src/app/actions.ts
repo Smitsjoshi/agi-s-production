@@ -26,7 +26,7 @@ try {
 }
 
 // Helper function for Groq API calls with JSON mode
-async function callGroqWithJSON<T>(prompt: string, systemPrompt?: string, temperature: number = 0.7): Promise<T> {
+async function callGroqWithJSON<T>(prompt: string, systemPrompt?: string, temperature: number = 0.7, model: string = 'llama-3.3-70b-versatile'): Promise<T> {
   const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
@@ -45,7 +45,7 @@ async function callGroqWithJSON<T>(prompt: string, systemPrompt?: string, temper
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'openai/gpt-oss-120b',
+      model: model,
       messages: messages,
       temperature: temperature,
       response_format: { type: 'json_object' }
@@ -799,22 +799,20 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     MISSION: Perform a high-fidelity "Inversion Analysis." Instead of just finding flaws, you must identify the "Critical Success Path" by first exposing the most lethal vulnerabilities.
     
     FORMATTING & QUALITY RULES (CRITICAL):
-    1. ZERO-TOLERANCE FOR SPELLING ERRORS. Use clean, professional English. NO "glitch" hallucinations (e.g., repeating letters like "aaa" or "nnn").
+    1. ZERO-TOLERANCE FOR SPELLING ERRORS. Use clean, professional English.
     2. BE CRITICALLY CONSTRUCTIVE. The tone should be authoritative and "real," not just "harsh."
     3. NO DUPLICATIONS. Each persona must focus on a unique vector.
     4. Provide a concrete STRATEGIC PIVOT for every risk identified.
     5. THE RISK RADAR: In the executive summary, include a "Risk Radar Briefing" that lists the top 3 categorical threats.
     
-    ORTHOGRAPHY & SYNTAX HARDENING (STRICTEST):
+    ORTHOGRAPHY & SYNTAX:
     - DO NOT use any markdown formatting (no **, no ##, no __, no \`) in the output.
-    - NO DOUBLE CHARACTERS unless strictly required by English (e.g., "better" is okay, "beetter" or "beettter" is FORBIDDEN).
-    - If you hallucinate repeated characters or "glitch" text, the simulation is a FAILURE.
     - ALL OUTPUT MUST BE IN PERFECT BUSINESS ENGLISH.
     - THE RESPONSE MUST BE PURE JSON ONLY. NO PREAMBLE, NO POSTSCRIPT.
     
     OUTPUT SCHEMA (JSON ONLY):
     {
-      "executiveSummary": "A definitive 2-paragraph strategic brief. Paragraph 1: Final Verdict. Paragraph 2: The Risk Radar Briefing. NO Hallucinations.",
+      "executiveSummary": "A definitive 2-paragraph strategic brief. Paragraph 1: Final Verdict. Paragraph 2: The Risk Radar Briefing.",
       "critiques": [
         {
           "personaName": "Persona Name",
@@ -828,9 +826,9 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     
     Rules:
     - RETURN ONLY VALID JSON.
-    - PROOFREAD output as a final step. If it looks like "glitch" text, rewrite it to be professional.`;
+    - Proofread for typos before outputting.`;
 
-    const result = await callGroqWithJSON<CrucibleOutput>(prompt, undefined, 0.1);
+    const result = await callGroqWithJSON<CrucibleOutput>(prompt, undefined, 0.1, 'llama-3.3-70b-versatile');
 
     // Validate output structure to prevent frontend crashes
     const validation = CrucibleOutputSchema.safeParse(result);
