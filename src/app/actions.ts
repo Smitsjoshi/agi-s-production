@@ -839,14 +839,14 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
        
        INSTRUCTIONS:
        1. Fix ALL typos and spelling mistakes.
-       2. Ensure the tone is polished, professional, and consistent.
-       3. Do NOT change the 'riskScore' or 'personaName'.
-       4. Clarify any awkward phrasing in the 'analysis' or 'strategicPivot'.
+       2. PAY SPECIAL ATTENTION to the 'analysis' field. It must be FLAWLESSLY written in standard Business English.
+       3. Ensure the tone is polished, professional, and consistent.
+       4. Do NOT change the 'riskScore' or 'personaName'.
        5. Return the EXACT SAME JSON structure, just polished.
        
        OUTPUT: Valid JSON only.`;
 
-      return await callGroqWithJSON<CrucibleOutput>(proofreadPrompt, undefined, 0.1, 'llama-3.3-70b-versatile');
+      return await callGroqWithJSON<CrucibleOutput>(proofreadPrompt, undefined, 0, 'llama-3.3-70b-versatile');
     };
 
     // Split into chunks
