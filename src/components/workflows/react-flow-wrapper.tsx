@@ -25,7 +25,7 @@ import {
     BrainCircuit, GitCommit, Server, Cloud, ShoppingCart, Briefcase, BarChart, BarChart3, Mic, Video, Users,
     File, Folder, Trash, Upload, DownloadCloud, FileUp, FileDown, Layers, Package, GitPullRequest,
     Code2, Braces, Settings, ToggleRight, AlertCircle, Bug, TestTube, Rocket, Anchor, Globe,
-    Network, Key, Shield, ShieldCheck, ShieldAlert, User, UserPlus, UserMinus, UserCheck, UserX, Calendar, MapPin, Phone, PhoneCall, Mailbox,
+    Network, Key, Shield, ShieldCheck, ShieldAlert, User, UserPlus, UserMinus, UserCheck, UserX, Calendar, MapPin, Phone, PhoneCall, Mailbox, Map as MapIcon,
     MessageCircle, Share, ThumbsUp, ThumbsDown, Award, Trophy, Gift, Sun, Moon, Sunset,
     Sunrise, Wind, CloudSun, CloudMoon, CloudRain, CloudSnow, CloudLightning, Gauge,
     Bitcoin, DollarSign, Euro, PoundSterling, CreditCard, Banknote, Wallet, Landmark, Building,
@@ -87,7 +87,7 @@ const paletteNodes: Record<string, NodePaletteItem[]> = {
         { icon: GitBranch, title: "Unreal Blueprint", description: "Logic for UE5 node graphs." },
         { icon: Book, title: "Lore Writer", description: "Expands game world history." },
         { icon: User, title: "NPC Dialog", description: "Generates interactive conversation trees." },
-        { icon: Map, title: "Level Designer", description: "Layouts for game maps." },
+        { icon: MapIcon, title: "Level Designer", description: "Layouts for game maps." },
         { icon: Sword, title: "Item Balancer", description: "Calculates stats for game items." },
         { icon: Shield, title: "Quest Giver", description: "Creates objective chains." },
         { icon: Music, title: "Sfx Finder", description: "Finds/Gen sound effects." },
@@ -133,7 +133,7 @@ const paletteNodes: Record<string, NodePaletteItem[]> = {
 // Icons mapping for AI generation (string -> Component)
 const iconMap: Record<string, LucideIcon> = {
     Search, ShieldCheck, BrainCircuit, PenTool, Scroll, Eye, Mic, Scissors, Scale, Upload, Code2, Globe, Stethoscope, Gavel, MessageSquare,
-    Box, Ghost, FileCode, GitBranch, Book, User, Map, Sword, Shield, Music,
+    Box, Ghost, FileCode, GitBranch, Book, User, MapIcon, Sword, Shield, Music,
     Calculator, Regex, Braces, ArrowRightLeft, Combine, Filter, Sigma, Binary, Shuffle, Table,
     FileCheck, Coins, Image, HardDrive, LineChart, Key, Zap,
     Radio, Cpu, Thermometer, Home, Battery, Video, Wifi, Printer, Bell, Sun,
@@ -365,7 +365,7 @@ const ReactFlowInner = () => {
     return (
         <div className="h-[calc(100vh-5rem)] w-full flex flex-col relative">
             {/* AI Workflow Maker Input */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-full max-w-xl px-4">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-full max-w-xl px-4">
                 <Card className="bg-background/80 backdrop-blur-md border border-primary/20 shadow-xl overflow-hidden">
                     <div className="flex p-2 gap-2">
                         <div className="relative flex-grow">
