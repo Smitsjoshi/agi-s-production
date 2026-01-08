@@ -23,7 +23,7 @@ import {
     FileText, Image, PenSquare, Share2, Shuffle, Combine, Milestone, ToggleLeft, Repeat, Variable,
     ArrowRightLeft, FileJson, Link2, MousePointer, Type, Eye, Camera, Download, Slack, AtSign, Send,
     Table, BookUser, Search, GitBranch, Asterisk, BookCopy, Zap, Cpu, ShieldHalf, Star, BookOpen, BookCheck,
-    BrainCircuit, GitCommit, Server, Cloud, ShoppingCart, Briefcase, BarChart, BarChart3, Mic, Video, Users,
+    BrainCircuit, GitCommit, Server, Cloud, ShoppingCart, Briefcase, BarChart, BarChart3, Mic, Music, Video, Users,
     File, Folder, Trash, Upload, DownloadCloud, FileUp, FileDown, Layers, Package, GitPullRequest,
     Code2, Braces, Settings, ToggleRight, AlertCircle, Bug, TestTube, Rocket, Anchor, Globe,
     Network, Key, Shield, ShieldCheck, ShieldAlert, User, UserPlus, UserMinus, UserCheck, UserX, Calendar, MapPin, Phone, PhoneCall, Mailbox, Map as MapIcon,
@@ -67,7 +67,8 @@ import {
     PenTool, Scroll, Sword, Sigma, Coins, LineChart, Thermometer, SearchCode,
     Receipt, Lock, Languages, PlayCircle, StopCircle, Joystick, Gamepad, Gamepad2, Feather, FunctionSquare, Pi, Infinity,
     Lightbulb, Mails,
-    ChefHat, Dumbbell, Flower2, Dog, Target, Smile, Ticket, Tag, Replace, WholeWord, CaseSensitive
+    ChefHat, Dumbbell, Flower2, Dog, Target, Smile, Ticket, Tag, Replace, WholeWord, CaseSensitive,
+    Calculator, Twitter, PieChart, Regex, Binary
 } from 'lucide-react';
 
 import CustomNode, { CustomNodeData } from './custom-node';
