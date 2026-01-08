@@ -78,8 +78,12 @@ const RiskGauge = ({ value }: { value: number }) => {
 
 const CritiqueCard = ({ critique }: { critique: CrucibleCritique }) => {
   const [showSolution, setShowSolution] = useState(false);
+
+  // Safety check: if critique is undefined, return null to prevent crash
+  if (!critique) return null;
+
   const persona = ADVERSARY_PERSONAS.find(p => p.name === critique.personaName);
-  const typedAnalysis = useTypewriter(critique.analysis, 10);
+  const typedAnalysis = useTypewriter(critique.analysis || '', 10);
 
   return (
     <Card className="group relative overflow-hidden border-none bg-gradient-to-br from-background to-muted/10 shadow-xl transition-all hover:shadow-2xl hover:translate-y-[-2px]">
@@ -105,7 +109,7 @@ const CritiqueCard = ({ critique }: { critique: CrucibleCritique }) => {
             <div className="space-y-1">
               <CardTitle className="text-2xl font-black italic uppercase tracking-tight">{critique.personaName}</CardTitle>
               <div className="flex flex-wrap gap-2">
-                {critique.keyConcerns.map(concern => (
+                {critique.keyConcerns?.map(concern => (
                   <Badge key={concern} variant="outline" className="bg-background/50 border-primary/10 text-[9px] uppercase font-black tracking-widest py-0.5 text-muted-foreground group-hover:text-primary group-hover:border-primary/30 transition-colors">
                     {concern}
                   </Badge>
@@ -209,7 +213,11 @@ export default function CruciblePage() {
       let critiqueIndex = 0;
       const intervalId = setInterval(() => {
         if (critiqueIndex < (result?.critiques?.length || 0)) {
-          setDisplayedCritiques(prev => [...prev, result.critiques[critiqueIndex]]);
+          const nextCritique = result.critiques[critiqueIndex];
+          // Ensure we don't push undefined values
+          if (nextCritique) {
+            setDisplayedCritiques(prev => [...prev, nextCritique]);
+          }
           critiqueIndex++;
         } else {
           clearInterval(intervalId);
