@@ -793,7 +793,8 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     const processBatch = async (personas: typeof ADVERSARY_PERSONAS, isLeadBatch: boolean) => {
       const personaDescriptions = personas.map(p => `${p.name}: ${p.description}`).join('\n');
 
-      const prompt = `You are a Senior Strategic Advisory Lead facilitating a high-stakes investigation into a business or technical blueprint.
+      // --- PHASE 1: GENERATION (Creative & Analytical) ---
+      const generationPrompt = `You are a Senior Strategic Advisory Lead facilitating a high-stakes investigation into a business or technical blueprint.
     
     BLUEPRINT: "${input.plan}"
     
@@ -802,17 +803,12 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     
     MISSION: Perform a high-fidelity "Inversion Analysis" from the perspective of THIS SPECIFIC COHORT.
     
-    FORMATTING & QUALITY RULES (CRITICAL):
+    QUALITY RULES:
     1. ZERO-TOLERANCE FOR SPELLING ERRORS. Use clean, professional English. Verified against Oxford English Dictionary.
-    2. BE CRITICALLY CONSTRUCTIVE. The tone should be authoritative and "real," not just "harsh."
+    2. BE CRITICALLY CONSTRUCTIVE. The tone should be authoritative.
     3. NO DUPLICATIONS. Each persona must focus on a unique vector.
     4. Provide a concrete STRATEGIC PIVOT for every risk identified.
-    5. THE RISK RADAR: In the executive summary, include a "Risk Radar Briefing" based on these specific critiques.
-    
-    ORTHOGRAPHY & SYNTAX:
-    - DO NOT use any markdown formatting (no **, no ##, no __, no \`) in the output.
-    - ALL OUTPUT MUST BE IN PERFECT BUSINESS ENGLISH.
-    - THE RESPONSE MUST BE PURE JSON ONLY. NO PREAMBLE, NO POSTSCRIPT.
+    5. THE RISK RADAR: In the executive summary, include a "Risk Radar Briefing".
     
     OUTPUT SCHEMA (JSON ONLY):
     {
@@ -829,10 +825,28 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     }
     
     Rules:
-    - RETURN ONLY VALID JSON.
-    - Double-check all spellings.`;
+    - RETURN ONLY VALID JSON.`;
 
-      return await callGroqWithJSON<CrucibleOutput>(prompt, undefined, 0.1, 'llama-3.3-70b-versatile');
+      const draftResult = await callGroqWithJSON<CrucibleOutput>(generationPrompt, undefined, 0.2, 'llama-3.3-70b-versatile');
+
+      // --- PHASE 2: PROOFREADING (Editorial & QA) ---
+      // We re-process the JSON to ensure absolute spelling perfection.
+      const proofreadPrompt = `You are the Chief Editor of a prestigious strategy consulting firm.
+       Review the following JSON output for ANY spelling, grammar, or syntax errors.
+       
+       INPUT JSON:
+       ${JSON.stringify(draftResult)}
+       
+       INSTRUCTIONS:
+       1. Fix ALL typos and spelling mistakes.
+       2. Ensure the tone is polished, professional, and consistent.
+       3. Do NOT change the 'riskScore' or 'personaName'.
+       4. Clarify any awkward phrasing in the 'analysis' or 'strategicPivot'.
+       5. Return the EXACT SAME JSON structure, just polished.
+       
+       OUTPUT: Valid JSON only.`;
+
+      return await callGroqWithJSON<CrucibleOutput>(proofreadPrompt, undefined, 0.1, 'llama-3.3-70b-versatile');
     };
 
     // Split into chunks

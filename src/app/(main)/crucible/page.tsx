@@ -367,7 +367,7 @@ export default function CruciblePage() {
                     {isLoading ? (
                       <div className="flex items-center gap-3">
                         <Loader2 className="h-5 w-5 animate-spin" />
-                        <span>Initializing Council...</span>
+                        <span>Mobilizing Council & Verifying Intelligence...</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-3">
