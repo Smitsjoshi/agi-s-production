@@ -83,8 +83,8 @@ const NavGroup = ({ title, items, state, pathname, playNavSound, user }: { title
     return items.map((item) => {
       const Icon = item.icon;
       const isActive = pathname.startsWith(item.href);
-      // Force unlock Ask and CodeX for everyone
-      const isAlwaysUnlocked = item.href === '/ask' || item.href === '/codex';
+      // Force unlock Ask, CodeX, and Catalyst for everyone
+      const isAlwaysUnlocked = item.href === '/ask' || item.href === '/codex' || item.href === '/catalyst';
       const isLocked = isAlwaysUnlocked ? false : (user?.pages?.includes('all') ? false : !user?.pages?.includes(item.href));
 
       if (isLocked) {
