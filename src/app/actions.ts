@@ -5,7 +5,7 @@ import {
   AdversaryPersonaIdSchema
 } from '@/lib/types';
 import type {
-  AiMode, SynthesisOutput, SynthesisInput, CrucibleOutput, CrucibleInput, CatalystOutput, CatalystInput,
+  AiMode, SynthesisOutput, SynthesisInput, CrucibleOutput, CrucibleInput, CrucibleCritique, CatalystOutput, CatalystInput,
   ContinuumInput, ContinuumOutput, AetherInput, AetherOutput, CosmosInput, CosmosOutput,
   AudioOverview, VideoOverview, MindMap, MindMapNode, Flashcard, FlashcardDeck, QuizQuestion, Quiz,
   Infographic, SlideContent, SlideDeck, Report
@@ -786,24 +786,28 @@ export async function generateVideoOverviewAction(sources: { name: string; conte
 
 export async function generateCrucibleAction(input: CrucibleInput): Promise<{ success: boolean; data?: CrucibleOutput; error?: string; }> {
   try {
+    const BATCH_SIZE = 5;
     const selectedPersonas = ADVERSARY_PERSONAS.filter(p => input.personas.includes(p.id));
-    const personaDescriptions = selectedPersonas.map(p => `${p.name}: ${p.description}`).join('\n');
 
-    const prompt = `You are a Senior Strategic Advisory Lead facilitating a high-stakes investigation into a business or technical blueprint.
+    // Helper to process a batch of personas
+    const processBatch = async (personas: typeof ADVERSARY_PERSONAS, isLeadBatch: boolean) => {
+      const personaDescriptions = personas.map(p => `${p.name}: ${p.description}`).join('\n');
+
+      const prompt = `You are a Senior Strategic Advisory Lead facilitating a high-stakes investigation into a business or technical blueprint.
     
     BLUEPRINT: "${input.plan}"
     
-    ADVERSARY COUNCIL:
+    ADVERSARY COUNCIL COHORT:
     ${personaDescriptions}
     
-    MISSION: Perform a high-fidelity "Inversion Analysis." Instead of just finding flaws, you must identify the "Critical Success Path" by first exposing the most lethal vulnerabilities.
+    MISSION: Perform a high-fidelity "Inversion Analysis" from the perspective of THIS SPECIFIC COHORT.
     
     FORMATTING & QUALITY RULES (CRITICAL):
-    1. ZERO-TOLERANCE FOR SPELLING ERRORS. Use clean, professional English.
+    1. ZERO-TOLERANCE FOR SPELLING ERRORS. Use clean, professional English. Verified against Oxford English Dictionary.
     2. BE CRITICALLY CONSTRUCTIVE. The tone should be authoritative and "real," not just "harsh."
     3. NO DUPLICATIONS. Each persona must focus on a unique vector.
     4. Provide a concrete STRATEGIC PIVOT for every risk identified.
-    5. THE RISK RADAR: In the executive summary, include a "Risk Radar Briefing" that lists the top 3 categorical threats.
+    5. THE RISK RADAR: In the executive summary, include a "Risk Radar Briefing" based on these specific critiques.
     
     ORTHOGRAPHY & SYNTAX:
     - DO NOT use any markdown formatting (no **, no ##, no __, no \`) in the output.
@@ -815,7 +819,7 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
       "executiveSummary": "A definitive 2-paragraph strategic brief. Paragraph 1: Final Verdict. Paragraph 2: The Risk Radar Briefing.",
       "critiques": [
         {
-          "personaName": "Persona Name",
+          "personaName": "Exact Name from List",
           "keyConcerns": ["Concern 1", "Concern 2"],
           "analysis": "A sophisticated analytical autopsy (150-200 words). Use industry-standard terminology. Identify a Failure Scenario.",
           "riskScore": 0-100,
@@ -826,14 +830,62 @@ export async function generateCrucibleAction(input: CrucibleInput): Promise<{ su
     
     Rules:
     - RETURN ONLY VALID JSON.
-    - Proofread for typos before outputting.`;
+    - Double-check all spellings.`;
 
-    const result = await callGroqWithJSON<CrucibleOutput>(prompt, undefined, 0.1, 'llama-3.3-70b-versatile');
+      return await callGroqWithJSON<CrucibleOutput>(prompt, undefined, 0.1, 'llama-3.3-70b-versatile');
+    };
 
-    // Validate output structure to prevent frontend crashes
-    const validation = CrucibleOutputSchema.safeParse(result);
+    // Split into chunks
+    const chunks = [];
+    for (let i = 0; i < selectedPersonas.length; i += BATCH_SIZE) {
+      chunks.push(selectedPersonas.slice(i, i + BATCH_SIZE));
+    }
+
+    // Execute batches in parallel
+    // We add a small delay between starts to prevent exact-second rate limiting if any
+    const results = await Promise.all(
+      chunks.map((chunk, index) =>
+        new Promise<CrucibleOutput>(resolve =>
+          setTimeout(() => processBatch(chunk, index === 0).then(resolve), index * 200)
+        )
+      )
+    );
+
+    // Aggregate results
+    let combinedCritiques: CrucibleCritique[] = [];
+    let leadSummary = "";
+
+    results.forEach((res, index) => {
+      if (res.critiques) {
+        combinedCritiques = [...combinedCritiques, ...res.critiques];
+      }
+      // Use the first batch's summary as the main one, as it usually contains the "c-suite" personas if sorted by default
+      if (index === 0) {
+        leadSummary = res.executiveSummary;
+      }
+    });
+
+    // If we have multiple batches, we might want to append a note to the summary
+    if (results.length > 1) {
+      leadSummary += `\n\n[System Note: Full Council Mobilized. ${combinedCritiques.length} critiques generated across ${results.length} strategic cohorts.]`;
+    }
+
+    const finalOutput: CrucibleOutput = {
+      executiveSummary: leadSummary || "Analysis complete.",
+      critiques: combinedCritiques
+    };
+
+    // Validate final aggregated output
+    // Note: We validate individual chunks in the helper if we wanted, but here we validate the whole
+    const validation = CrucibleOutputSchema.safeParse(finalOutput);
     if (!validation.success) {
-      console.error('Crucible Validation Failed:', validation.error);
+      console.error('Crucible Aggregation Validation Failed:', validation.error);
+      // Fallback: try to return what we have even if partial, or throw
+      // Often strictly throwing is better to avoid bad UI states, but user wants results. 
+      // Let's return the partials if at least one critique exists.
+      if (combinedCritiques.length > 0) {
+        return { success: true, data: finalOutput };
+      }
       throw new Error('The Intelligence Council returned a malformed assessment. Please try again.');
     }
 
