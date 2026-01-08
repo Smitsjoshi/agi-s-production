@@ -38,7 +38,7 @@ import {
     Brain, Twitter, Instagram, Megaphone, Music, Box, Trello, LineChart, Calculator, Coins, TrendingUp, Receipt, Lock, SearchCode, FileSearch, Fingerprint, AlertTriangle, GraduationCap, Users2, Sparkles, Microscope, Languages, Github,
     Activity, PlayCircle, StopCircle, RefreshCw, Command, Joystick, Gamepad, Gamepad2, Sword, Shield as ShieldIcon, Scroll, Feather, PenTool, Hash, Binary, FunctionSquare, Regex, Pi, Sigma, Infinity,
     Thermometer, Droplets, Lightbulb, Power, Mails,
-    Scale, Stethoscope, Gavel, Ghost, FileCode, FileCheck, Bell, Loader2, Play, Wand2, X
+    Scale, Stethoscope, Gavel, Ghost, FileCode, FileCheck, Bell, Loader2, Play, Wand2, X, ChevronDown, ChevronRight
 } from 'lucide-react';
 
 import CustomNode, { CustomNodeData } from './custom-node';
@@ -362,16 +362,22 @@ const ReactFlowInner = () => {
     };
 
 
+    const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
+
+    const toggleCategory = (cat: string) => {
+        setCollapsedCategories(prev => ({ ...prev, [cat]: !prev[cat] }));
+    };
+
     return (
-        <div className="h-[calc(100vh-5rem)] w-full flex flex-col relative">
-            {/* AI Workflow Maker Input */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-full max-w-xl px-4">
-                <Card className="bg-background/80 backdrop-blur-md border border-primary/20 shadow-xl overflow-hidden">
+        <div className="h-[calc(100vh-4rem)] w-full flex flex-col relative overflow-hidden">
+            {/* AI Workflow Maker Input - Bottom Center */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 w-full max-w-xl px-4 pointer-events-none">
+                <Card className="bg-background/80 backdrop-blur-md border border-primary/20 shadow-xl overflow-hidden pointer-events-auto">
                     <div className="flex p-2 gap-2">
                         <div className="relative flex-grow">
                             <Wand2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-purple-500 animate-pulse" />
                             <Input
-                                placeholder="Describe a workflow (e.g., 'Create a loop that generates 3 tweets, critiques them, and posts the best one')..."
+                                placeholder="Describe a workflow..."
                                 className="pl-9 border-transparent bg-muted/30 focus-visible:ring-0 focus-visible:bg-muted/50"
                                 value={magicPrompt}
                                 onChange={(e) => setMagicPrompt(e.target.value)}
@@ -390,7 +396,7 @@ const ReactFlowInner = () => {
                 </Card>
             </div>
 
-            <div className="flex-grow flex w-full">
+            <div className="flex-grow flex w-full h-full overflow-hidden">
                 {/* Main Canvas */}
                 <div className="flex-grow h-full relative border-r">
                     <ReactFlow
@@ -428,8 +434,8 @@ const ReactFlowInner = () => {
                 </div>
 
                 {/* Right Sidebar (Palette + Outcomes) */}
-                <div className="w-[380px] h-full bg-muted/5 flex flex-col">
-                    <div className="flex border-b">
+                <div className="w-[380px] h-full bg-muted/5 flex flex-col border-l">
+                    <div className="flex border-b shrink-0">
                         <button
                             onClick={() => setShowOutcomes(false)}
                             className={cn("flex-1 p-3 text-xs font-black uppercase tracking-widest transition-colors", !showOutcomes ? "bg-background border-b-2 border-primary text-primary" : "text-muted-foreground hover:bg-muted/50")}
@@ -444,37 +450,46 @@ const ReactFlowInner = () => {
                         </button>
                     </div>
 
-                    <div className="flex-grow overflow-hidden">
+                    <div className="flex-grow overflow-hidden relative">
                         {!showOutcomes ? (
-                            <ScrollArea className="h-full">
-                                <div className="p-4 space-y-6">
+                            <ScrollArea className="h-full w-full">
+                                <div className="p-4 space-y-4">
                                     {Object.entries(paletteNodes).map(([category, items]) => (
-                                        <div key={category}>
-                                            <h3 className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{category}</h3>
-                                            <div className="grid grid-cols-1 gap-2">
-                                                {items.map(item => (
-                                                    <button
-                                                        key={item.title}
-                                                        onClick={() => onAddNode(item)}
-                                                        className="flex items-start gap-3 p-3 rounded-xl border bg-background/50 hover:bg-primary/5 hover:border-primary/30 transition-all text-left group"
-                                                    >
-                                                        <div className="p-2 rounded-lg bg-muted group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                                                            <item.icon className="h-4 w-4" />
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-bold text-sm text-foreground/90">{item.title}</div>
-                                                            <div className="text-[10px] text-muted-foreground/80 line-clamp-1">{item.description}</div>
-                                                        </div>
-                                                    </button>
-                                                ))}
-                                            </div>
+                                        <div key={category} className="rounded-lg border bg-card/30 overflow-hidden">
+                                            <button
+                                                onClick={() => toggleCategory(category)}
+                                                className="w-full flex items-center justify-between p-3 bg-muted/20 hover:bg-muted/40 transition-colors"
+                                            >
+                                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{category}</h3>
+                                                {collapsedCategories[category] ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                                            </button>
+
+                                            {!collapsedCategories[category] && (
+                                                <div className="grid grid-cols-1 gap-2 p-2 pt-0 animate-in slide-in-from-top-2 duration-200">
+                                                    {items.map(item => (
+                                                        <button
+                                                            key={item.title}
+                                                            onClick={() => onAddNode(item)}
+                                                            className="flex items-start gap-3 p-2 rounded-lg border border-transparent hover:border-primary/20 hover:bg-primary/5 transition-all text-left group"
+                                                        >
+                                                            <div className="p-1.5 rounded-md bg-muted group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                                                <item.icon className="h-3.5 w-3.5" />
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-bold text-xs text-foreground/90">{item.title}</div>
+                                                                <div className="text-[9px] text-muted-foreground/80 line-clamp-1">{item.description}</div>
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
                             </ScrollArea>
                         ) : (
                             <div className="h-full flex flex-col">
-                                <div className="p-3 border-b bg-background/50 flex justify-between items-center">
+                                <div className="p-3 border-b bg-background/50 flex justify-between items-center shrink-0">
                                     <span className="text-[10px] uppercase font-bold text-muted-foreground">Execution Log</span>
                                     {outcomes.length > 0 && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-mono">{outcomes.length} events</span>}
                                 </div>
@@ -487,7 +502,7 @@ const ReactFlowInner = () => {
                                             </div>
                                         ) : (
                                             outcomes.map((o, i) => (
-                                                <div key={i} className="p-3 rounded-lg border bg-background/60 text-xs">
+                                                <div key={i} className="p-3 rounded-lg border bg-background/60 text-xs animate-in slide-in-from-right-2 fade-in duration-300">
                                                     <div className="flex justify-between mb-1 opacity-70">
                                                         <span className="font-bold text-primary">{o.title}</span>
                                                         <span className="text-[9px]">{o.timestamp}</span>
