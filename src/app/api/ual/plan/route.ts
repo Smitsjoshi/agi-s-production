@@ -81,8 +81,21 @@ export async function POST(req: NextRequest) {
 
         // Format history for the prompt
         const historyText = history.length > 0
-            ? history.map((h, i) => `Step ${h.step}: ${JSON.stringify(h.actions)}`).join('\n')
+            ? history.map((h, i) => `Step ${h.step}: ${JSON.stringify(h.actions)} -> Result: ${h.result || 'Unknown'}`).join('\n')
             : "No previous actions taken.";
+
+        // DYNAMIC CLARIFICATION: Check if we are stuck or blocked
+        let antiLoopInstruction = "";
+        const isBlocked = history.some(h => JSON.stringify(h).includes("BLOCKED"));
+        if (isBlocked) {
+            antiLoopInstruction = `
+WARNING: PREVIOUS ATTEMPTS WERE BLOCKED BY ANTI-BOT DEFENSES.
+STRATEGY CHANGE REQUIRED:
+1. DO NOT try to refresh or wait on the current page. It will not work.
+2. NAVIGATE IMMEDIATELY to a different search engine or website.
+3. If you were on coinbase.com, try coinmarketcap.com or google.com.
+`;
+        }
 
         const prompt = `You are an AUTONOMOUS WEB AGENT PLANNER.
 Your job: Convert user goals into EXECUTABLE browser actions.
@@ -97,52 +110,28 @@ Page Text: ${context?.text?.substring(0, 300) || 'Empty page'}
 ACTION HISTORY (What you have already done):
 ${historyText}
 
+${antiLoopInstruction}
+
 ═══════════════════════════════════════════════════════════════
 CRITICAL RULES - READ CAREFULLY:
 ═══════════════════════════════════════════════════════════════
 
 1. DO NOT REPEAT FAILED ACTIONS. If you see an action in the HISTORY that didn't work (e.g. you are still on the same page), TRY SOMETHING DIFFERENT.
-2. When you generate a "type" action, you MUST include the "value" field.
-   The "value" is THE ACTUAL TEXT TO TYPE.
-
-WRONG ❌:
-{ "type": "type", "selector": "input[name='q']" }  // NO VALUE = BROKEN
-
-CORRECT ✅:
-{ "type": "type", "selector": "input[name='q']", "value": "green nike shoes amazon" }
-
-═══════════════════════════════════════════════════════════════
+2. DETECT BLOCKS: If the Title contains "Just a moment", "Security Check", or "Access Denied", YOU ARE BLOCKED. 
+   - Strategy: Navigate to a different source immediately (e.g., Use Google Cache, or search result #2).
+3. VERIFICATION: You must define how to verify if this step succeeded.
 
 OUTPUT FORMAT (JSON ONLY):
 {
   "status": "CONTINUE",
   "reasoning": "Why this plan achieves the goal",
+  "verification": {
+      "question": "Did the price appear?",
+      "criteria": "The text contains '$' or the title does not contain 'Just a moment'."
+  },
   "actions": [
     { "type": "navigate", "url": "https://www.google.com" },
     { "type": "type", "selector": "input[name='q']", "value": "THE SEARCH QUERY HERE" },
-    { "type": "press", "key": "Enter" }
-  ]
-}
-
-EXAMPLES FOR COMMON GOALS:
-
-Goal: "find green nike shoes from amazon"
-{
-  "status": "CONTINUE",
-  "reasoning": "Search Google for Amazon listings",
-  "actions": [
-    { "type": "type", "selector": "input[name='q']", "value": "green nike shoes amazon" },
-    { "type": "press", "key": "Enter" }
-  ]
-}
-
-Goal: "what is the price of bitcoin"
-{
-  "status": "CONTINUE", 
-  "reasoning": "Search for BTC price",
-  "actions": [
-    { "type": "navigate", "url": "https://www.google.com" },
-    { "type": "type", "selector": "input[name='q']", "value": "bitcoin price usd" },
     { "type": "press", "key": "Enter" }
   ]
 }
@@ -227,6 +216,7 @@ Return ONLY the JSON object.`;
             actions,
             status: plan.status,
             reasoning: plan.reasoning,
+            verification: (plan as any).verification,
             answer: plan.answer,
             raw: response
         });

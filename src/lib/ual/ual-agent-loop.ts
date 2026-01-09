@@ -61,9 +61,6 @@ export class UALAgentLoop {
                     timestamp: Date.now()
                 });
 
-                // Record actions to history
-                actionHistory.push({ step: stepCount, actions, reasoning });
-
                 // 2. EXECUTING
                 const result: UALResult = await this.client.executeTask({
                     goal,
@@ -71,6 +68,14 @@ export class UALAgentLoop {
                     url: currentState.url,
                     actions
                 });
+
+                // Record actions AND RESULT to history
+                // This is critical for the planner to know if it failed
+                const executionResult = result.success
+                    ? (result.data?.botStatus === "BLOCK_DETECTED" ? "FAILED: BLOCKED" : "SUCCESS")
+                    : `FAILED: ${result.error}`;
+
+                actionHistory.push({ step: stepCount, actions, reasoning, result: executionResult });
 
                 // 3. OBSERVING
                 const obsMessage = result.data?.botStatus === "BLOCK_DETECTED"
@@ -83,6 +88,33 @@ export class UALAgentLoop {
                     screenshot: result.screenshot,
                     timestamp: Date.now()
                 });
+
+                // 4. VERIFICATION & SELF-CORRECTION (The Brain)
+                if ((plan as any).verification) {
+                    const criteria = (plan as any).verification.criteria;
+                    const question = (plan as any).verification.question;
+
+                    // Simple text-based verification for now
+                    const pageText = result.data?.text || result.data?.title || '';
+                    const isBlocked = pageText.includes("Just a moment") || pageText.includes("Access Denied") || pageText.includes("Security Check");
+
+                    if (isBlocked) {
+                        onStep({
+                            type: 'failed',
+                            message: "⚠️ Anti-Bot Block Detected. Hard switching strategy...",
+                            timestamp: Date.now()
+                        });
+
+                        // CRITICAL: Overwrite the last history entry to ensure the planner sees the BLOCK failure
+                        if (actionHistory.length > 0) {
+                            actionHistory[actionHistory.length - 1].result = "FAILED: BLOCKED BY CLOUDFLARE/CAPTCHA. DO NOT RETRY THIS URL. NAVIGATE TO GOOGLE.";
+                        }
+
+                        // Hard wait to reset
+                        await new Promise(r => setTimeout(r, 3000));
+                        continue; // Re-plan immediately
+                    }
+                }
 
                 if (!result.success) {
                     onStep({
