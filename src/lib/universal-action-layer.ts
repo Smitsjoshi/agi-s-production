@@ -102,11 +102,11 @@ export class UALClient {
     /**
      * Plan actions using AI
      */
-    async planActions(goal: string, url?: string, state?: any): Promise<{ actions: WebAction[], status?: string, reasoning?: string, answer?: string }> {
+    async planActions(goal: string, url?: string, state?: any, history?: any[]): Promise<{ actions: WebAction[], status?: string, reasoning?: string, answer?: string }> {
         const response = await fetch('/api/ual/plan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ goal, context: { url, ...state } }),
+            body: JSON.stringify({ goal, context: { url, ...state }, history }),
         });
 
         if (!response.ok) {

@@ -19,6 +19,7 @@ export class UALAgentLoop {
         let stepCount = 0;
         const sessionId = `agent-${Math.random().toString(36).substring(2, 9)}`;
         let currentState: { url?: string; title?: string; text?: string; botStatus?: string } = {};
+        const actionHistory: any[] = [];
 
         try {
             while (stepCount < this.maxSteps && this.isRunning) {
@@ -31,8 +32,8 @@ export class UALAgentLoop {
                     timestamp: Date.now()
                 });
 
-                // Pass context (url, title, snippet, botStatus) to planner
-                const plan = await this.client.planActions(goal, currentState.url, currentState);
+                // Pass context (url, title, snippet, botStatus) AND HISTORY to planner
+                const plan = await this.client.planActions(goal, currentState.url, currentState, actionHistory);
                 const { actions, status, reasoning } = plan;
 
                 if (status === 'COMPLETED') {
@@ -59,6 +60,9 @@ export class UALAgentLoop {
                     actions,
                     timestamp: Date.now()
                 });
+
+                // Record actions to history
+                actionHistory.push({ step: stepCount, actions, reasoning });
 
                 // 2. EXECUTING
                 const result: UALResult = await this.client.executeTask({

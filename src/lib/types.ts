@@ -470,6 +470,8 @@ export interface ChatMessage {
     sources?: { url: string; title: string; preview?: string }[];
     reasoning?: string;
     confidenceScore?: number;
+    feedback?: 'up' | 'down';
+    feedbackReason?: string;
 
     // Fields for structured Blueprint output
     title?: string;

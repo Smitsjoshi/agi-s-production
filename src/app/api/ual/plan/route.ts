@@ -62,11 +62,13 @@ async function callGroqForPlanning(messages: Array<{ role: string; content: stri
 export async function POST(req: NextRequest) {
     let goal = '';
     let context: any = {};
+    let history: any[] = [];
 
     try {
         const body = await req.json();
         goal = body.goal;
         context = body.context;
+        history = body.history || [];
 
         // DEBUG: Check for API Key (Masked)
         const hasKey = !!process.env.GROQ_API_KEY;
@@ -76,6 +78,11 @@ export async function POST(req: NextRequest) {
         if (!hasKey) {
             throw new Error("Missing GROQ_API_KEY environment variable. We tried to load it but failed.");
         }
+
+        // Format history for the prompt
+        const historyText = history.length > 0
+            ? history.map((h, i) => `Step ${h.step}: ${JSON.stringify(h.actions)}`).join('\n')
+            : "No previous actions taken.";
 
         const prompt = `You are an AUTONOMOUS WEB AGENT PLANNER.
 Your job: Convert user goals into EXECUTABLE browser actions.
@@ -87,12 +94,16 @@ URL: ${context?.url || 'about:blank'}
 Title: ${context?.title || 'Unknown'}
 Page Text: ${context?.text?.substring(0, 300) || 'Empty page'}
 
+ACTION HISTORY (What you have already done):
+${historyText}
+
 ═══════════════════════════════════════════════════════════════
-CRITICAL RULE - READ THIS CAREFULLY:
+CRITICAL RULES - READ CAREFULLY:
 ═══════════════════════════════════════════════════════════════
 
-When you generate a "type" action, you MUST include the "value" field.
-The "value" is THE ACTUAL TEXT TO TYPE.
+1. DO NOT REPEAT FAILED ACTIONS. If you see an action in the HISTORY that didn't work (e.g. you are still on the same page), TRY SOMETHING DIFFERENT.
+2. When you generate a "type" action, you MUST include the "value" field.
+   The "value" is THE ACTUAL TEXT TO TYPE.
 
 WRONG ❌:
 { "type": "type", "selector": "input[name='q']" }  // NO VALUE = BROKEN

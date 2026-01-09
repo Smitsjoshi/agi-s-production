@@ -18,6 +18,19 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { useTheme } from 'next-themes';
 import { fadeInUp } from '@/lib/ui-animations';
+import { submitFeedback } from '@/app/actions/feedback-actions';
+import { ConversationStore } from '@/lib/conversation-store';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
 // Code block component with copy functionality
 const CodeBlock = ({ language, value }: { language: string; value: string }) => {
@@ -163,7 +176,55 @@ export function ChatMessageDisplay({
   isLoading?: boolean;
   onBranch?: (messageId: string) => void;
 }) {
-  const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
+  const [feedback, setFeedback] = useState<'up' | 'down' | null>(message.feedback || null);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [feedbackReason, setFeedbackReason] = useState(message.feedbackReason || '');
+  const { toast } = useToast();
+
+  const handleFeedback = async (type: 'up' | 'down') => {
+    if (feedback === type) {
+      // Toggle off if clicking the same one (optional: remove feedback logic?)
+      // For now we keep it simple
+      return;
+    }
+
+    if (type === 'down') {
+      setIsFeedbackModalOpen(true);
+      return;
+    }
+
+    // Handle Upvote immediately
+    setFeedback('up');
+    submitFeedback({
+      messageId: message.id,
+      feedback: 'up',
+      content: message.content
+    });
+    ConversationStore.updateMessageFeedback('current', message.id, 'up');
+
+    toast({
+      title: "Feedback Submitted",
+      description: "Thanks for your feedback!",
+    });
+  };
+
+  const submitNegativeFeedback = async () => {
+    setFeedback('down');
+    setIsFeedbackModalOpen(false);
+
+    await submitFeedback({
+      messageId: message.id,
+      feedback: 'down',
+      reason: feedbackReason,
+      content: message.content
+    });
+    ConversationStore.updateMessageFeedback('current', message.id, 'down', feedbackReason);
+
+    toast({
+      title: "Feedback Submitted",
+      description: "We'll use this to improve.",
+    });
+  };
 
   if (message.role === 'user') {
     return (
@@ -218,32 +279,6 @@ export function ChatMessageDisplay({
               <div className="text-sm">
                 <EnhancedMarkdown content={message.content} />
               </div>
-
-              {message.agentSteps && message.agentSteps.length > 0 && (
-                <div className="mt-4 border rounded-md p-3 bg-muted/30">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Agent Execution Strategy</h4>
-                  <div className="space-y-2">
-                    {message.agentSteps.map((step, idx) => (
-                      <div key={idx} className="flex items-start gap-2 text-xs">
-                        <div className={cn(
-                          "w-2 h-2 rounded-full mt-1",
-                          step.type === 'completed' ? "bg-green-500" :
-                            step.type === 'failed' ? "bg-red-500" :
-                              step.type === 'planning' ? "bg-blue-500" :
-                                step.type === 'executing' ? "bg-yellow-500" : "bg-gray-500"
-                        )} />
-                        <div className="flex-1">
-                          <span className="font-medium text-foreground">{step.type.toUpperCase()}</span>: {step.message}
-                          {step.screenshot && (
-                            <img src={`data:image/png;base64,${step.screenshot}`} alt="Step Screenshot" className="mt-1 rounded border max-w-[200px]" />
-                          )}
-                        </div>
-                        <span className="text-muted-foreground tabular-nums">{new Date(step.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {message.agentSteps && message.agentSteps.length > 0 && (
                 <div className="mt-4 border rounded-md p-3 bg-muted/30">
@@ -326,7 +361,7 @@ export function ChatMessageDisplay({
                     variant={feedback === 'up' ? 'secondary' : 'ghost'}
                     size="icon"
                     className="h-7 w-7"
-                    onClick={() => setFeedback(feedback === 'up' ? null : 'up')}
+                    onClick={() => handleFeedback('up')}
                   >
                     <ThumbsUp className={cn("h-4 w-4", feedback === 'up' && "text-primary")} />
                   </Button>
@@ -334,7 +369,7 @@ export function ChatMessageDisplay({
                     variant={feedback === 'down' ? 'secondary' : 'ghost'}
                     size="icon"
                     className="h-7 w-7"
-                    onClick={() => setFeedback(feedback === 'down' ? null : 'down')}
+                    onClick={() => handleFeedback('down')}
                   >
                     <ThumbsDown className={cn("h-4 w-4", feedback === 'down' && "text-destructive")} />
                   </Button>
@@ -360,6 +395,32 @@ export function ChatMessageDisplay({
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={isFeedbackModalOpen} onOpenChange={setIsFeedbackModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Provide Feedback</DialogTitle>
+            <DialogDescription>
+              Help us improve by telling us what went wrong with this response.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="reason">Reason (Optional)</Label>
+              <Textarea
+                id="reason"
+                placeholder="The answer was hallucinated, incorrect, or unsafe..."
+                value={feedbackReason}
+                onChange={(e) => setFeedbackReason(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsFeedbackModalOpen(false)}>Cancel</Button>
+            <Button onClick={submitNegativeFeedback}>Submit Feedback</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

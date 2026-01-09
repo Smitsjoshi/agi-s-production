@@ -159,4 +159,15 @@ export class ConversationStore {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
     }
   }
+  static updateMessageFeedback(conversationId: string, messageId: string, feedback: 'up' | 'down', reason?: string): void {
+    const conversation = this.getConversation(conversationId);
+    if (!conversation) return;
+
+    const message = conversation.messages.find(m => m.id === messageId);
+    if (message) {
+      message.feedback = feedback;
+      message.feedbackReason = reason;
+      this.saveConversation(conversation);
+    }
+  }
 }
