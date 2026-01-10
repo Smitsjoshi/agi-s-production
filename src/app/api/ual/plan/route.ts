@@ -84,16 +84,46 @@ export async function POST(req: NextRequest) {
             ? history.map((h, i) => `Step ${h.step}: ${JSON.stringify(h.actions)} -> Result: ${h.result || 'Unknown'}`).join('\n')
             : "No previous actions taken.";
 
-        // DYNAMIC CLARIFICATION: Check if we are stuck or blocked
+        // DYNAMIC CLARIFICATION & BLACKLISTING
+        // Check for blocked attempts and explicitly FORBID those domains
         let antiLoopInstruction = "";
-        const isBlocked = history.some(h => JSON.stringify(h).includes("BLOCKED"));
-        if (isBlocked) {
+        const blockedSteps = history.filter(h => JSON.stringify(h).includes("BLOCKED"));
+
+        if (blockedSteps.length > 0) {
+            // Extract domains from failed actions
+            const forbiddenDomains = new Set<string>();
+            blockedSteps.forEach(h => {
+                if (h.actions && Array.isArray(h.actions)) {
+                    h.actions.forEach((a: any) => {
+                        if (a.url) {
+                            try {
+                                const hostname = new URL(a.url).hostname.replace('www.', '');
+                                forbiddenDomains.add(hostname);
+                            } catch (e) { /* ignore invalid urls */ }
+                        }
+                    });
+                }
+            });
+
+            // Specific Hardcoded blocks we know about
+            if (JSON.stringify(history).includes("coinbase.com")) forbiddenDomains.add("coinbase.com");
+
+            const forbiddenList = Array.from(forbiddenDomains).join(', ');
+
             antiLoopInstruction = `
-WARNING: PREVIOUS ATTEMPTS WERE BLOCKED BY ANTI-BOT DEFENSES.
-STRATEGY CHANGE REQUIRED:
-1. DO NOT try to refresh or wait on the current page. It will not work.
-2. NAVIGATE IMMEDIATELY to a different search engine or website.
-3. If you were on coinbase.com, try coinmarketcap.com or google.com.
+═══════════════════════════════════════════════════════════════
+⛔ CRITICAL SECURITY OVERRIDE - ACTIVE BLOCKS DETECTED ⛔
+═══════════════════════════════════════════════════════════════
+The following domains have BLOCKED you: [ ${forbiddenList} ]
+
+YOU ARE STRICTLY FORBIDDEN FROM NAVIGATING TO OR INTERACTING WITH:
+${Array.from(forbiddenDomains).map(d => `- ${d} (and any subdomains)`).join('\n')}
+
+STRATEGY OVERRIDE:
+1. DO NOT attempt to bypass these blocks. You will fail.
+2. NAVIGATE IMMEDIATELY to an alternative source.
+   - Example: If coinbase.com is blocked, use coinmarketcap.com, binance.com, or google.com snippets.
+3. If you are stuck on a blocked page, your NEXT action MUST be a 'navigate' to a SAFE domain.
 `;
         }
 

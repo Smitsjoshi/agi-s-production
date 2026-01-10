@@ -190,6 +190,26 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
     e.preventDefault();
     if (!input.trim() && !file) return;
 
+    // 1. RECALL STEP (Total Recall)
+    let memoryContext = "";
+    try {
+      // Dynamic import to avoid circular dep issues during heavy load
+      const { memoryService } = await import('@/lib/memory-service');
+      const recalledItems = await memoryService.recall(input, 3);
+
+      if (recalledItems.length > 0) {
+        console.log("🧠 Memory Recalled:", recalledItems);
+        toast({
+          title: "🧠 Memory Active",
+          description: `Recalled ${recalledItems.length} past items.`,
+          duration: 2000,
+        });
+        memoryContext = `\n\n[RECALLED MEMORY CONTEXT]:\n${recalledItems.map(item => `- ${item.content.substring(0, 100)}...`).join('\n')}`;
+      }
+    } catch (e) {
+      console.error("Memory Recall Failed", e);
+    }
+
     // Capture current values
     const currentInput = input;
     const currentFile = file;

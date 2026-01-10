@@ -1,4 +1,6 @@
 import { ChatMessage, AiMode } from './types';
+import { memoryService } from './memory-service';
+
 
 export interface Conversation {
   id: string;
@@ -27,6 +29,7 @@ export class ConversationStore {
     return conversations.find(c => c.id === id) || null;
   }
 
+
   static saveConversation(conversation: Conversation): void {
     const conversations = this.getAllConversations();
     const index = conversations.findIndex(c => c.id === conversation.id);
@@ -40,6 +43,21 @@ export class ConversationStore {
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+
+    // Fire-and-forget indexing to Memory Service (Async)
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        conversation.messages.forEach(msg => {
+          memoryService.addMemory({
+            type: 'message',
+            content: msg.content,
+            conversationId: conversation.id,
+            metadata: { role: msg.role },
+            tags: conversation.tags || []
+          });
+        });
+      }, 0);
+    }
   }
 
   static deleteConversation(id: string): void {

@@ -85,18 +85,63 @@ export class UALClient {
     /**
      * Execute a task via the UAL API
      */
+    /**
+     * Execute a task via the UAL Browser API
+     */
     async executeTask(task: UALTask): Promise<UALResult> {
-        const response = await fetch('/api/ual/execute', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(task),
-        });
+        // Prepare results
+        const steps: string[] = [];
+        let screenshot: string | undefined;
+        let lastData: any;
 
-        if (!response.ok) {
-            throw new Error(`UAL API error: ${response.statusText}`);
+        // Execute each action sequentially via the browser/route API
+        if (task.actions) {
+            for (const action of task.actions) {
+                try {
+                    // Check if action is supported by BrowserEngine
+                    if (['click', 'type', 'navigate', 'scroll', 'wait', 'press'].includes(action.type)) {
+                        const response = await fetch('/api/ual/browser', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: action.type === 'navigate' ? 'navigate' : 'execute',
+                                type: action.type,
+                                url: action.url,
+                                selector: action.selector,
+                                value: action.value,
+                                key: action.key
+                            }),
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Browser API error: ${response.statusText}`);
+                        }
+
+                        const result = await response.json();
+                        if (result.screenshot) screenshot = result.screenshot;
+                        if (result.text) lastData = result; // Capture page context if returned
+
+                        steps.push(`Executed ${action.type}: Success`);
+                    } else {
+                        steps.push(`Skipped unsupported action: ${action.type}`);
+                    }
+                } catch (e: any) {
+                    console.error(`Action failed: ${action.type}`, e);
+                    return {
+                        success: false,
+                        error: `Action ${action.type} failed: ${e.message}`,
+                        steps
+                    };
+                }
+            }
         }
 
-        return await response.json();
+        return {
+            success: true,
+            screenshot,
+            data: lastData,
+            steps
+        };
     }
 
     /**
