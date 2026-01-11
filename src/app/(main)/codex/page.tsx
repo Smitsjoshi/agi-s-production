@@ -278,14 +278,41 @@ export default function CodeXPage() {
                     previewCode = code.replace(/\*\*[^*]+\*\*/g, '').replace(/```/g, '').trim();
                 }
 
-                doc.open();
-                doc.write(previewCode);
-                doc.close();
+                // For HTML: write directly
+                if (language === 'html') {
+                    doc.open();
+                    doc.write(previewCode);
+                    doc.close();
+                }
+                // For JavaScript/React: wrap in HTML
+                else if (language === 'javascript' || language === 'react') {
+                    const htmlWrapper = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script>
+        ${previewCode}
+    </script>
+</body>
+</html>`;
+                    doc.open();
+                    doc.write(htmlWrapper);
+                    doc.close();
+                }
             }
         }
     }, [code, language]);
 
-    const canPreview = ['html', 'react', 'css', 'javascript'].includes(language);
+    const canPreview = ['html', 'javascript', 'react'].includes(language);
     const currentPreviewMode = PREVIEW_MODES.find(m => m.value === previewMode);
     const PreviewIcon = currentPreviewMode?.icon || Monitor;
 

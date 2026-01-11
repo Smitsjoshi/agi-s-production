@@ -177,19 +177,41 @@ ${REALITY_SHARDS[mode] || FALLBACK_REALITY_SHARD}`;
 
     const answer = await callGroqText(messages, modelId);
 
-    // For CodeX mode, return cleaned componentCode
+    // For CodeX mode, return cleaned componentCode with MUCH better extraction
     if (mode === 'CodeX') {
       const extractCode = (text: string) => {
-        const codeBlockRegex = /```(?:\w+)?\s*([\s\S]*?)\s*```/g;
+        // Try to find code blocks first
+        const codeBlockRegex = /```(?:html|css|javascript|typescript|jsx|tsx|python|java|cpp|go|rust|php|ruby)?\s*\n([\s\S]*?)\n```/g;
         const matches = [...text.matchAll(codeBlockRegex)];
+
         if (matches.length > 0) {
+          // Return all code blocks joined
           return matches.map(m => m[1].trim()).join('\n\n');
         }
-        return text.replace(/\*\*[^*]+\*\*/g, '').replace(/```/g, '').trim();
+
+        // If no code blocks, check if entire response looks like code
+        const looksLikeCode = text.includes('function') ||
+          text.includes('const ') ||
+          text.includes('class ') ||
+          text.includes('<div') ||
+          text.includes('def ') ||
+          text.includes('public ');
+
+        if (looksLikeCode) {
+          // Remove any markdown formatting but keep the code
+          return text
+            .replace(/\*\*[^*]+\*\*/g, '') // Remove bold
+            .replace(/^#+\s+.+$/gm, '') // Remove headers
+            .replace(/```/g, '') // Remove stray backticks
+            .trim();
+        }
+
+        // Last resort: return as-is
+        return text.trim();
       };
 
       const cleanedCode = extractCode(answer);
-      return { componentCode: cleanedCode, reasoning: `Generated code using AGI-S S-Series Engine` };
+      return { componentCode: cleanedCode, reasoning: `Generated using ${modelId}` };
     }
 
     return { answer };
