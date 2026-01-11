@@ -423,26 +423,35 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
                   </PopoverContent>
                 </Popover>
 
-                <Button
-                  type="button"
-                  variant={isListening ? "destructive" : "outline"} // Changed to outline for visibility if ghost was blending in
-                  size="icon"
-                  className={cn("h-8 w-8 transition-colors", isListening ? "animate-pulse" : "text-muted-foreground hover:text-foreground")}
-                  onClick={() => {
-                    // Toggle Logic
-                    if (isListening) {
-                      stopListening();
-                    } else {
-                      // Ensure we have a way to stop speaking if needed, simplified
-                      if (typeof stopSpeaking === 'function') stopSpeaking();
-                      startListening();
-                    }
-                  }}
-                  disabled={isLoading}
-                  title={isListening ? "Stop Listening" : "Start Voice Mode"}
-                >
-                  <Mic className="h-4 w-4" />
-                </Button>
+                {/* HUGE VOICE BUTTON */}
+                <div className="flex-1 flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant={isListening ? "default" : "outline"}
+                    size="lg"
+                    className={cn(
+                      "h-12 px-6 gap-3 font-bold transition-all flex-1 max-w-xs",
+                      isListening
+                        ? "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white animate-pulse shadow-lg shadow-red-500/50 border-0"
+                        : "border-2 border-primary/40 hover:border-primary hover:bg-primary/10 hover:scale-105"
+                    )}
+                    onClick={() => {
+                      if (isListening) {
+                        stopListening();
+                      } else {
+                        startListening();
+                      }
+                    }}
+                    disabled={isLoading}
+                    title={isListening ? "Stop Listening" : "Start Voice Mode"}
+                  >
+                    <Mic className={cn("h-6 w-6", isListening && "animate-pulse")} />
+                    <span className="text-base font-bold">
+                      {isListening ? "🎤 Listening..." : "Voice Chat"}
+                    </span>
+                  </Button>
+                </div>
+
                 <Button
                   type="button"
                   variant="ghost"
