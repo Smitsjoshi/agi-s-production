@@ -80,62 +80,65 @@ export class UALAgentLoop {
                 });
 
                 // 2. EXECUTING
-                let finalResult: UALResult = { success: false, error: 'No actions executed' }; // Initialize a result object
+                let finalResult: UALResult = { success: false, error: 'No actions executed', steps: [] };
 
                 for (const nextAction of actions) {
+                    // Check if stop was requested
+                    if (!this.isRunning) {
+                        finalResult = { success: false, error: 'Stopped by user', steps: [] };
+                        break;
+                    }
+
                     // 3. EXECUTION PHASE
                     onStep({ type: 'executing', message: `Executing: ${nextAction.type}`, timestamp: Date.now(), actions: [nextAction] });
 
                     let result: UALResult;
+                    const action = nextAction as any;
 
                     // DESKTOP ACTION HANDLER
-                    if (nextAction.type.startsWith('desktop_') || (nextAction.type === 'click' && nextAction.x !== undefined) || (nextAction.type === 'type' && !nextAction.selector)) {
+                    if (action.type.startsWith('desktop_') || (action.type === 'click' && action.x !== undefined) || (action.type === 'type' && !action.selector)) {
                         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                            const payload: any = { type: 'UNKNOWN', ...nextAction };
+                            const payload: any = { type: 'UNKNOWN', ...action };
 
                             // Map Planner Actions to Bridge Commands
-                            if (nextAction.type === 'desktop_run') {
+                            if (action.type === 'desktop_run') {
                                 payload.type = 'RUN_TERMINAL';
-                                payload.command = nextAction.command;
-                            } else if (nextAction.type === 'desktop_key') {
+                                payload.command = action.command;
+                            } else if (action.type === 'desktop_key') {
                                 payload.type = 'KEY_PRESS';
-                                payload.key = nextAction.key;
-                            } else if (nextAction.type === 'click' && nextAction.x !== undefined) {
-                                // Move AND Click
-                                this.ws.send(JSON.stringify({ type: 'MOUSE_MOVE', x: nextAction.x, y: nextAction.y }));
-                                await new Promise(r => setTimeout(r, 100)); // wait for move
+                                payload.key = action.key;
+                            } else if (action.type === 'click' && action.x !== undefined) {
+                                this.ws.send(JSON.stringify({ type: 'MOUSE_MOVE', x: action.x, y: action.y }));
+                                await new Promise(r => setTimeout(r, 100));
                                 payload.type = 'CLICK';
-                            } else if (nextAction.type === 'desktop_type' || (nextAction.type === 'type' && !nextAction.selector)) {
+                            } else if (action.type === 'desktop_type' || (action.type === 'type' && !action.selector)) {
                                 payload.type = 'TYPE';
-                                payload.text = nextAction.text;
+                                payload.text = action.text || action.value;
                             }
 
                             this.ws.send(JSON.stringify(payload));
-                            result = { success: true, message: "Sent to Desktop Bridge" };
-                            await new Promise(r => setTimeout(r, 500)); // Wait for execution
+                            result = {
+                                success: true,
+                                steps: [`Desktop action: ${action.type}`],
+                                data: { title: 'Desktop Action Executed', url: 'desktop://', text: 'Action completed' }
+                            };
+                            await new Promise(r => setTimeout(r, 800));
                         } else {
-                            // Fallback if bridge is not running
-                            if (nextAction.type === 'click' && !nextAction.x) {
-                                // It's a browser click
-                                result = await this.client.executeAction(nextAction);
-                            } else {
-                                throw new Error("Desktop Bridge not connected. Run 'node src/server/desktop-bridge.js' locally.");
-                            }
+                            result = { success: false, error: 'Desktop Bridge not connected', steps: [] };
                         }
                     } else {
                         // STANDARD BROWSER ACTION
-                        result = await this.client.executeAction(nextAction);
+                        result = await this.client.executeTask({ goal, sessionId, actions: [nextAction] });
                     }
 
-                    // If any action fails, we might want to break or mark the overall execution as failed
                     if (!result.success) {
-                        finalResult = result; // Store the failing result
-                        break; // Stop executing further actions in this step
+                        finalResult = result;
+                        break;
                     }
-                    finalResult = result; // Keep track of the last successful result
+                    finalResult = result;
                 }
 
-                const result: UALResult = finalResult; // Use the accumulated result for subsequent steps
+                const result: UALResult = finalResult;
 
                 // Record actions AND RESULT to history
                 // This is critical for the planner to know if it failed
