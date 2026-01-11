@@ -51,7 +51,7 @@ export class UALAgentLoop {
                 });
 
                 // Pass context (url, title, snippet, botStatus) AND HISTORY to planner
-                const plan = await this.client.planActions(goal, currentState.url, currentState, actionHistory);
+                const plan = await this.client.planActions(goal, currentState.url, currentState, this.actionHistory);
                 const { actions, status, reasoning } = plan;
 
                 if (status === 'COMPLETED') {
@@ -143,7 +143,7 @@ export class UALAgentLoop {
                     ? (result.data?.botStatus === "BLOCK_DETECTED" ? "FAILED: BLOCKED" : "SUCCESS")
                     : `FAILED: ${result.error}`;
 
-                actionHistory.push({ step: stepCount, actions, reasoning, result: executionResult });
+                this.actionHistory.push(JSON.stringify({ step: stepCount, actions, reasoning, result: executionResult }));
 
                 // 3. OBSERVING
                 const obsMessage = result.data?.botStatus === "BLOCK_DETECTED"
@@ -174,8 +174,11 @@ export class UALAgentLoop {
                         });
 
                         // CRITICAL: Overwrite the last history entry to ensure the planner sees the BLOCK failure
-                        if (actionHistory.length > 0) {
-                            actionHistory[actionHistory.length - 1].result = "FAILED: BLOCKED BY CLOUDFLARE/CAPTCHA. DO NOT RETRY THIS URL. NAVIGATE TO GOOGLE.";
+                        if (this.actionHistory.length > 0) {
+                            // Parse because it's stored as string now
+                            const lastEntry = JSON.parse(this.actionHistory[this.actionHistory.length - 1]);
+                            lastEntry.result = "FAILED: BLOCKED BY CLOUDFLARE/CAPTCHA. DO NOT RETRY THIS URL. NAVIGATE TO GOOGLE.";
+                            this.actionHistory[this.actionHistory.length - 1] = JSON.stringify(lastEntry);
                         }
 
                         // Hard wait to reset
