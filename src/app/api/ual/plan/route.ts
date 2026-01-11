@@ -159,6 +159,21 @@ OUTPUT FORMAT (JSON ONLY):
       "question": "Did the price appear?",
       "criteria": "The text contains '$' or the title does not contain 'Just a moment'."
   },
+ // 6. BROWSER & DESKTOP TOOLS (Use these for interaction)
+//    - "navigate": { "url": "https://..." }
+//    - "click": { "selector": "css_selector" } (Browser) or { "x": 50, "y": 50 } (Desktop % coordinates)
+//    - "type": { "selector": "...", "text": "..." } (Browser) or { "text": "..." } (Desktop)
+//    - "desktop_run": { "command": "calc" } (Opens Calculator, Notepad, etc.)
+//    - "desktop_key": { "key": "enter" }
+//
+// 7. DESKTOP MODE (IMPORTANT):
+//    - If user asks to "Open Calculator" or "Type in Notepad", use "desktop_run" and "desktop_type".
+//    - Do NOT use browser tools for desktop tasks.
+//    - For mouse movement, use "click" with x/y (0-100%).
+
+// 8. CRITICAL RULES:
+//    - If the user goal is vague (e.g., "research X"), break it down into search -> visit -> extract.
+//    - If the user says "move mouse", generate a "click" action with x/y but no selector.
   "actions": [
     { "type": "navigate", "url": "https://www.google.com" },
     { "type": "type", "selector": "input[name='q']", "value": "THE SEARCH QUERY HERE" },
