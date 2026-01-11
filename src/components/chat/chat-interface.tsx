@@ -425,18 +425,21 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
 
                 <Button
                   type="button"
-                  variant={isListening ? "destructive" : "ghost"}
+                  variant={isListening ? "destructive" : "outline"} // Changed to outline for visibility if ghost was blending in
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                  className={cn("h-8 w-8 transition-colors", isListening ? "animate-pulse" : "text-muted-foreground hover:text-foreground")}
                   onClick={() => {
+                    // Toggle Logic
                     if (isListening) {
                       stopListening();
                     } else {
-                      stopSpeaking(); // <--- INTERRUPTION: Stop AI voice immediately
+                      // Ensure we have a way to stop speaking if needed, simplified
+                      if (typeof stopSpeaking === 'function') stopSpeaking();
                       startListening();
                     }
                   }}
                   disabled={isLoading}
+                  title={isListening ? "Stop Listening" : "Start Voice Mode"}
                 >
                   <Mic className="h-4 w-4" />
                 </Button>

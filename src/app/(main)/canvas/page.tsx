@@ -161,14 +161,17 @@ export default function CanvasPage() {
                         <div className="absolute inset-0 bg-blue-500/5 blur-xl rounded-full opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
                         <div className="bg-[#0A0A0A] border border-white/10 hover:border-white/20 focus-within:border-blue-500/50 focus-within:bg-[#0f0f0f] focus-within:ring-1 focus-within:ring-blue-500/20 rounded-xl flex items-center h-11 w-full px-4 shadow-lg transition-all">
                             <Command className="h-4 w-4 text-white/30 mr-3 animate-pulse" />
-                            <Input
-                                value={goal}
-                                onChange={(e) => setGoal(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && !isRunning && handleStart()}
-                                placeholder="Enter objective for autonomous execution..."
-                                className="bg-transparent border-0 h-full text-sm font-light placeholder:text-white/20 focus-visible:ring-0 px-0 tracking-wide"
-                                disabled={isRunning}
-                            />
+                            {/* Chat Input Area - Force High Z-Index */}
+                            <div className="bg-transparent h-full text-sm font-light placeholder:text-white/20 focus-visible:ring-0 px-0 tracking-wide flex-1 z-50 relative pointer-events-auto">
+                                <Input
+                                    placeholder="Enter objective for autonomous execution..."
+                                    value={goal}
+                                    onChange={(e) => setGoal(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && !isRunning && handleStart()}
+                                    className="bg-transparent border-0 h-full w-full"
+                                    disabled={isRunning}
+                                />
+                            </div>
                             {isRunning ? (
                                 <Button onClick={handleStop} variant="ghost" size="sm" className="h-7 px-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg text-xs uppercase font-bold tracking-wider gap-2 ml-2">
                                     <StopCircle className="h-3 w-3" /> Stop
