@@ -44,8 +44,12 @@ wss.on('connection', (ws) => {
                     console.log("Simulating Click...");
                     break;
                 case 'TYPE':
-                    // sanitize input?
-                    const safeText = cmd.text.replace(/"/g, '\\"');
+                    // Properly escape for PowerShell - replace quotes with backtick-quote
+                    const safeText = cmd.text
+                        .replace(/`/g, '``')   // Escape backticks first
+                        .replace(/"/g, '`"')   // Escape double quotes
+                        .replace(/\$/g, '`$')  // Escape dollar signs
+                        .replace(/\n/g, '{ENTER}'); // Convert newlines
                     runPowershell(`[System.Windows.Forms.SendKeys]::SendWait("${safeText}")`);
                     break;
                 case 'KEY_PRESS':
