@@ -959,9 +959,26 @@ export async function generateCatalystAction(input: CatalystInput): Promise<{ su
     
     Rules:
     - Create exactly 3 modules for this preview.
+    - Each module quiz should have 3-5 questions.
+    - **CRITICAL**: The finalExam MUST have 5-10 comprehensive questions covering all modules.
+    - **CRITICAL**: For EVERY question, the "correctAnswer" field MUST be an EXACT COPY of one of the options (character-for-character match).
     - Be academically rigorous but accessible.
     - Provide REAL or HIGH-PROBABILITY URLs for resources (Youtube, Wikipedia, Documentation).
-    - Return ONLY valid JSON.`;
+    - Return ONLY valid JSON.
+    
+    Example of CORRECT answer format:
+    {
+      "question": "What is 2+2?",
+      "options": ["3", "4", "5", "6"],
+      "correctAnswer": "4"  ← EXACT match with options[1]
+    }
+    
+    WRONG (will cause bugs):
+    {
+      "question": "What is 2+2?",
+      "options": ["Three", "Four", "Five"],
+      "correctAnswer": "four"  ← lowercase, won't match "Four"
+    }`;
 
     const result = await callGroqWithJSON<CatalystOutput>(prompt);
     return { success: true, data: result };
