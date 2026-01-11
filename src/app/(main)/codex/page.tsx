@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import {
     Loader2, Wand2, FileDown, Clipboard, Code, Play,
     RotateCcw, Save, History, Smartphone, Tablet, Monitor,
-    Maximize2, Copy, Check, Sparkles, MessageSquare, Settings2, ShieldHalf
+    Maximize2, Copy, Check, Sparkles, MessageSquare, Settings2, ShieldHalf,
+    Zap, Heart, Rocket, GitBranch, RefreshCw
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { askAi } from '@/app/actions';
