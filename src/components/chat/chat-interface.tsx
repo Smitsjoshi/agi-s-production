@@ -432,6 +432,7 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
                     if (isListening) {
                       stopListening();
                     } else {
+                      stopSpeaking(); // <--- INTERRUPTION: Stop AI voice immediately
                       startListening();
                     }
                   }}

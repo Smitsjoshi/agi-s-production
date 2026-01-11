@@ -2,169 +2,59 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Loader2, Sparkles, Wand2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { generateContinuumAction } from '@/app/actions';
-import type { ContinuumOutput } from '@/lib/types';
-import Image from 'next/image';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-
-const exampleEvents = [
-  "The signing of the Declaration of Independence, 1776",
-  "The first human colony on Mars, 2077",
-  "The fall of the Berlin Wall, 1989",
-  "The height of the Roaring Twenties in New York City",
-];
+import { SimulationEngine, TimelineEvent } from '@/lib/continuum/simulation-engine';
+import { Loader2, RefreshCcw } from 'lucide-react';
 
 export default function ContinuumPage() {
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<ContinuumOutput | null>(null);
-  const { toast } = useToast();
+  const [events, setEvents] = useState<TimelineEvent[]>([
+    { year: 1969, title: "Moon Landing", description: "Apollo 11 lands on the moon.", intensity: 8, type: 'discovery' },
+    { year: 1991, title: "WWW Created", description: "Tim Berners-Lee releases the web.", intensity: 9, type: 'discovery' },
+    { year: 2023, title: "AGI Awakening", description: "First autonomous agents emerge.", intensity: 10, type: 'discovery' },
+  ]);
+  const [loading, setLoading] = useState(false);
 
-  const handleGenerate = async (eventDescription: string) => {
-    if (!eventDescription.trim()) return;
-
-    setIsLoading(true);
-    setResult(null);
-
-    const response = await generateContinuumAction({ eventDescription });
-
-    if (response.success && response.data) {
-      setResult(response.data);
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Error Generating Event',
-        description: response.error,
-      });
-    }
-
-    setIsLoading(false);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleGenerate(input);
+  const handleDivergence = async (index: number) => {
+    setLoading(true);
+    const event = events[index];
+    const newTimeline = await SimulationEngine.simulateTimelineChange(events, event.year, "A Time Traveler interfered here.");
+    setEvents(newTimeline);
+    setLoading(false);
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-8">
-      <div className="text-center">
-        <h1 className="font-headline text-4xl font-bold text-primary">Continuum</h1>
-        <p className="text-muted-foreground text-lg mt-2">The AI-powered historical & future event simulator.</p>
+    <div className="h-full w-full p-8 overflow-y-auto bg-black text-white">
+      <h1 className="text-4xl font-light mb-8 tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">CONTINUUM // CHRONOS</h1>
+
+      <div className="relative border-l-2 border-white/20 ml-8 space-y-12 pb-24">
+        {events.map((event, i) => (
+          <div key={i} className="relative pl-8 group">
+            <div className="absolute -left-[9px] top-2 w-4 h-4 rounded-full bg-blue-500 ring-4 ring-black group-hover:bg-purple-500 transition-colors cursor-pointer"
+              onClick={() => handleDivergence(i)}
+            />
+            <div className="flex items-baseline gap-4">
+              <span className="text-2xl font-mono text-blue-400">{event.year}</span>
+              <h3 className="text-xl font-bold">{event.title}</h3>
+            </div>
+            <p className="text-white/60 mt-2 max-w-xl">{event.description}</p>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity text-purple-400 hover:text-purple-300 hover:bg-purple-900/20"
+              onClick={() => handleDivergence(i)}
+            >
+              <RefreshCcw className="w-4 h-4 mr-2" /> Diverge Timeline
+            </Button>
+          </div>
+        ))}
       </div>
 
-      <Card className="max-w-3xl mx-auto">
-        <CardHeader>
-          <CardTitle>Describe an Event</CardTitle>
-          <CardDescription>Enter a historical or future event to generate an immersive snapshot.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center gap-4">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="e.g., 'The first Moon landing, 1969'"
-              className="flex-1 text-base"
-              disabled={isLoading}
-            />
-            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-              {isLoading ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <>
-                  <Wand2 className="mr-2" />
-                  Generate Snapshot
-                </>
-              )}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex-col sm:flex-row items-start sm:items-center gap-2 p-4 border-t bg-muted/50">
-            <p className="text-sm text-muted-foreground font-medium">Or try an example:</p>
-            <div className="flex flex-wrap gap-2">
-                {exampleEvents.map(event => (
-                    <Button key={event} variant="outline" size="sm" onClick={() => handleGenerate(event)} disabled={isLoading}>
-                        {event}
-                    </Button>
-                ))}
-            </div>
-        </CardFooter>
-      </Card>
-
-      {isLoading && (
-        <div className="text-center p-8">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-          <p className="mt-4 text-muted-foreground">Continuum is traveling through time... please wait.</p>
-        </div>
-      )}
-
-      {result && (
-        <div className="space-y-8">
-          <Card className="overflow-hidden">
-            <CardHeader className="text-center p-6">
-                <p className='font-bold text-primary'>{result.era}</p>
-                <CardTitle className="font-headline text-3xl">{result.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-                <Image src={result.mainImageUrl} alt={result.title} width={1200} height={600} className="w-full h-auto object-cover" priority data-ai-hint="historical event" />
-            </CardContent>
-          </Card>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card>
-                  <CardHeader>
-                      <CardTitle className="font-headline">{result.narrative.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="prose dark:prose-invert max-w-none">
-                     <p>{result.narrative.story}</p>
-                  </CardContent>
-              </Card>
-
-              <Card>
-                  <CardHeader>
-                      <CardTitle className="font-headline">{result.report.title}</CardTitle>
-                      <CardDescription>Source: {result.report.source}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="prose dark:prose-invert max-w-none">
-                    <p>{result.report.content}</p>
-                  </CardContent>
-              </Card>
-          </div>
-
-          <div>
-            <h2 className="text-2xl font-headline font-bold text-center mb-6 flex items-center justify-center gap-2">
-                <Sparkles className="text-primary" /> What If?
-            </h2>
-            <Carousel
-              opts={{
-                align: "start",
-                loop: true,
-              }}
-              className="w-full"
-            >
-              <CarouselContent>
-                {result.whatIf.map((scenario, index) => (
-                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                    <div className="p-1 h-full">
-                       <Card className="h-full flex flex-col">
-                        <CardHeader>
-                            <CardTitle className="text-lg font-semibold">{scenario.scenario}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-1">
-                            <p className="text-muted-foreground">{scenario.description}</p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="hidden sm:flex" />
-              <CarouselNext className="hidden sm:flex" />
-            </Carousel>
+      {loading && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto mb-4" />
+            <p className="text-purple-300 font-mono animate-pulse">REWRITING CAUSALITY...</p>
           </div>
         </div>
       )}
