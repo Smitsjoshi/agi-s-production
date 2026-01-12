@@ -14,6 +14,7 @@ import { nanoid } from 'nanoid';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { Separator } from '../ui/separator';
+import { Slider } from '../ui/slider';
 import { useSound } from '@/hooks/use-sound';
 import { Logo } from '../logo';
 import { useSpeechToText } from '@/hooks/use-speech-to-text';
@@ -58,6 +59,7 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
   const [input, setInput] = useState('');
   const [mode, setMode] = useState<AiMode>('AGI-S S-1');
   const [isLoading, setIsLoading] = useState(false);
+  const [detailLevel, setDetailLevel] = useState([50]);
   const [file, setFile] = useState<{ name: string; type: 'image' | 'pdf'; data: string } | null>(null);
   const [isClient, setIsClient] = useState(false);
 
@@ -245,7 +247,11 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
         const enhancedResponse = await fetch('/api/ask/enhanced', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: currentInput, mode }),
+          body: JSON.stringify({
+            query: currentInput,
+            mode,
+            detailLevel: detailLevel[0] // Pass the permanent detail level
+          }),
         });
 
         if (!enhancedResponse.ok) {
@@ -364,161 +370,208 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
             </ScrollArea>
           </div>
         )}
-        <div className="relative rounded-xl border bg-background/50 focus-within:ring-1 focus-within:ring-ring transition-all shadow-sm">
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col gap-2 p-3"
-          >
-            <Textarea
-              value={input}
-              onChange={handleInputChange}
-              placeholder={`Ask ${mode}...`}
-              className="chat-input flex-1 resize-none border-0 shadow-none focus-visible:ring-0 text-base min-h-[60px] bg-transparent p-2"
-              onKeyDown={handleKeyDown}
-              disabled={isLoading}
-              rows={1}
-            />
-
-            <div className="flex items-center justify-between mt-2">
-              <div className="flex items-center gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground font-normal" disabled={isLoading}>
-                      <ModeIcon className="h-4 w-4" />
-                      <span className="text-xs">{mode}</span>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[26rem] p-0 mb-2">
-                    <ScrollArea className="h-[32rem]">
-                      <div className="p-4 grid gap-4">
-                        <div className="space-y-2">
-                          <h4 className="font-medium leading-none">AI Modes</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Select a specialized AI agent for your task.
-                          </p>
-                        </div>
-                        <div className="grid gap-2">
-                          {MAIN_AI_MODES.map((m) => {
-                            const { icon: Icon, description } = AI_MODE_DETAILS[m];
-                            return (
-                              <div
-                                key={m}
-                                onClick={() => setMode(m)}
-                                className={cn(
-                                  'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
-                                  mode === m ? 'bg-secondary' : 'hover:bg-muted/50'
-                                )}
-                              >
-                                <Icon className="h-5 w-5 mt-0.5 text-primary" />
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <p className="font-medium text-sm">{m}</p>
-                                  </div>
-                                  <p className="text-xs text-muted-foreground">{description}</p>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <Separator />
-                        <div className="space-y-2">
-                          <h4 className="font-medium leading-none">Personas</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Chat with a specialized persona.
-                          </p>
-                        </div>
-                        <div className="grid gap-2">
-                          {PERSONAS.map((m) => {
-                            const { icon: Icon, description } = AI_MODE_DETAILS[m];
-                            return (
-                              <div
-                                key={m}
-                                onClick={() => setMode(m)}
-                                className={cn(
-                                  'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
-                                  mode === m ? 'bg-secondary' : 'hover:bg-muted/50'
-                                )}
-                              >
-                                <Icon className="h-5 w-5 mt-0.5 text-primary" />
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <p className="font-medium text-sm">{m}</p>
-                                  </div>
-                                  <p className="text-xs text-muted-foreground">{description}</p>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </ScrollArea>
-                  </PopoverContent>
-                </Popover>
-
-                {/* HUGE VOICE BUTTON */}
-                <div className="flex-1 flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant={isListening ? "default" : "outline"}
-                    size="lg"
-                    className={cn(
-                      "h-12 px-6 gap-3 font-bold transition-all flex-1 max-w-xs",
-                      isListening
-                        ? "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white animate-pulse shadow-lg shadow-red-500/50 border-0"
-                        : "border-2 border-primary/40 hover:border-primary hover:bg-primary/10 hover:scale-105"
-                    )}
-                    onClick={() => {
-                      if (isListening) {
-                        stopListening();
-                        // SMALL DELAY TO LET TRANSCRIPT FINISH AND THEN SUBMIT
-                        setTimeout(async () => {
-                          if (input.trim()) {
-                            // We need to pass the actual event or mock it
-                            const mockEvent = { preventDefault: () => { } } as any;
-                            await handleSubmit(mockEvent);
-                          }
-                        }, 600);
-                      } else {
-                        startListening();
-                      }
-                    }}
-                    disabled={isLoading}
-                    title={isListening ? "Stop Listening" : "Start Voice Mode"}
-                  >
-                    <Mic className={cn("h-6 w-6", isListening && "animate-pulse")} />
-                    <span className="text-base font-bold">
-                      {isListening ? "🎤 Listening..." : "Voice Chat"}
-                    </span>
-                  </Button>
+        {/* PERMANENT REFINEMENT SLIDER (Dominance Mode) */}
+        <div className="mx-auto w-full max-w-4xl px-4 md:px-6 mb-4">
+          <div className="bg-background/40 backdrop-blur-xl border border-primary/20 rounded-2xl p-4 shadow-xl shadow-primary/5 transition-all duration-500 hover:border-primary/40 group">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-1.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                  <Sparkles className="h-4 w-4 text-primary animate-pulse" />
                 </div>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isLoading}
-                >
-                  <Image className="h-4 w-4" />
-                </Button>
-                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf" />
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 block leading-none mb-1">Intelligence Layer</span>
+                  <span className="text-sm font-bold text-foreground tracking-tight">Expertise Refinement</span>
+                </div>
               </div>
-
               <div className="flex items-center gap-2">
-                {file && (
-                  <span className="text-xs text-muted-foreground truncate max-w-[150px]">{file.name}</span>
-                )}
-                <Button type="submit" size="icon" className="h-8 w-8 rounded-lg bg-foreground text-background hover:bg-foreground/90" disabled={isLoading || (!input.trim() && !file)}>
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                </Button>
+                <div className={cn(
+                  "h-1.5 w-1.5 rounded-full animate-ping",
+                  detailLevel[0] < 33 ? "bg-emerald-500" : detailLevel[0] < 66 ? "bg-amber-500" : "bg-rose-500"
+                )} />
+                <span className={cn(
+                  "text-[11px] font-black font-mono px-2.5 py-1 rounded-full border shadow-sm transition-all duration-300",
+                  detailLevel[0] < 33 ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
+                    detailLevel[0] < 66 ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
+                      "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                )}>
+                  {detailLevel[0] < 33 ? 'SIMPLIFIED' :
+                    detailLevel[0] < 66 ? 'BALANCED' :
+                      'PROFESSIONAL'}
+                </span>
               </div>
             </div>
-          </form>
+            <Slider
+              value={detailLevel}
+              onValueChange={setDetailLevel}
+              max={100}
+              step={1}
+              className="w-full py-1 cursor-pointer"
+            />
+            <div className="flex justify-between mt-2">
+              <span className="text-[10px] font-medium text-muted-foreground/60 uppercase">ELI5</span>
+              <span className="text-[10px] font-medium text-muted-foreground/60 uppercase">Balanced</span>
+              <span className="text-[10px] font-medium text-muted-foreground/60 uppercase">PhD Level</span>
+            </div>
+          </div>
         </div>
-        <p className="text-[10px] text-center text-muted-foreground/40 mt-3">
-          AGI-S can make mistakes.
-        </p>
+
+        <div className="max-w-4xl mx-auto px-4 md:px-6">
+          <div className="relative rounded-xl border bg-background/50 focus-within:ring-1 focus-within:ring-ring transition-all shadow-sm">
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-2 p-3"
+            >
+              <Textarea
+                value={input}
+                onChange={handleInputChange}
+                placeholder={`Ask ${mode}...`}
+                className="chat-input flex-1 resize-none border-0 shadow-none focus-visible:ring-0 text-base min-h-[60px] bg-transparent p-2"
+                onKeyDown={handleKeyDown}
+                disabled={isLoading}
+                rows={1}
+              />
+
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 gap-2 text-muted-foreground hover:text-foreground font-normal" disabled={isLoading}>
+                        <ModeIcon className="h-4 w-4" />
+                        <span className="text-xs">{mode}</span>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[26rem] p-0 mb-2">
+                      <ScrollArea className="h-[32rem]">
+                        <div className="max-w-4xl mx-auto px-4 md:px-6">
+                          <div className="space-y-2">
+                            <h4 className="font-medium leading-none">AI Modes</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Select a specialized AI agent for your task.
+                            </p>
+                          </div>
+                          <div className="grid gap-2">
+                            {MAIN_AI_MODES.map((m) => {
+                              const { icon: Icon, description } = AI_MODE_DETAILS[m];
+                              return (
+                                <div
+                                  key={m}
+                                  onClick={() => setMode(m)}
+                                  className={cn(
+                                    'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
+                                    mode === m ? 'bg-secondary' : 'hover:bg-muted/50'
+                                  )}
+                                >
+                                  <Icon className="h-5 w-5 mt-0.5 text-primary" />
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <p className="font-medium text-sm">{m}</p>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">{description}</p>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <Separator />
+                          <div className="space-y-2">
+                            <h4 className="font-medium leading-none">Personas</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Chat with a specialized persona.
+                            </p>
+                          </div>
+                          <div className="grid gap-2">
+                            {PERSONAS.map((m) => {
+                              const { icon: Icon, description } = AI_MODE_DETAILS[m];
+                              return (
+                                <div
+                                  key={m}
+                                  onClick={() => setMode(m)}
+                                  className={cn(
+                                    'flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors',
+                                    mode === m ? 'bg-secondary' : 'hover:bg-muted/50'
+                                  )}
+                                >
+                                  <Icon className="h-5 w-5 mt-0.5 text-primary" />
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <p className="font-medium text-sm">{m}</p>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">{description}</p>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </ScrollArea>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* HUGE VOICE BUTTON */}
+                  <div className="flex-1 flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant={isListening ? "default" : "outline"}
+                      size="lg"
+                      className={cn(
+                        "h-12 px-6 gap-3 font-bold transition-all flex-1 max-w-xs",
+                        isListening
+                          ? "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white animate-pulse shadow-lg shadow-red-500/50 border-0"
+                          : "border-2 border-primary/40 hover:border-primary hover:bg-primary/10 hover:scale-105"
+                      )}
+                      onClick={() => {
+                        if (isListening) {
+                          stopListening();
+                          // SMALL DELAY TO LET TRANSCRIPT FINISH AND THEN SUBMIT
+                          setTimeout(async () => {
+                            if (input.trim()) {
+                              // We need to pass the actual event or mock it
+                              const mockEvent = { preventDefault: () => { } } as any;
+                              await handleSubmit(mockEvent);
+                            }
+                          }, 600);
+                        } else {
+                          startListening();
+                        }
+                      }}
+                      disabled={isLoading}
+                      title={isListening ? "Stop Listening" : "Start Voice Mode"}
+                    >
+                      <Mic className={cn("h-6 w-6", isListening && "animate-pulse")} />
+                      <span className="text-base font-bold">
+                        {isListening ? "🎤 Listening..." : "Voice Chat"}
+                      </span>
+                    </Button>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isLoading}
+                  >
+                    <Image className="h-4 w-4" />
+                  </Button>
+                  <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf" />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {file && (
+                    <span className="text-xs text-muted-foreground truncate max-w-[150px]">{file.name}</span>
+                  )}
+                  <Button type="submit" size="icon" className="h-8 w-8 rounded-lg bg-foreground text-background hover:bg-foreground/90" disabled={isLoading || (!input.trim() && !file)}>
+                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <p className="text-[10px] text-center text-muted-foreground/40 mt-3">
+            AGI-S can make mistakes.
+          </p>
+        </div>
       </div>
     </div>
   );

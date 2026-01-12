@@ -115,42 +115,42 @@ export function EnhancedChatMessage({
                             </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="quick" className="space-y-3">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Target className="h-4 w-4" />
-                                <span>Quick Answer (2 sec)</span>
+                        <TabsContent value="quick" className="space-y-4 animate-in fade-in duration-500">
+                            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-primary/70">
+                                <Target className="h-3.5 w-3.5" />
+                                <span>Core Response</span>
                             </div>
-                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                            <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-black prose-headings:tracking-tight prose-headings:text-foreground/90 prose-p:leading-relaxed prose-p:text-foreground/80">
                                 <ReactMarkdown>{enhancedData.quick}</ReactMarkdown>
                             </div>
                         </TabsContent>
 
-                        <TabsContent value="deep" className="space-y-3">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Brain className="h-4 w-4" />
-                                <span>Deep Analysis</span>
+                        <TabsContent value="deep" className="space-y-4 animate-in fade-in duration-500">
+                            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-primary/70">
+                                <Brain className="h-3.5 w-3.5" />
+                                <span>Comprehensive Analysis</span>
                             </div>
-                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                            <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-black prose-headings:tracking-tight prose-headings:text-foreground/90 prose-p:leading-relaxed prose-p:text-foreground/80">
                                 <ReactMarkdown>{enhancedData.deep}</ReactMarkdown>
                             </div>
                         </TabsContent>
 
-                        <TabsContent value="devils" className="space-y-3">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Flame className="h-4 w-4" />
-                                <span>Devil's Advocate</span>
+                        <TabsContent value="devils" className="space-y-4 animate-in fade-in duration-500">
+                            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-orange-500/70">
+                                <Flame className="h-3.5 w-3.5" />
+                                <span>Adversarial Perspective</span>
                             </div>
-                            <div className="prose prose-sm dark:prose-invert max-w-none bg-orange-500/5 border border-orange-500/20 rounded-lg p-4">
+                            <div className="prose prose-slate dark:prose-invert max-w-none bg-orange-500/[0.03] border border-orange-500/10 rounded-2xl p-6 shadow-inner prose-p:text-foreground/80">
                                 <ReactMarkdown>{enhancedData.devils}</ReactMarkdown>
                             </div>
                         </TabsContent>
 
-                        <TabsContent value="data" className="space-y-3">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <BarChart3 className="h-4 w-4" />
-                                <span>Data-Driven</span>
+                        <TabsContent value="data" className="space-y-4 animate-in fade-in duration-500">
+                            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-blue-500/70">
+                                <BarChart3 className="h-3.5 w-3.5" />
+                                <span>Evidence & Metrics</span>
                             </div>
-                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                            <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-black prose-headings:tracking-tight prose-headings:text-foreground/90 prose-p:leading-relaxed prose-p:text-foreground/80">
                                 <ReactMarkdown>{enhancedData.data}</ReactMarkdown>
                             </div>
                         </TabsContent>
@@ -251,24 +251,35 @@ export function EnhancedChatMessage({
 
     // Regular message (fallback)
     return (
-        <div className="mb-4">
-            <div className="bg-muted/50 rounded-2xl px-4 py-3 max-w-[90%]">
-                <div className="prose prose-sm dark:prose-invert max-w-none">
+        <div className="mb-6 group">
+            <div className="bg-muted/30 backdrop-blur-md rounded-3xl px-6 py-5 max-w-[95%] border border-primary/5 shadow-sm transition-all duration-300 hover:bg-muted/40 hover:border-primary/10">
+                <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-black prose-headings:tracking-tight prose-headings:text-foreground/90 prose-p:leading-relaxed prose-p:text-foreground/80 prose-li:text-foreground/80">
                     <ReactMarkdown
                         components={{
-                            code({ node, inline, className, children, ...props }) {
+                            code(props) {
+                                const { children, className, node, ...rest } = props;
                                 const match = /language-(\w+)/.exec(className || '');
-                                return !inline && match ? (
-                                    <SyntaxHighlighter
-                                        style={oneDark}
-                                        language={match[1]}
-                                        PreTag="div"
-                                        {...props}
-                                    >
-                                        {String(children).replace(/\n$/, '')}
-                                    </SyntaxHighlighter>
+                                return match ? (
+                                    <div className="my-6 rounded-2xl overflow-hidden border border-primary/10 shadow-lg">
+                                        <div className="bg-muted/50 px-4 py-2 flex items-center justify-between border-b border-primary/5">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">{match[1]}</span>
+                                            <div className="flex gap-1.5">
+                                                <div className="w-2.5 h-2.5 rounded-full bg-rose-500/20" />
+                                                <div className="w-2.5 h-2.5 rounded-full bg-amber-500/20" />
+                                                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/20" />
+                                            </div>
+                                        </div>
+                                        <SyntaxHighlighter
+                                            style={oneDark as any}
+                                            language={match[1]}
+                                            PreTag="div"
+                                            customStyle={{ margin: 0, padding: '1.5rem', background: 'transparent' }}
+                                        >
+                                            {String(children).replace(/\n$/, '')}
+                                        </SyntaxHighlighter>
+                                    </div>
                                 ) : (
-                                    <code className={className} {...props}>
+                                    <code className={cn("bg-primary/10 text-primary px-1.5 py-0.5 rounded-md text-sm font-mono", className)} {...rest}>
                                         {children}
                                     </code>
                                 );

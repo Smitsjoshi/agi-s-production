@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
     try {
-        const { query, mode } = await request.json();
+        const { query, mode, detailLevel } = await request.json();
 
         if (!query) {
             return NextResponse.json(
@@ -27,13 +27,13 @@ export async function POST(request: NextRequest) {
         // Generate 4 perspectives in parallel
         const perspectives = await Promise.all([
             // 1. Quick Answer
-            generatePerspective(query, 'quick', apiKey),
+            generatePerspective(query, 'quick', apiKey, detailLevel),
             // 2. Deep Analysis
-            generatePerspective(query, 'deep', apiKey),
+            generatePerspective(query, 'deep', apiKey, detailLevel),
             // 3. Devil's Advocate
-            generatePerspective(query, 'devils', apiKey),
+            generatePerspective(query, 'devils', apiKey, detailLevel),
             // 4. Data-Driven
-            generatePerspective(query, 'data', apiKey),
+            generatePerspective(query, 'data', apiKey, detailLevel),
         ]);
 
         // Web search (optional - can be added later)
@@ -65,13 +65,18 @@ export async function POST(request: NextRequest) {
 async function generatePerspective(
     query: string,
     type: 'quick' | 'deep' | 'devils' | 'data',
-    apiKey: string
+    apiKey: string,
+    detailLevel: number = 50
 ): Promise<string> {
+    const expertise = detailLevel < 33 ? 'SIMPLIFIED (ELI5, no jargon, easy to understand)' :
+        detailLevel < 66 ? 'BALANCED (Clear, informative, professional)' :
+            'EXPERT (PhD level, technical, detailed, nuanced)';
+
     const prompts = {
-        quick: `Give a QUICK, concise answer (2-3 sentences max) to: ${query}`,
-        deep: `Provide a DEEP, comprehensive analysis of: ${query}\n\nInclude:\n- Background context\n- Multiple viewpoints\n- Implications\n- Examples`,
-        devils: `Play DEVIL'S ADVOCATE for: ${query}\n\nChallenge the common view. Present the opposite perspective. Be contrarian but constructive.`,
-        data: `Provide a DATA-DRIVEN analysis of: ${query}\n\nInclude:\n- Statistics\n- Trends\n- Comparisons\n- Evidence-based insights`,
+        quick: `Expertise Level: ${expertise}\n\nGive a QUICK, concise answer (2-3 sentences max) to: ${query}`,
+        deep: `Expertise Level: ${expertise}\n\nProvide a DEEP, comprehensive analysis of: ${query}\n\nInclude:\n- Background context\n- Multiple viewpoints\n- Implications\n- Examples`,
+        devils: `Expertise Level: ${expertise}\n\nPlay DEVIL'S ADVOCATE for: ${query}\n\nChallenge the common view. Present the opposite perspective. Be contrarian but constructive.`,
+        data: `Expertise Level: ${expertise}\n\nProvide a DATA-DRIVEN analysis of: ${query}\n\nInclude:\n- Statistics\n- Trends\n- Comparisons\n- Evidence-based insights`,
     };
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
