@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Target, Brain, Flame, BarChart3, Globe,
     Sparkles, Code2, Image as ImageIcon, ChevronDown, ChevronUp,
-    Copy, ThumbsUp, ThumbsDown, Check, Play, ExternalLink, Video
+    Copy, ThumbsUp, ThumbsDown, Check, Play, ExternalLink, Video,
+    X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
@@ -144,6 +145,45 @@ export function EnhancedChatMessage({
         );
     };
 
+    // YouTube Player Modal
+    const YouTubeModal = ({ videoId, isOpen, onClose }: { videoId: string; isOpen: boolean; onClose: () => void }) => {
+        if (!isOpen) return null;
+        return (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 pointer-events-auto">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    onClick={onClose}
+                    className="absolute inset-0 bg-background/80 backdrop-blur-3xl"
+                />
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="relative w-full max-w-5xl aspect-video bg-black rounded-[2rem] overflow-hidden shadow-2xl border border-primary/20"
+                >
+                    <iframe
+                        className="w-full h-full"
+                        src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                    />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-4 right-4 h-10 w-10 text-white hover:bg-white/20 rounded-full"
+                        onClick={onClose}
+                    >
+                        <X className="h-6 w-6" />
+                    </Button>
+                </motion.div>
+            </div>
+        );
+    };
+
+    const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+
     // KILLER FEATURE 1: Multi-Perspective Answers
     if (isEnhanced && enhancedData) {
         const currentExpLabel = currentDetailLevel < 33 ? 'Simplified' : currentDetailLevel < 66 ? 'Balanced' : 'Professional';
@@ -270,11 +310,14 @@ export function EnhancedChatMessage({
                                             transition={{ delay: idx * 0.1 }}
                                             className="group/vid relative bg-muted/30 border border-primary/10 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-500"
                                         >
-                                            <div className="aspect-video relative overflow-hidden">
+                                            <div className="aspect-video relative overflow-hidden bg-muted">
                                                 <img
-                                                    src={video.thumbnail}
+                                                    src={`https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`}
                                                     alt={video.title}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover/vid:scale-110 group-hover/vid:rotate-1"
+                                                    onError={(e) => {
+                                                        (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${video.videoId}/0.jpg`;
+                                                    }}
                                                 />
                                                 <div className="absolute inset-0 bg-black/40 group-hover/vid:bg-black/20 transition-all duration-500" />
                                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/vid:opacity-100 transition-opacity duration-500">
@@ -282,11 +325,9 @@ export function EnhancedChatMessage({
                                                         <Play className="h-6 w-6 text-primary-foreground fill-current" />
                                                     </div>
                                                 </div>
-                                                <a
-                                                    href={`https://www.youtube.com/watch?v=${video.videoId}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="absolute inset-0 z-10"
+                                                <button
+                                                    onClick={() => setSelectedVideo(video.videoId)}
+                                                    className="absolute inset-0 z-10 w-full h-full cursor-pointer"
                                                 />
                                             </div>
                                             <div className="p-4 bg-background/40 backdrop-blur-xl border-t border-primary/5">
@@ -324,6 +365,11 @@ export function EnhancedChatMessage({
                         </div>
                     )}
                 </Card>
+                <YouTubeModal
+                    videoId={selectedVideo || ''}
+                    isOpen={!!selectedVideo}
+                    onClose={() => setSelectedVideo(null)}
+                />
             </div>
         );
     }

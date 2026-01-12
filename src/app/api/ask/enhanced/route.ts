@@ -111,7 +111,7 @@ async function generatePerspective(
             messages: [
                 {
                     role: 'system',
-                    content: 'You are AGI-S. You MUST return ONLY valid JSON. Your response must be an object with "summary", "standard", and "technical" keys. Use markdown inside the strings.',
+                    content: 'You are AGI-S. You MUST return ONLY valid JSON. Your response must be an object with "summary", "standard", and "technical" keys. Use markdown inside the strings. IMPORTANT: NEVER include raw URL links to YouTube or websites inside your text responses; just provide the information. Links will be handled separately.',
                 },
                 {
                     role: 'user',
@@ -184,7 +184,7 @@ async function searchVideos(query: string): Promise<Array<{
                 messages: [
                     {
                         role: 'system',
-                        content: 'You are a video research assistant. Find 3 highly relevant, high-quality educational YouTube video topics/titles for the given query. Return ONLY a JSON array of objects with "title", "description", "videoId" (make up a plausible-looking 11-char ID if unknown), and "thumbnail" (use https://img.youtube.com/vi/[videoId]/0.jpg).',
+                        content: 'You are a video research expert. Find 3 REAL, HIGH-QUALITY educational YouTube videos for the given query. Use globally famous educational channels (like Kurzesagt, TED-Ed, Veritasium, or similar). Return ONLY a JSON object with a "videos" array. Each object MUST have: "title" (Compelling), "description" (2 sentence summary), "videoId" (A REAL 11-char ID), and "thumbnail" (https://img.youtube.com/vi/[videoId]/maxresdefault.jpg).',
                     },
                     {
                         role: 'user',
