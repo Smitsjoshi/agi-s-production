@@ -36,11 +36,19 @@ async function observePage(page) {
     if (!page) return {};
 
     // 1. Capture high-quality observation data
-    const [screenshot, title, url, accessibilityTree] = await Promise.all([
+    let accessibilityTree = null;
+    try {
+        if (page.accessibility) {
+            accessibilityTree = await page.accessibility.snapshot();
+        }
+    } catch (e) {
+        console.log(`\x1b[31m[Warning] Accessibility Snapshot failed: ${e.message}\x1b[0m`);
+    }
+
+    const [screenshot, title, url] = await Promise.all([
         page.screenshot({ type: 'jpeg', quality: 50 }),
         page.title(),
-        page.url(),
-        page.accessibility.snapshot()
+        page.url()
     ]);
 
     // 2. Comprehensive DOM Grounding (Actionable elements only)
@@ -77,83 +85,85 @@ async function observePage(page) {
     };
 }
 
-// Semantic Grounding Action Handler (Perplexity/Skyvern style)
+// BULLETPROOF SMART ACTION (COMET V2)
 async function smartAction(page, type, selector, value) {
-    console.log(`\x1b[35m[Semantic Agent]\x1b[0m ${type} command received...`);
+    console.log(`\x1b[35m[UAL AGENT]\x1b[0m Executing ${type}...`);
 
-    // 1. Try to dismiss common consent modals automatically
+    // 0. Ensure page is front and focused
+    await page.bringToFront();
+
+    // 1. Dismiss common "Obstacles" (Modals/Popups)
     try {
-        const consentSelectors = ['button:has-text("Accept all")', 'button:has-text("I agree")', '#L2AGLb', '.ayH38e'];
-        for (const s of consentSelectors) {
-            const btn = await page.$(s);
-            if (btn && await btn.isVisible()) {
-                console.log(`\x1b[34m[Auto-Heal] Dismissing Modal...\x1b[0m`);
-                await btn.click({ timeout: 1500 }).catch(() => { });
+        const obstacles = ['button:has-text("Accept")', 'button:has-text("I agree")', '#L2AGLb', '.ayH38e', '[aria-label="Accept all"]'];
+        for (const s of obstacles) {
+            const el = await page.$(s);
+            if (el && await el.isVisible()) {
+                console.log(`\x1b[34m[Heal] Clearing obstacle: ${s}\x1b[0m`);
+                await el.click({ timeout: 1000 }).catch(() => { });
             }
         }
     } catch (e) { }
 
-    // 2. Primary Execution Path (If selector exists)
+    // 2. BRUTE FORCE SELECTOR PATH
     if (selector) {
         try {
-            await page.waitForSelector(selector, { state: 'visible', timeout: 3000 });
+            console.log(`\x1b[36m[Grounding] Targeting selector: ${selector}\x1b[0m`);
+            const target = await page.waitForSelector(selector, { state: 'visible', timeout: 2000 });
+
             if (type === 'click') {
-                await page.click(selector, { timeout: 3000 });
+                await target.click({ force: true, timeout: 2000 });
                 return;
             } else if (type === 'type') {
-                await page.fill(selector, value, { timeout: 3000 });
-                await page.press(selector, 'Enter');
+                await target.click({ force: true }); // Focus it first
+                await page.keyboard.insertText(value);
+                await page.keyboard.press('Enter');
                 return;
             }
         } catch (e) {
-            console.log(`\x1b[33m[Grounding] Selector ${selector} failed, attempting semantic recovery...\x1b[0m`);
+            console.log(`\x1b[33m[Warning] Selector ${selector} failed or timed out. Triggering Semantic Recovery...\x1b[0m`);
         }
     }
 
-    // 3. SEMANTIC RECOVERY (Comet Mode)
-    // If the planner gave a bad selector, we try to find the element by TEXT or ROLE
-    const targetText = value || selector.replace(/[#.[\]]/g, ' ').trim();
+    // 3. SEMANTIC RECOVERY (COMET MODE)
+    // If the selector failed, we use the "Value" or "Selector" as a text hint
+    const searchHint = value || (selector ? selector.replace(/[#.[\]'"=]/g, ' ').trim() : "");
 
-    const recoveryStrategies = [
-        // Role + Name match
-        async () => {
-            const role = type === 'type' ? 'textbox' : 'button';
-            const loc = page.getByRole(role).and(page.getByText(targetText, { exact: false })).first();
-            if (await loc.isVisible()) return loc;
-        },
-        // Placeholder match
-        async () => {
-            if (type === 'type') {
-                const loc = page.getByPlaceholder(new RegExp(targetText, 'i')).first();
-                if (await loc.isVisible()) return loc;
-            }
-        },
-        // Raw text match
-        async () => {
-            const loc = page.getByText(targetText, { exact: false }).first();
-            if (await loc.isVisible()) return loc;
-        }
+    console.log(`\x1b[35m[Recovery] Searching semantically for: "${searchHint}"\x1b[0m`);
+
+    const strategies = [
+        () => page.getByRole('button', { name: searchHint, exact: false }).first(),
+        () => page.getByRole('textbox', { name: searchHint, exact: false }).first(),
+        () => page.getByPlaceholder(searchHint, { exact: false }).first(),
+        () => page.getByText(searchHint, { exact: false }).first(),
+        () => page.locator('input, button, a').filter({ hasText: searchHint }).first()
     ];
 
-    for (const strategy of recoveryStrategies) {
+    for (const strategy of strategies) {
         try {
-            const loc = await strategy();
-            if (loc) {
-                console.log(`\x1b[32m[Auto-Heal] Semantic Match Found!\x1b[0m`);
-                if (type === 'click') await loc.click({ timeout: 2000 });
-                else {
-                    await loc.fill(value);
-                    await loc.press('Enter');
+            const loc = strategy();
+            if (await loc.isVisible({ timeout: 1000 })) {
+                console.log(`\x1b[32m[Success] Semantic anchor found!\x1b[0m`);
+                if (type === 'click') {
+                    await loc.click({ force: true });
+                } else {
+                    await loc.click({ force: true });
+                    await page.keyboard.insertText(value);
+                    await page.keyboard.press('Enter');
                 }
                 return;
             }
         } catch (e) { }
     }
 
-    // 4. COORDINATE GROUNDING (Last Resort)
-    // If we have coordinates from the domTree, we can click them directly
-    console.log(`\x1b[31m[Grounding Failed] No element found matching instructions.\x1b[0m`);
-    throw new Error(`Target not found: ${selector}`);
+    // 4. FALLBACK: TYPE ANYWAY (If it's a type action and we are stuck)
+    if (type === 'type') {
+        console.log(`\x1b[31m[Critical Fallback] Target not found. Typing blindly at current focus...\x1b[0m`);
+        await page.keyboard.insertText(value);
+        await page.keyboard.press('Enter');
+        return;
+    }
+
+    throw new Error(`Execution Failed: Could not find or ground target "${selector || value}"`);
 }
 
 wss.on('connection', (ws) => {
@@ -168,7 +178,9 @@ wss.on('connection', (ws) => {
 
             switch (cmd.type) {
                 case 'BROWSER_NAVIGATE':
-                    await activePage.goto(cmd.url, { waitUntil: 'domcontentloaded' });
+                    console.log(`\x1b[34mNavigating to: ${cmd.url}\x1b[0m`);
+                    await activePage.goto(cmd.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+                    await activePage.waitForLoadState('networkidle').catch(() => { });
                     result.data = await observePage(activePage);
                     break;
 
