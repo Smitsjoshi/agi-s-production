@@ -19,16 +19,31 @@ async function getBrowserInstance(type = 'chromium') {
 
     const engine = type === 'firefox' ? firefox : (type === 'webkit' ? webkit : chromium);
 
-    console.log(`\x1b[33mLaunching ${type}...\x1b[0m`);
+    console.log(`\x1b[33mLaunching ${type} with Ghost Protocol...\x1b[0m`);
     browser = await engine.launch({
-        headless: false, // Visible for the user
-        args: ['--no-sandbox']
+        headless: false,
+        args: [
+            '--no-sandbox',
+            '--disable-blink-features=AutomationControlled', // Mask automation
+            '--disable-infobars'
+        ]
     });
-    context = await browser.newContext({
-        viewport: { width: 1280, height: 720 }
-    });
-    page = await context.newPage();
 
+    context = await browser.newContext({
+        viewport: { width: 1280, height: 720 },
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        deviceScaleFactor: 1,
+        hasTouch: false,
+        isMobile: false
+    });
+
+    // Ghost Protocol: Script injection to mask webdriver
+    await context.addInitScript(() => {
+        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+        window.chrome = { runtime: {} };
+    });
+
+    page = await context.newPage();
     return { browser, page };
 }
 
@@ -85,7 +100,7 @@ async function observePage(page) {
     };
 }
 
-// BULLETPROOF SMART ACTION (COMET V2)
+// BULLETPROOF SMART ACTION (GHOST PROTOCOL V3)
 async function smartAction(page, type, selector, value) {
     console.log(`\x1b[35m[UAL AGENT]\x1b[0m Executing ${type}...`);
 
@@ -111,11 +126,23 @@ async function smartAction(page, type, selector, value) {
             const target = await page.waitForSelector(selector, { state: 'visible', timeout: 2000 });
 
             if (type === 'click') {
+                // Ghost Movement: Randomize path toward center of element
+                const box = await target.boundingBox();
+                if (box) {
+                    const targetX = box.x + box.width / 2 + (Math.random() * 4 - 2);
+                    const targetY = box.y + box.height / 2 + (Math.random() * 4 - 2);
+                    await page.mouse.move(targetX, targetY, { steps: 10 });
+                    await page.waitForTimeout(100 + Math.random() * 150);
+                }
                 await target.click({ force: true, timeout: 2000 });
                 return;
             } else if (type === 'type') {
-                await target.click({ force: true }); // Focus it first
-                await page.keyboard.insertText(value);
+                await target.click({ force: true });
+                // Ghost Typing: Delay between characters
+                for (const char of value) {
+                    await page.keyboard.type(char, { delay: 50 + Math.random() * 100 });
+                }
+                await page.waitForTimeout(200 + Math.random() * 400);
                 await page.keyboard.press('Enter');
                 return;
             }
@@ -125,9 +152,7 @@ async function smartAction(page, type, selector, value) {
     }
 
     // 3. SEMANTIC RECOVERY (COMET MODE)
-    // If the selector failed, we use the "Value" or "Selector" as a text hint
     const searchHint = value || (selector ? selector.replace(/[#.[\]'"=]/g, ' ').trim() : "");
-
     console.log(`\x1b[35m[Recovery] Searching semantically for: "${searchHint}"\x1b[0m`);
 
     const strategies = [
@@ -143,11 +168,15 @@ async function smartAction(page, type, selector, value) {
             const loc = strategy();
             if (await loc.isVisible({ timeout: 1000 })) {
                 console.log(`\x1b[32m[Success] Semantic anchor found!\x1b[0m`);
+                await loc.scrollIntoViewIfNeeded();
+                await page.waitForTimeout(200);
                 if (type === 'click') {
                     await loc.click({ force: true });
                 } else {
                     await loc.click({ force: true });
-                    await page.keyboard.insertText(value);
+                    for (const char of value) {
+                        await page.keyboard.type(char, { delay: 40 + Math.random() * 80 });
+                    }
                     await page.keyboard.press('Enter');
                 }
                 return;
@@ -155,10 +184,12 @@ async function smartAction(page, type, selector, value) {
         } catch (e) { }
     }
 
-    // 4. FALLBACK: TYPE ANYWAY (If it's a type action and we are stuck)
+    // 4. FALLBACK: TYPE ANYWAY
     if (type === 'type') {
         console.log(`\x1b[31m[Critical Fallback] Target not found. Typing blindly at current focus...\x1b[0m`);
-        await page.keyboard.insertText(value);
+        for (const char of value) {
+            await page.keyboard.type(char, { delay: 40 + Math.random() * 80 });
+        }
         await page.keyboard.press('Enter');
         return;
     }

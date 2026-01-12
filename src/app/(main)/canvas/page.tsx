@@ -93,9 +93,17 @@ export default function CanvasPage() {
         setCurrentScreenshot(null);
 
         try {
+            // Ensure bridge is connected before starting
+            if (!agentRef.current.isBridgeConnected()) {
+                setError('Desktop Bridge offline. Restart it with: node src/server/desktop-bridge.js');
+                setIsRunning(false);
+                return;
+            }
+
             await agentRef.current.run(goal, (step) => {
                 setSteps(prev => [...prev, step]);
                 if (step.screenshot) {
+                    setBrowserScreenshot(`data:image/jpeg;base64,${step.screenshot}`);
                     setCurrentScreenshot(step.screenshot);
                 }
                 if (step.type === 'completed' || step.type === 'failed') {
@@ -111,12 +119,12 @@ export default function CanvasPage() {
     const handleStop = () => {
         if (agentRef.current) {
             agentRef.current.stop();
+            setIsRunning(false);
             setSteps(prev => [...prev, {
                 type: 'failed',
-                message: 'Agent stopped by user.',
+                message: 'SYSTEM INTERRUPT: Stop command issued by user.',
                 timestamp: Date.now()
             }]);
-            setIsRunning(false);
         }
     };
 
@@ -323,96 +331,89 @@ export default function CanvasPage() {
                 </div>
 
                 {/* RIGHT: BROWSER VIEWPORT */}
-                <div className="bg-[#080808] relative flex flex-col p-8 items-center justify-center overflow-hidden">
-
-                    {/* Background Pattern for Empty State */}
-                    {!browserScreenshot && !currentScreenshot && (
-                        <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
-                            <div className="w-[600px] h-[400px] border border-white/5 rounded-2xl flex flex-col">
-                                <div className="h-8 border-b border-white/5 bg-white/5 flex items-center px-4 gap-2">
-                                    <div className="h-2 w-2 rounded-full bg-white/20"></div>
-                                    <div className="h-2 w-2 rounded-full bg-white/20"></div>
+                <div className="bg-[#080808] relative flex flex-col p-6 items-center justify-center overflow-hidden">
+                    <div className="w-full h-full max-w-5xl flex flex-col transition-all duration-700">
+                        {/* Browser Frame */}
+                        <div className="flex-1 bg-[#0a0a0a] rounded-xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] border border-white/5 flex flex-col relative group">
+                            {/* Browser Toolbar */}
+                            <div className="h-10 bg-[#141414] flex items-center px-4 gap-4 border-b border-white/5">
+                                <div className="flex gap-1.5 grayscale opacity-40">
+                                    <div className="h-2.5 w-2.5 rounded-full bg-[#FF5F56]"></div>
+                                    <div className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E]"></div>
+                                    <div className="h-2.5 w-2.5 rounded-full bg-[#27C93F]"></div>
                                 </div>
-                                <div className="flex-1 flex items-center justify-center">
-                                    <Globe className="h-12 w-12 text-white/10" />
+                                <div className="flex-1 h-6 bg-black/40 rounded flex items-center px-3 border border-white/5">
+                                    <Globe className="h-3 w-3 text-white/20 mr-2" />
+                                    <span className="text-[10px] text-white/40 font-mono truncate">
+                                        {steps.findLast(s => s.type === 'observing')?.message.split('at ')[1] || 'neural://canvas-session'}
+                                    </span>
                                 </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {!browserScreenshot && !currentScreenshot ? (
-                        <div className="relative z-10 flex flex-col items-center justify-center space-y-6">
-                            <div className="flex items-center justify-center h-20 w-20 rounded-3xl bg-black border border-white/10 shadow-[0_0_40px_rgba(255,255,255,0.05)] relative group cursor-pointer">
-                                <div className="absolute inset-0 bg-blue-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                                <Globe className="h-8 w-8 text-white/20 group-hover:text-blue-400 transition duration-500" />
-                            </div>
-                            <div className="text-center max-w-sm px-6">
-                                <h3 className="text-xl font-bold text-white/40 tracking-tight">System Offline</h3>
-                                <p className="text-[11px] text-white/20 font-light mt-3 leading-relaxed">
-                                    Local Bridge disconnected. To enable autonomous browser intelligence on your PC, run the following in your terminal:
-                                </p>
-                                <div className="mt-4 bg-white/5 border border-white/10 rounded-lg p-3 group/cmd cursor-copy hover:border-blue-500/30 transition-all">
-                                    <code className="text-[10px] text-blue-400 font-mono">node src/server/desktop-bridge.js</code>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="w-full h-full max-w-5xl max-h-[800px] flex flex-col transition-all duration-700 animate-in zoom-in-95 fade-in">
-
-                            {/* Browser Frame */}
-                            <div className="flex-1 bg-white rounded-xl overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] border border-white/10 flex flex-col relative group">
-
-                                {/* Browser Toolbar */}
-                                <div className="h-10 bg-[#1a1a1a] flex items-center px-4 gap-4 border-b border-[#2a2a2a]">
-                                    <div className="flex gap-1.5">
-                                        <div className="h-2.5 w-2.5 rounded-full bg-[#FF5F56] border border-[#E0443E]"></div>
-                                        <div className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E] border border-[#DEA123]"></div>
-                                        <div className="h-2.5 w-2.5 rounded-full bg-[#27C93F] border border-[#1AAB29]"></div>
-                                    </div>
-
-                                    {/* URL Bar */}
-                                    <div className="flex-1 h-6 bg-[#0a0a0a] rounded flex items-center px-3 border border-[#2a2a2a] group-hover:border-[#3a3a3a] transition-colors">
-                                        <ShieldCheck className="h-3 w-3 text-emerald-500 mr-2" />
-                                        <span className="text-[10px] text-white/40 font-mono truncate max-w-[400px]">
-                                            {steps.find(s => s.type === 'observing')?.message.split('at ')[1] || 'about:blank'}
-                                        </span>
-                                    </div>
-
-                                    {/* Connection Status */}
-                                    <div className="flex items-center gap-2">
-                                        <Wifi className={cn("h-3 w-3", isRunning ? "text-blue-400" : "text-white/20")} />
-                                        <Maximize2 className="h-3 w-3 text-white/20 hover:text-white/60 cursor-pointer" />
+                                <div className="flex items-center gap-3">
+                                    <div className={cn("text-[8px] font-bold px-1.5 py-0.5 rounded border",
+                                        bridgeConnected ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/5" : "text-amber-500 border-amber-500/20 bg-amber-500/5")}>
+                                        {bridgeConnected ? "GHOST_PROTOCOL_LIVE" : "GHOST_MODE_OFFLINE"}
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Viewport Stream */}
-                                <div className="flex-1 bg-white overflow-hidden relative">
+                            {/* Viewport Stream */}
+                            <div className="flex-1 bg-black overflow-hidden relative group">
+                                {browserScreenshot || currentScreenshot ? (
                                     <img
-                                        src={browserScreenshot || `data:image/png;base64,${currentScreenshot}`}
+                                        src={browserScreenshot || `data:image/jpeg;base64,${currentScreenshot}`}
                                         alt="Live Browser View"
-                                        className="w-full h-full object-contain bg-[#f0f0f0]"
+                                        className="w-full h-full object-contain"
                                     />
-
-                                    {/* Overlay Interface */}
-                                    {isRunning && (
-                                        <div className="absolute top-4 right-4 flex flex-col gap-2">
-                                            <div className="bg-black/70 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-md border border-white/10 flex items-center gap-2 animate-pulse shadow-lg">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-red-500"></div>
-                                                Live Feed
-                                            </div>
+                                ) : (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-40 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1)_0%,transparent_70%)]">
+                                        <div className="h-24 w-24 rounded-full border border-white/5 flex items-center justify-center bg-white/5 mb-6 animate-pulse">
+                                            <Zap className="h-10 w-10 text-blue-400/50" />
                                         </div>
-                                    )}
+                                        <h3 className="text-xl font-bold text-white/40 tracking-tight">Neural Canvas Idle</h3>
+                                        <p className="text-[10px] text-white/20 mt-2 font-mono">AWAITING_OBJECTIVE_STREAM</p>
+                                    </div>
+                                )}
 
-                                    {/* Interaction Cursor Simulation (Optional Visual) */}
-                                    {isRunning && (
-                                        <div className="absolute bottom-4 left-4 bg-black/80 backdrop-blur text-white/60 text-[9px] px-2 py-1 rounded border border-white/10 font-mono">
-                                            X: {Math.floor(Math.random() * 1920)} Y: {Math.floor(Math.random() * 1080)}
+                                {/* Overlay Elements */}
+                                {isRunning && (
+                                    <div className="absolute top-4 right-4 animate-in fade-in zoom-in duration-500">
+                                        <div className="bg-black/80 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 flex items-center gap-2 shadow-2xl">
+                                            <div className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+                                            AUTONOMOUS_MODE
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* OUTPUT TERMINAL WINDOW (Functional Results) */}
+                            <div className="h-48 bg-[#050505] border-t border-white/5 flex flex-col">
+                                <div className="h-8 border-b border-white/5 px-4 flex items-center justify-between bg-white/[0.02]">
+                                    <div className="flex items-center gap-2">
+                                        <Terminal className="h-3 w-3 text-white/40" />
+                                        <span className="text-[9px] font-bold uppercase tracking-widest text-white/40">Extraction Terminal</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="h-1 w-1 rounded-full bg-emerald-500"></div>
+                                        <span className="text-[8px] text-white/20 font-mono">STREAMING_LIVE</span>
+                                    </div>
+                                </div>
+                                <div className="flex-1 overflow-y-auto p-4 font-mono text-[10px] space-y-2">
+                                    {steps.filter(s => s.type === 'completed' || s.type === 'observing' && s.message.length > 50).length > 0 ? (
+                                        steps.filter(s => s.type === 'completed' || s.type === 'observing' && s.message.length > 50).map((s, i) => (
+                                            <div key={i} className="flex gap-3 text-white/60 animate-in slide-in-from-left-2">
+                                                <span className="text-blue-500/50 shrink-0">[{i + 1}]</span>
+                                                <p className="leading-relaxed">{s.message}</p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="h-full flex items-center justify-center text-white/10 italic">
+                                            No data extracted yet. Results will stream here during execution.
                                         </div>
                                     )}
                                 </div>
                             </div>
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </div>
