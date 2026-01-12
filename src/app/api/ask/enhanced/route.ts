@@ -69,32 +69,32 @@ async function generatePerspective(
     detailLevel: number = 50
 ): Promise<{ summary: string; standard: string; technical: string }> {
     const prompts = {
-        quick: `You are AGI-S. Respond to: ${query}. 
-               Return a JSON object with three versions of your answer:
-               1. "summary": ELI5, bullet points, ultra-concise.
-               2. "standard": Balanced, professional, clear.
-               3. "technical": Deep, analytical, including edge cases and high-level reasoning.
+        quick: `Respond to: ${query}. 
+               Return a JSON object with three IDENTICAL top-level keys but VASTLY DIFFERENT content:
+               1. "summary": ELI5 (Explain Like I'm 5). Use ultra-simple language, stick to one or two short bullet points. No jargon.
+               2. "standard": Balanced professional response. Clear, informative, and well-structured.
+               3. "technical": Expert/PhD level. Use high-level terminology, discuss internal mechanisms, edge cases, and architectural implications.
                
                Format: {"summary": "...", "standard": "...", "technical": "..."}`,
-        deep: `Provide a DEEP, comprehensive analysis of: ${query}.
-               Return a JSON object with three versions of your analysis:
-               1. "summary": High-level executive summary.
-               2. "standard": Full comprehensive analysis with background and implications.
-               3. "technical": Exhaustive technical breakdown with multi-source synthesis logic.
+        deep: `Provide a DEEP analysis of: ${query}.
+               Return a JSON object with three VASTLY DIFFERENT levels of depth:
+               1. "summary": Executive high-level summary. Focus only on the "bottom line".
+               2. "standard": Comprehensive analysis. Includes background, key drivers, and consequences.
+               3. "technical": Forensic-level deconstruction. Discusses underlying data structures, theoretical frameworks, and low-level specifications.
                
                Format: {"summary": "...", "standard": "...", "technical": "..."}`,
         devils: `Play DEVIL'S ADVOCATE for: ${query}.
-               Return a JSON object with three versions of your challenge:
-               1. "summary": The core contrarian argument.
-               2. "standard": A balanced but critical counter-perspective.
-               3. "technical": A rigorous forensic deconstruction of the primary assumptions.
+               Return a JSON object with three VASTLY DIFFERENT critical intensities:
+               1. "summary": The single biggest flaw or counter-argument in one sentence.
+               2. "standard": A balanced but firm critical perspective challenging the main premise.
+               3. "technical": A rigorous analytical assault on the logical consistency and structural weaknesses of the idea.
                
                Format: {"summary": "...", "standard": "...", "technical": "..."}`,
         data: `Provide a DATA-DRIVEN analysis of: ${query}.
-               Return a JSON object with three versions:
-               1. "summary": The most important stats and trends.
-               2. "standard": Full evidence-based report.
-               3. "technical": Detailed statistical analysis, methodology discussion, and raw metric insights.
+               Return a JSON object with three VASTLY DIFFERENT data granularities:
+               1. "summary": The most critical KPIs/numbers only.
+               2. "standard": Full evidence-based report with trends and correlations.
+               3. "technical": Detailed raw metric breakdown, statistical significance discussion, and methodology audit.
                
                Format: {"summary": "...", "standard": "...", "technical": "..."}`,
     };

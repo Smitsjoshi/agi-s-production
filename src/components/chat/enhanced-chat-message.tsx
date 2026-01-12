@@ -92,8 +92,21 @@ export function EnhancedChatMessage({
 
     // KILLER FEATURE 1: Multi-Perspective Answers
     if (isEnhanced && enhancedData) {
+        const currentExpLabel = currentDetailLevel < 33 ? 'Simplified' : currentDetailLevel < 66 ? 'Balanced' : 'Professional';
+        const currentExpColor = currentDetailLevel < 33 ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' :
+            currentDetailLevel < 66 ? 'text-amber-500 bg-amber-500/10 border-amber-500/20' :
+                'text-rose-500 bg-rose-500/10 border-rose-500/20';
+
         return (
-            <div className="mb-8 overflow-visible">
+            <div className="mb-8 overflow-visible relative group/amsg">
+                {/* Visual Feedback Badge */}
+                <div className={cn(
+                    "absolute -top-3 right-8 z-20 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm transition-all duration-500 opacity-0 group-hover/amsg:opacity-100",
+                    currentExpColor
+                )}>
+                    {currentExpLabel} Refinement Active
+                </div>
+
                 <Card className="p-0 overflow-hidden bg-gradient-to-br from-background via-background to-primary/[0.02] border-primary/10 shadow-2xl shadow-primary/5 rounded-[2rem]">
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                         <div className="px-6 pt-6 pb-2 border-b border-primary/5 bg-background/50 backdrop-blur-sm">

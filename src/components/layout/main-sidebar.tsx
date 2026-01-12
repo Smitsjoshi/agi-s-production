@@ -49,11 +49,7 @@ const businessNavItems: NavItem[] = [
 ];
 
 const exploreNavItems: NavItem[] = [
-  { href: '/discover', icon: Compass, label: 'Discover', description: 'Your daily brief of market trends and top headlines.', locked: false },
-  { href: '/notifications', icon: Bell, label: 'Notifications', description: 'Manage your notification settings.', locked: true },
-  // Removed: api page
   { href: '/support', icon: LifeBuoy, label: 'Support', description: 'Get help and submit feedback.', locked: false },
-  { href: '/faq', icon: HelpCircle, label: 'FAQ', description: 'Find answers to common questions.', locked: false },
 ];
 
 const createNavItems: NavItem[] = [

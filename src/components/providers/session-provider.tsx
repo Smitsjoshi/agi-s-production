@@ -37,20 +37,21 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             pages: ['all']
           };
           setUser(userData);
-        } else if (['dushyant@testing.com', 'dushyant@gmail.com', 'yash@testing.com', 'dhruv@testing.com'].includes(email || '')) {
+        } else if (['dushyant@testing.com', 'dushyant@gmail.com', 'yash@testing.com', 'dhruv@testing.com', 'kenul@testing.com'].includes(email || '')) {
           // Testers: Partial Access
           const names: { [key: string]: string } = {
             'dushyant@testing.com': 'Dushyant',
             'dushyant@gmail.com': 'Dushyant',
             'yash@testing.com': 'Yash',
-            'dhruv@testing.com': 'Dhruv'
+            'dhruv@testing.com': 'Dhruv',
+            'kenul@testing.com': 'Kenul'
           };
           const userData: User = {
             id: firebaseUser.uid,
             email: firebaseUser.email!,
             name: names[email || ''] || 'Tester',
             avatarUrl: firebaseUser.photoURL || '',
-            pages: ['/ask']
+            pages: ['/ask', '/catalyst'] // Added /catalyst as requested
           };
           setUser(userData);
         } else {
