@@ -34,64 +34,126 @@ async function getBrowserInstance(type = 'chromium') {
 
 async function observePage(page) {
     if (!page) return {};
-    const screenshot = await page.screenshot({ type: 'jpeg', quality: 60 });
-    const title = await page.title();
-    const url = page.url();
-    const text = await page.evaluate(() => document.body.innerText.substring(0, 1000));
 
-    // Simple DOM tree for the planner
+    // 1. Capture high-quality observation data
+    const [screenshot, title, url, accessibilityTree] = await Promise.all([
+        page.screenshot({ type: 'jpeg', quality: 50 }),
+        page.title(),
+        page.url(),
+        page.accessibility.snapshot()
+    ]);
+
+    // 2. Comprehensive DOM Grounding (Actionable elements only)
     const domTree = await page.evaluate(() => {
-        const elements = Array.from(document.querySelectorAll('button, a, input, select, textarea, [role="button"]'));
-        return elements.slice(0, 50).map(el => ({
-            tag: el.tagName.toLowerCase(),
-            text: el.innerText?.substring(0, 50) || el.value?.substring(0, 50) || '',
-            id: el.id,
-            role: el.getAttribute('role'),
-            selector: el.id ? `#${el.id}` : el.tagName.toLowerCase()
-        }));
+        const isVisible = (el) => {
+            const rect = el.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0 && window.getComputedStyle(el).visibility !== 'hidden';
+        };
+
+        const elements = Array.from(document.querySelectorAll('button, a, input, select, textarea, [role="button"], [onclick]'));
+
+        return elements
+            .filter(isVisible)
+            .slice(0, 100) // Increase density
+            .map(el => {
+                const rect = el.getBoundingClientRect();
+                return {
+                    tag: el.tagName.toLowerCase(),
+                    text: el.innerText?.trim().substring(0, 60) || el.value?.trim().substring(0, 60) || el.getAttribute('aria-label') || el.placeholder || '',
+                    id: el.id,
+                    role: el.getAttribute('role') || (el.tagName === 'A' ? 'link' : el.tagName.toLowerCase()),
+                    selector: el.id ? `#${el.id}` : (el.getAttribute('name') ? `[name="${el.getAttribute('name')}"]` : null),
+                    bounds: { x: rect.left, y: rect.top, w: rect.width, h: rect.height }
+                };
+            });
     });
 
     return {
         screenshot: screenshot.toString('base64'),
         title,
         url,
-        text,
+        accessibilityTree,
         domTree
     };
 }
 
-// Self-healing action handler
+// Semantic Grounding Action Handler (Perplexity/Skyvern style)
 async function smartAction(page, type, selector, value) {
-    console.log(`\x1b[35mActing:\x1b[0m ${type} on ${selector}`);
+    console.log(`\x1b[35m[Semantic Agent]\x1b[0m ${type} command received...`);
 
-    // 1. Try to dismiss common consent modals if they exist
+    // 1. Try to dismiss common consent modals automatically
     try {
-        const consentSelectors = [
-            'button:has-text("Accept all")',
-            'button:has-text("I agree")',
-            'button:has-text("Accept Cookies")',
-            '#L2AGLb' // Google specific
-        ];
+        const consentSelectors = ['button:has-text("Accept all")', 'button:has-text("I agree")', '#L2AGLb', '.ayH38e'];
         for (const s of consentSelectors) {
             const btn = await page.$(s);
             if (btn && await btn.isVisible()) {
-                console.log(`\x1b[34mAuto-dismissing consent modal...\x1b[0m`);
-                await btn.click({ timeout: 2000 }).catch(() => { });
+                console.log(`\x1b[34m[Auto-Heal] Dismissing Modal...\x1b[0m`);
+                await btn.click({ timeout: 1500 }).catch(() => { });
             }
         }
     } catch (e) { }
 
-    // 2. Wait for the actual target
-    await page.waitForSelector(selector, { state: 'visible', timeout: 7000 }).catch(() => {
-        console.log(`\x1b[31mWarning: Selector ${selector} not visible, forcing action...\x1b[0m`);
-    });
-
-    if (type === 'click') {
-        await page.click(selector, { timeout: 5000 });
-    } else if (type === 'type') {
-        await page.fill(selector, value, { timeout: 5000 });
-        await page.press(selector, 'Enter');
+    // 2. Primary Execution Path (If selector exists)
+    if (selector) {
+        try {
+            await page.waitForSelector(selector, { state: 'visible', timeout: 3000 });
+            if (type === 'click') {
+                await page.click(selector, { timeout: 3000 });
+                return;
+            } else if (type === 'type') {
+                await page.fill(selector, value, { timeout: 3000 });
+                await page.press(selector, 'Enter');
+                return;
+            }
+        } catch (e) {
+            console.log(`\x1b[33m[Grounding] Selector ${selector} failed, attempting semantic recovery...\x1b[0m`);
+        }
     }
+
+    // 3. SEMANTIC RECOVERY (Comet Mode)
+    // If the planner gave a bad selector, we try to find the element by TEXT or ROLE
+    const targetText = value || selector.replace(/[#.[\]]/g, ' ').trim();
+
+    const recoveryStrategies = [
+        // Role + Name match
+        async () => {
+            const role = type === 'type' ? 'textbox' : 'button';
+            const loc = page.getByRole(role).and(page.getByText(targetText, { exact: false })).first();
+            if (await loc.isVisible()) return loc;
+        },
+        // Placeholder match
+        async () => {
+            if (type === 'type') {
+                const loc = page.getByPlaceholder(new RegExp(targetText, 'i')).first();
+                if (await loc.isVisible()) return loc;
+            }
+        },
+        // Raw text match
+        async () => {
+            const loc = page.getByText(targetText, { exact: false }).first();
+            if (await loc.isVisible()) return loc;
+        }
+    ];
+
+    for (const strategy of recoveryStrategies) {
+        try {
+            const loc = await strategy();
+            if (loc) {
+                console.log(`\x1b[32m[Auto-Heal] Semantic Match Found!\x1b[0m`);
+                if (type === 'click') await loc.click({ timeout: 2000 });
+                else {
+                    await loc.fill(value);
+                    await loc.press('Enter');
+                }
+                return;
+            }
+        } catch (e) { }
+    }
+
+    // 4. COORDINATE GROUNDING (Last Resort)
+    // If we have coordinates from the domTree, we can click them directly
+    console.log(`\x1b[31m[Grounding Failed] No element found matching instructions.\x1b[0m`);
+    throw new Error(`Target not found: ${selector}`);
 }
 
 wss.on('connection', (ws) => {

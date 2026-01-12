@@ -129,20 +129,26 @@ STRATEGY OVERRIDE:
 
         // Format the interactive elements for the planning brain
         const elementsText = context?.domTree && Array.isArray(context.domTree)
-            ? context.domTree.map((el: any) => `- ${el.tag}${el.id ? '#' + el.id : ''} [role="${el.role || 'none'}"]: "${el.text || ''}" (Selector: ${el.selector || el.tag + (el.id ? '#' + el.id : '')})`).join('\n')
+            ? context.domTree.map((el: any) => `- [${el.role}] "${el.text}" (Selector: ${el.selector || 'none'})`).join('\n')
             : "No interactive elements detected yet.";
 
-        const prompt = `You are an AUTONOMOUS WEB AGENT PLANNER.
-Your job: Convert user goals into EXECUTABLE browser actions.
+        const accessibilityText = context?.accessibilityTree
+            ? JSON.stringify(context.accessibilityTree, null, 2).substring(0, 3000)
+            : "No accessibility data available.";
 
-USER GOAL: "${goal}"
+        const prompt = `You are an ELITE AUTONOMOUS AGENT (Mode: Comet/Skyvern).
+Your job: Execute the user goal by interacting with the page Semantically.
 
-CURRENT STATE:
+GOAL: "${goal}"
+
+CURRENT VIEWPORT:
 URL: ${context?.url || 'about:blank'}
 Title: ${context?.title || 'Unknown'}
-Page Content Snippet: ${context?.text?.substring(0, 500) || 'Empty page'}
 
-INTERACTIVE ELEMENTS (Choose from these for 'click' or 'type' actions):
+ACCESSIBILITY TREE (DENSE):
+${accessibilityText}
+
+SEMANTIC ELEMENTS:
 ${elementsText}
 
 ACTION HISTORY (What you have already done):
@@ -151,13 +157,13 @@ ${historyText}
 ${antiLoopInstruction}
 
 ═══════════════════════════════════════════════════════════════
-CRITICAL RULES - READ CAREFULLY:
+STRATEGIC GUIDELINES (COMET MODE):
 ═══════════════════════════════════════════════════════════════
 
-1. DO NOT REPEAT FAILED ACTIONS. If you see an action in the HISTORY that didn't work (e.g. you are still on the same page), TRY SOMETHING DIFFERENT.
-2. DETECT BLOCKS: If the Title contains "Just a moment", "Security Check", or "Access Denied", YOU ARE BLOCKED. 
-   - Strategy: Navigate to a different source immediately (e.g., Use Google Cache, or search result #2).
-3. VERIFICATION: You must define how to verify if this step succeeded.
+1. PREFER SEMANTIC SELECTION: If an element has a clear role (e.g., "button") and text (e.g., "Search"), priority is clicking that. 
+2. RECOVERY: If a CSS selector fails, the bridge will automatically use the text/role to find the element. Be descriptive in your reasoning.
+3. NO STUCKNESS: If you are on a page that isn't helping (e.g., a landing page with no info), navigate to a search engine or a more relevant sub-page immediately.
+4. ACTION CHAINING: Don't just do one thing. If you need to search, do 'navigate' -> 'type' -> 'press Enter' in one go.
 
 OUTPUT FORMAT (JSON ONLY):
 {

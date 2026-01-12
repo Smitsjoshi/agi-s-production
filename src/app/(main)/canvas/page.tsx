@@ -305,8 +305,13 @@ export default function CanvasPage() {
                                                         action.type === 'navigate' && "text-blue-400/80",
                                                         action.type === 'click' && "text-amber-400/80",
                                                         action.type === 'type' && "text-emerald-400/80"
-                                                    )}>{action.type}</span>
-                                                    <span className="truncate opacity-50 flex-1">{action.url || action.selector || action.value || ''}</span>
+                                                    )}>{action.type === 'type' ? 'INPUT' : action.type === 'click' ? 'SELECT' : action.type}</span>
+                                                    <span className="truncate opacity-80 flex-1">
+                                                        {action.type === 'navigate' && `Navigating to ${action.url?.replace('https://', '')}`}
+                                                        {action.type === 'type' && `Entering data...`}
+                                                        {action.type === 'click' && `Executing interaction...`}
+                                                        {(!['navigate', 'type', 'click'].includes(action.type || '')) && (action.url || action.selector || action.value || '')}
+                                                    </span>
                                                 </div>
                                             ))}
                                         </div>
