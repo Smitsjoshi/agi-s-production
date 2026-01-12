@@ -67,16 +67,36 @@ async function generatePerspective(
     type: 'quick' | 'deep' | 'devils' | 'data',
     apiKey: string,
     detailLevel: number = 50
-): Promise<string> {
-    const expertise = detailLevel < 33 ? 'SIMPLIFIED (ELI5, no jargon, easy to understand)' :
-        detailLevel < 66 ? 'BALANCED (Clear, informative, professional)' :
-            'EXPERT (PhD level, technical, detailed, nuanced)';
-
+): Promise<{ summary: string; standard: string; technical: string }> {
     const prompts = {
-        quick: `Expertise Level: ${expertise}\n\nGive a QUICK, concise answer (2-3 sentences max) to: ${query}`,
-        deep: `Expertise Level: ${expertise}\n\nProvide a DEEP, comprehensive analysis of: ${query}\n\nInclude:\n- Background context\n- Multiple viewpoints\n- Implications\n- Examples`,
-        devils: `Expertise Level: ${expertise}\n\nPlay DEVIL'S ADVOCATE for: ${query}\n\nChallenge the common view. Present the opposite perspective. Be contrarian but constructive.`,
-        data: `Expertise Level: ${expertise}\n\nProvide a DATA-DRIVEN analysis of: ${query}\n\nInclude:\n- Statistics\n- Trends\n- Comparisons\n- Evidence-based insights`,
+        quick: `You are AGI-S. Respond to: ${query}. 
+               Return a JSON object with three versions of your answer:
+               1. "summary": ELI5, bullet points, ultra-concise.
+               2. "standard": Balanced, professional, clear.
+               3. "technical": Deep, analytical, including edge cases and high-level reasoning.
+               
+               Format: {"summary": "...", "standard": "...", "technical": "..."}`,
+        deep: `Provide a DEEP, comprehensive analysis of: ${query}.
+               Return a JSON object with three versions of your analysis:
+               1. "summary": High-level executive summary.
+               2. "standard": Full comprehensive analysis with background and implications.
+               3. "technical": Exhaustive technical breakdown with multi-source synthesis logic.
+               
+               Format: {"summary": "...", "standard": "...", "technical": "..."}`,
+        devils: `Play DEVIL'S ADVOCATE for: ${query}.
+               Return a JSON object with three versions of your challenge:
+               1. "summary": The core contrarian argument.
+               2. "standard": A balanced but critical counter-perspective.
+               3. "technical": A rigorous forensic deconstruction of the primary assumptions.
+               
+               Format: {"summary": "...", "standard": "...", "technical": "..."}`,
+        data: `Provide a DATA-DRIVEN analysis of: ${query}.
+               Return a JSON object with three versions:
+               1. "summary": The most important stats and trends.
+               2. "standard": Full evidence-based report.
+               3. "technical": Detailed statistical analysis, methodology discussion, and raw metric insights.
+               
+               Format: {"summary": "...", "standard": "...", "technical": "..."}`,
     };
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -86,19 +106,20 @@ async function generatePerspective(
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            model: type === 'quick' ? 'llama-3.1-8b-instant' : 'llama-3.3-70b-versatile',
+            model: 'llama-3.3-70b-versatile', // Use the strongest model for triple-generation
             messages: [
                 {
                     role: 'system',
-                    content: 'You are AGI-S, an advanced AI assistant. Provide clear, accurate, and helpful responses.',
+                    content: 'You are AGI-S. You MUST return ONLY valid JSON. Your response must be an object with "summary", "standard", and "technical" keys. Use markdown inside the strings.',
                 },
                 {
                     role: 'user',
                     content: prompts[type],
                 },
             ],
-            temperature: type === 'devils' ? 0.8 : 0.3,
-            max_tokens: type === 'quick' ? 200 : 1000,
+            temperature: 0.1, // Low temperature for consistent JSON
+            response_format: { type: "json_object" },
+            max_tokens: 2000,
         }),
     });
 
@@ -107,7 +128,16 @@ async function generatePerspective(
     }
 
     const data = await response.json();
-    return data.choices[0]?.message?.content || 'No response generated';
+    const content = data.choices[0]?.message?.content || '{}';
+    try {
+        return JSON.parse(content);
+    } catch (e) {
+        return {
+            summary: content,
+            standard: content,
+            technical: content
+        };
+    }
 }
 
 async function searchWeb(query: string): Promise<Array<{

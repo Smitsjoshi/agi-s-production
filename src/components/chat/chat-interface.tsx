@@ -328,10 +328,11 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
                 role={msg.role as 'user' | 'assistant'}
                 isEnhanced={msg.isEnhanced}
                 enhancedData={msg.enhancedData}
+                currentDetailLevel={detailLevel[0]} // Sync with global slider
               />
             ))}
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
-              <EnhancedChatMessage role="assistant" content="" isLoading={true} />
+              <EnhancedChatMessage role="assistant" content="" isLoading={true} currentDetailLevel={detailLevel[0]} />
             )}
           </div>
         </ScrollArea>
