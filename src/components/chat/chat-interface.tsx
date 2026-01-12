@@ -311,10 +311,11 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
   }
 
   return (
-    <div className="flex h-full flex-col tour-chat-interface">
-      <div className="flex-1 overflow-y-auto">
-        <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="p-4 md:p-6 space-y-8 max-w-4xl mx-auto">
+    <div className="flex h-full flex-col relative tour-chat-interface overflow-hidden">
+      {/* 1. MESSAGES AREA (Scrollable) */}
+      <div className="flex-1 relative overflow-hidden">
+        <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
+          <div className="p-4 md:p-6 space-y-8 max-w-4xl mx-auto pb-[280px]"> {/* Large bottom padding for the static input bar */}
             {messages.length === 0 && !isLoading && (
               <div className="flex flex-col items-center justify-center h-[60vh] text-center opacity-40 hover:opacity-100 transition-opacity duration-700">
                 <Logo className="h-12 w-auto mb-6 grayscale opacity-80" />
@@ -338,86 +339,90 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
         </ScrollArea>
       </div>
 
-      <div className="p-4 md:p-6 max-w-4xl mx-auto w-full">
-        {slashCommandOpen && (
-          <div className="absolute bottom-full left-4 mb-2 w-64 bg-popover border rounded-md shadow-lg overflow-hidden z-50 animate-in fade-in slide-in-from-bottom-2">
-            <div className="p-2 border-b text-xs font-medium text-muted-foreground">
-              Select Mode
-            </div>
-            <ScrollArea className="h-48">
-              <div className="p-1">
-                {filteredModes.length === 0 ? (
-                  <div className="p-2 text-sm text-muted-foreground text-center">No modes found</div>
-                ) : (
-                  filteredModes.map((m, index) => {
-                    const { icon: Icon } = AI_MODE_DETAILS[m];
-                    return (
-                      <div
-                        key={m}
-                        className={cn(
-                          "flex items-center gap-2 p-2 rounded-sm cursor-pointer text-sm",
-                          index === selectedIndex ? "bg-accent text-accent-foreground" : "hover:bg-muted"
-                        )}
-                        onClick={() => selectMode(m)}
-                        onMouseEnter={() => setSelectedIndex(index)}
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span>{m}</span>
-                      </div>
-                    );
-                  })
-                )}
+      {/* 2. STATIC INPUT AREA (Gemini/ChatGPT Style) */}
+      <div className="absolute bottom-0 left-0 right-0 z-30 pt-10 pb-4 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none">
+        <div className="max-w-4xl mx-auto w-full px-4 md:px-6 pointer-events-auto">
+          {slashCommandOpen && (
+            <div className="absolute bottom-full left-0 mb-4 w-64 bg-popover border rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-bottom-2 backdrop-blur-xl border-primary/20">
+              <div className="p-3 border-b border-primary/10 text-[10px] font-black uppercase tracking-widest text-primary/60">
+                Switch Intelligence Mode
               </div>
-            </ScrollArea>
-          </div>
-        )}
-        {/* PERMANENT REFINEMENT SLIDER (Dominance Mode) */}
-        <div className="mx-auto w-full max-w-4xl px-4 md:px-6 mb-4">
-          <div className="bg-background/40 backdrop-blur-xl border border-primary/20 rounded-2xl p-4 shadow-xl shadow-primary/5 transition-all duration-500 hover:border-primary/40 group">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="p-1.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                  <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+              <ScrollArea className="h-48">
+                <div className="p-1">
+                  {filteredModes.length === 0 ? (
+                    <div className="p-4 text-sm text-muted-foreground text-center italic">No modes found...</div>
+                  ) : (
+                    filteredModes.map((m, index) => {
+                      const { icon: Icon } = AI_MODE_DETAILS[m];
+                      return (
+                        <div
+                          key={m}
+                          className={cn(
+                            "flex items-center gap-3 p-3 rounded-lg cursor-pointer text-sm transition-all duration-200",
+                            index === selectedIndex ? "bg-primary/10 text-primary scale-[1.02]" : "hover:bg-muted/50 opacity-70 hover:opacity-100"
+                          )}
+                          onClick={() => selectMode(m)}
+                          onMouseEnter={() => setSelectedIndex(index)}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span className="font-medium tracking-tight">{m}</span>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
-                <div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 block leading-none mb-1">Intelligence Layer</span>
-                  <span className="text-sm font-bold text-foreground tracking-tight">Expertise Refinement</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className={cn(
-                  "h-1.5 w-1.5 rounded-full animate-ping",
-                  detailLevel[0] < 33 ? "bg-emerald-500" : detailLevel[0] < 66 ? "bg-amber-500" : "bg-rose-500"
-                )} />
-                <span className={cn(
-                  "text-[11px] font-black font-mono px-2.5 py-1 rounded-full border shadow-sm transition-all duration-300",
-                  detailLevel[0] < 33 ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-                    detailLevel[0] < 66 ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
-                      "bg-rose-500/10 text-rose-500 border-rose-500/20"
-                )}>
-                  {detailLevel[0] < 33 ? 'SIMPLIFIED' :
-                    detailLevel[0] < 66 ? 'BALANCED' :
-                      'PROFESSIONAL'}
-                </span>
-              </div>
+              </ScrollArea>
             </div>
-            <Slider
-              value={detailLevel}
-              onValueChange={setDetailLevel}
-              max={100}
-              step={1}
-              className="w-full py-1 cursor-pointer"
-            />
-            <div className="flex justify-between mt-2">
-              <span className="text-[10px] font-medium text-muted-foreground/60 uppercase">ELI5</span>
-              <span className="text-[10px] font-medium text-muted-foreground/60 uppercase">Balanced</span>
-              <span className="text-[10px] font-medium text-muted-foreground/60 uppercase">PhD Level</span>
-            </div>
-          </div>
-        </div>
+          )}
+          {/* PERMANENT REFINEMENT SLIDER */}
+          <div className="mb-4">
+            <div className="bg-background/80 backdrop-blur-2xl border border-primary/20 rounded-2xl p-4 shadow-2xl shadow-primary/5 transition-all duration-500 hover:border-primary/40 group relative overflow-hidden">
+              {/* Glossy overlay */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-primary/[0.02] to-transparent pointer-events-none" />
 
-        <div className="max-w-4xl mx-auto px-4 md:px-6">
-          <div className="relative rounded-xl border bg-background/50 focus-within:ring-1 focus-within:ring-ring transition-all shadow-sm">
+              <div className="flex items-center justify-between mb-3 relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                    <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 block leading-none mb-1">Intelligence Layer</span>
+                    <span className="text-sm font-bold text-foreground tracking-tight">Expertise Refinement</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "h-1.5 w-1.5 rounded-full animate-ping",
+                    detailLevel[0] < 33 ? "bg-emerald-500" : detailLevel[0] < 66 ? "bg-amber-500" : "bg-rose-500"
+                  )} />
+                  <span className={cn(
+                    "text-[11px] font-black font-mono px-2.5 py-1 rounded-full border shadow-sm transition-all duration-300",
+                    detailLevel[0] < 33 ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
+                      detailLevel[0] < 66 ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
+                        "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                  )}>
+                    {detailLevel[0] < 33 ? 'SIMPLIFIED' :
+                      detailLevel[0] < 66 ? 'BALANCED' :
+                        'PROFESSIONAL'}
+                  </span>
+                </div>
+              </div>
+              <Slider
+                value={detailLevel}
+                onValueChange={setDetailLevel}
+                max={100}
+                step={1}
+                className="w-full py-1 cursor-pointer relative z-10"
+              />
+              <div className="flex justify-between mt-2 relative z-10">
+                <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-widest">ELI5</span>
+                <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-widest">Balanced</span>
+                <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-widest">PhD Level</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative rounded-2xl border border-primary/10 bg-background/80 backdrop-blur-2xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all shadow-2xl shadow-primary/5">
             <form
               onSubmit={handleSubmit}
               className="flex flex-col gap-2 p-3"
@@ -569,9 +574,9 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
               </div>
             </form>
           </div>
-          <p className="text-[10px] text-center text-muted-foreground/40 mt-3">
-            AGI-S can make mistakes.
-          </p>
+          <div className="p-2 text-[10px] text-center text-muted-foreground/40 mt-1">
+            AGI-S can make mistakes. Check important info.
+          </div>
         </div>
       </div>
     </div>
