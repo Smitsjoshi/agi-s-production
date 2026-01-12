@@ -7,7 +7,8 @@ import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Target, Brain, Flame, BarChart3, Globe,
-    Sparkles, Code2, Image as ImageIcon, ChevronDown, ChevronUp
+    Sparkles, Code2, Image as ImageIcon, ChevronDown, ChevronUp,
+    Copy, ThumbsUp, ThumbsDown, Check
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
@@ -90,6 +91,53 @@ export function EnhancedChatMessage({
         );
     }
 
+    // Assistant Message Actions Component
+    const MessageActions = ({ text }: { text: string }) => {
+        const [copied, setCopied] = useState(false);
+        const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
+
+        const handleCopy = () => {
+            navigator.clipboard.writeText(text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        };
+
+        return (
+            <div className="flex items-center gap-1 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors hover:bg-primary/10 rounded-lg"
+                    onClick={handleCopy}
+                >
+                    {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                        "h-8 w-8 transition-colors rounded-lg",
+                        feedback === 'up' ? "text-emerald-500 bg-emerald-500/10" : "text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10"
+                    )}
+                    onClick={() => setFeedback('up')}
+                >
+                    <ThumbsUp className="h-4 w-4" />
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                        "h-8 w-8 transition-colors rounded-lg",
+                        feedback === 'down' ? "text-rose-500 bg-rose-500/10" : "text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10"
+                    )}
+                    onClick={() => setFeedback('down')}
+                >
+                    <ThumbsDown className="h-4 w-4" />
+                </Button>
+            </div>
+        );
+    };
+
     // KILLER FEATURE 1: Multi-Perspective Answers
     if (isEnhanced && enhancedData) {
         const currentExpLabel = currentDetailLevel < 33 ? 'Simplified' : currentDetailLevel < 66 ? 'Balanced' : 'Professional';
@@ -97,8 +145,11 @@ export function EnhancedChatMessage({
             currentDetailLevel < 66 ? 'text-amber-500 bg-amber-500/10 border-amber-500/20' :
                 'text-rose-500 bg-rose-500/10 border-rose-500/20';
 
+        // Helper to get current active perspective content
+        const currentText = getExpertiseContent(enhancedData[activeTab as keyof EnhancedAnswer] as ExpertiseContent);
+
         return (
-            <div className="mb-8 overflow-visible relative group/amsg">
+            <div className="mb-8 overflow-visible relative group/amsg group">
                 {/* Visual Feedback Badge */}
                 <div className={cn(
                     "absolute -top-3 right-8 z-20 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shadow-sm transition-all duration-500 opacity-0 group-hover/amsg:opacity-100",
@@ -182,6 +233,8 @@ export function EnhancedChatMessage({
                                             <MarkdownRenderer content={getExpertiseContent(enhancedData.data)} />
                                         </div>
                                     </TabsContent>
+
+                                    <MessageActions text={currentText} />
                                 </motion.div>
                             </AnimatePresence>
                         </div>
@@ -242,6 +295,7 @@ export function EnhancedChatMessage({
                 <div className="prose-dominance">
                     <MarkdownRenderer content={content} />
                 </div>
+                <MessageActions text={content} />
             </div>
         </div>
     );

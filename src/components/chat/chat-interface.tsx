@@ -316,24 +316,27 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
       <div className="flex-1 relative overflow-hidden">
         <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
           <div className="p-4 md:p-6 space-y-8 max-w-4xl mx-auto pb-[280px]"> {/* Large bottom padding for the static input bar */}
-            {messages.length === 0 && !isLoading && (
+            {(messages.length === 0 && !isLoading) ? (
               <div className="flex flex-col items-center justify-center h-[60vh] text-center opacity-40 hover:opacity-100 transition-opacity duration-700">
                 <Logo className="h-12 w-auto mb-6 grayscale opacity-80" />
                 <h1 className="text-xl font-medium tracking-tight text-foreground/80">One Interface. Infinite Capabilities.</h1>
               </div>
-            )}
-            {messages.map((msg) => (
-              <EnhancedChatMessage
-                key={msg.id}
-                content={msg.content}
-                role={msg.role as 'user' | 'assistant'}
-                isEnhanced={msg.isEnhanced}
-                enhancedData={msg.enhancedData}
-                currentDetailLevel={detailLevel[0]} // Sync with global slider
-              />
-            ))}
-            {isLoading && messages[messages.length - 1]?.role === 'user' && (
-              <EnhancedChatMessage role="assistant" content="" isLoading={true} currentDetailLevel={detailLevel[0]} />
+            ) : (
+              <>
+                {messages.map((msg) => (
+                  <EnhancedChatMessage
+                    key={msg.id}
+                    content={msg.content}
+                    role={msg.role as 'user' | 'assistant'}
+                    isEnhanced={msg.isEnhanced}
+                    enhancedData={msg.enhancedData}
+                    currentDetailLevel={detailLevel[0]} // Sync with global slider
+                  />
+                ))}
+                {isLoading && (
+                  <EnhancedChatMessage role="assistant" content="" isLoading={true} currentDetailLevel={detailLevel[0]} />
+                )}
+              </>
             )}
           </div>
         </ScrollArea>
@@ -374,55 +377,39 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
               </ScrollArea>
             </div>
           )}
-          {/* PERMANENT REFINEMENT SLIDER */}
-          <div className="mb-4">
-            <div className="bg-background/80 backdrop-blur-2xl border border-primary/20 rounded-2xl p-4 shadow-2xl shadow-primary/5 transition-all duration-500 hover:border-primary/40 group relative overflow-hidden">
-              {/* Glossy overlay */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-primary/[0.02] to-transparent pointer-events-none" />
-
-              <div className="flex items-center justify-between mb-3 relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="p-1.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                    <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 block leading-none mb-1">Intelligence Layer</span>
-                    <span className="text-sm font-bold text-foreground tracking-tight">Expertise Refinement</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className={cn(
-                    "h-1.5 w-1.5 rounded-full animate-ping",
-                    detailLevel[0] < 33 ? "bg-emerald-500" : detailLevel[0] < 66 ? "bg-amber-500" : "bg-rose-500"
-                  )} />
-                  <span className={cn(
-                    "text-[11px] font-black font-mono px-2.5 py-1 rounded-full border shadow-sm transition-all duration-300",
-                    detailLevel[0] < 33 ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-                      detailLevel[0] < 66 ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
-                        "bg-rose-500/10 text-rose-500 border-rose-500/20"
-                  )}>
-                    {detailLevel[0] < 33 ? 'SIMPLIFIED' :
-                      detailLevel[0] < 66 ? 'BALANCED' :
-                        'PROFESSIONAL'}
-                  </span>
-                </div>
+          <div className="relative rounded-2xl border border-primary/10 bg-background/80 backdrop-blur-3xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all shadow-2xl shadow-primary/5 overflow-hidden">
+            {/* COMPACT INTEGRATED REFINEMENT SLIDER */}
+            <div className="px-5 py-3 border-b border-primary/5 bg-primary/[0.01] flex items-center justify-between gap-6">
+              <div className="flex items-center gap-2 shrink-0">
+                <Sparkles className="h-3 w-3 text-primary/50" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-primary/40">Expertise</span>
               </div>
-              <Slider
-                value={detailLevel}
-                onValueChange={setDetailLevel}
-                max={100}
-                step={1}
-                className="w-full py-1 cursor-pointer relative z-10"
-              />
-              <div className="flex justify-between mt-2 relative z-10">
-                <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-widest">ELI5</span>
-                <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-widest">Balanced</span>
-                <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-widest">PhD Level</span>
+
+              <div className="flex-1 max-w-sm flex items-center gap-4">
+                <span className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-tighter shrink-0">ELI5</span>
+                <Slider
+                  value={detailLevel}
+                  onValueChange={setDetailLevel}
+                  max={100}
+                  step={1}
+                  className="w-full py-1 cursor-pointer"
+                />
+                <span className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-tighter shrink-0">PhD</span>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0 min-w-[80px] justify-end">
+                <span className={cn(
+                  "text-[9px] font-black font-mono px-2 py-0.5 rounded-full border transition-all duration-300",
+                  detailLevel[0] < 33 ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
+                    detailLevel[0] < 66 ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
+                      "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                )}>
+                  {detailLevel[0] < 33 ? 'BASIC' :
+                    detailLevel[0] < 66 ? 'MID' :
+                      'PRO'}
+                </span>
               </div>
             </div>
-          </div>
-
-          <div className="relative rounded-2xl border border-primary/10 bg-background/80 backdrop-blur-2xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all shadow-2xl shadow-primary/5">
             <form
               onSubmit={handleSubmit}
               className="flex flex-col gap-2 p-3"
