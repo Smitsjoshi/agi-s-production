@@ -44,13 +44,15 @@ interface EnhancedChatMessageProps {
     role: 'user' | 'assistant';
     isEnhanced?: boolean;
     enhancedData?: EnhancedAnswer;
+    isLoading?: boolean;
 }
 
 export function EnhancedChatMessage({
     content,
     role,
     isEnhanced = false,
-    enhancedData
+    enhancedData,
+    isLoading = false
 }: EnhancedChatMessageProps) {
     const [refinementLevel, setRefinementLevel] = useState([50]);
     const [showWebSources, setShowWebSources] = useState(false);
@@ -59,9 +61,30 @@ export function EnhancedChatMessage({
     if (role === 'user') {
         return (
             <div className="flex justify-end mb-4">
-                <div className="bg-primary text-primary-foreground rounded-2xl px-4 py-2 max-w-[80%]">
+                <div className="bg-primary text-primary-foreground rounded-2xl px-4 py-2 max-w-[80%] shadow-sm">
                     <p className="text-sm">{content}</p>
                 </div>
+            </div>
+        );
+    }
+
+    if (isLoading) {
+        return (
+            <div className="mb-6 max-w-[90%]">
+                <Card className="p-4 bg-muted/20 border-dashed animate-pulse">
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="h-8 w-24 bg-muted rounded" />
+                        <div className="h-8 w-24 bg-muted rounded" />
+                        <div className="h-8 w-24 bg-muted rounded" />
+                    </div>
+                    <div className="space-y-3">
+                        <div className="h-4 w-full bg-muted rounded" />
+                        <div className="h-4 w-3/4 bg-muted rounded" />
+                        <div className="h-20 w-full bg-muted/50 rounded mt-4 flex items-center justify-center">
+                            <Sparkles className="h-5 w-5 text-primary/40 animate-spin-slow" />
+                        </div>
+                    </div>
+                </Card>
             </div>
         );
     }

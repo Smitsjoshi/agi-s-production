@@ -22,7 +22,8 @@ export type AiMode =
     | 'The Gourmet'
     | 'The Forecaster'
     | 'Comparison Analyst'
-    | 'The Ethicist';
+    | 'The Ethicist'
+    | 'Enhanced';
 
 export interface User {
     id: string;
@@ -469,6 +470,8 @@ export interface ChatMessage {
     content: string;
     sources?: { url: string; title: string; preview?: string }[];
     reasoning?: string;
+    isEnhanced?: boolean;
+    enhancedData?: any;
     confidenceScore?: number;
     feedback?: 'up' | 'down';
     feedbackReason?: string;

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Paperclip, Send, Loader2, Bot, BrainCircuit, Code, FlaskConical, Microscope, PlusCircle, Briefcase, Globe, Feather, Dices, Palette, Soup, TrendingUp, GitCompareArrows, Scale, Cpu, Workflow, Mic, Image, ArrowRight, Star, BookOpen, Volume2, VolumeX } from 'lucide-react';
+import { Paperclip, Send, Loader2, Bot, BrainCircuit, Code, FlaskConical, Microscope, PlusCircle, Briefcase, Globe, Feather, Dices, Palette, Soup, TrendingUp, GitCompareArrows, Scale, Cpu, Workflow, Mic, Image, ArrowRight, Star, BookOpen, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import useLocalStorage from '@/hooks/use-local-storage';
 import { askAi } from '@/app/actions';
 import type { ChatMessage, AiMode, Agent } from '@/lib/types';
-import { ChatMessageDisplay } from '@/components/chat/chat-message';
+import { EnhancedChatMessage } from '@/components/chat/enhanced-chat-message';
 import { nanoid } from 'nanoid';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -36,6 +36,7 @@ const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: st
   'The Forecaster': { icon: TrendingUp, description: 'A trend analyst and data-driven futurist.', isPersona: true },
   'Comparison Analyst': { icon: GitCompareArrows, description: 'An unbiased evaluator for side-by-side comparisons.', isPersona: true },
   'The Ethicist': { icon: Scale, description: 'Analyzes complex moral and ethical dilemmas.', isPersona: true },
+  'Enhanced': { icon: Sparkles, description: 'DOMINANCE MODE: Multi-perspective, web search, visual diagrams, and expertise control.' },
   'Synthesis': { icon: Code, description: 'Data integration and synthesis.' },
   'Crucible': { icon: Code, description: 'Idea testing and red-teaming.' },
   // Hidden from UI but required by type
@@ -43,7 +44,7 @@ const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: st
   'Blueprint': { icon: Workflow, description: 'External Page' },
 };
 
-const MAIN_AI_MODES = ['AGI-S S-1', 'AGI-S S-2', 'CodeX', 'Academic Research', 'Deep Dive'] as AiMode[];
+const MAIN_AI_MODES = ['AGI-S S-1', 'AGI-S S-2', 'Enhanced', 'CodeX', 'Academic Research', 'Deep Dive'] as AiMode[];
 const PERSONAS = Object.keys(AI_MODE_DETAILS).filter(key => AI_MODE_DETAILS[key as AiMode].isPersona) as AiMode[];
 
 interface ChatInterfaceProps {
@@ -237,19 +238,44 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
       // Pass the *updated* messages array logic (current prev + userMessage) is handled by the backend/action usually requesting full history.
       const messagesForApi = [...messages, userMessage];
 
-      // STANDARD AI CHAT
-      const result = await askAi(currentInput, mode, messagesForApi, currentFile || undefined);
+      // 2. CHOOSE ENDPOINT
+      let assistantMessage: ChatMessage;
 
-      if (result.error) {
-        throw new Error(result.error);
+      if (mode === 'Enhanced') {
+        const enhancedResponse = await fetch('/api/ask/enhanced', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: currentInput, mode }),
+        });
+
+        if (!enhancedResponse.ok) {
+          throw new Error('Enhanced API failed');
+        }
+
+        const enhancedResult = await enhancedResponse.json();
+
+        assistantMessage = {
+          id: generateId(),
+          role: 'assistant',
+          content: enhancedResult.data.quick, // Use quick as primary content
+          isEnhanced: true,
+          enhancedData: enhancedResult.data,
+        };
+      } else {
+        // STANDARD AI CHAT
+        const result = await askAi(currentInput, mode, messagesForApi, currentFile || undefined);
+
+        if (result.error) {
+          throw new Error(result.error);
+        }
+
+        assistantMessage = {
+          id: generateId(),
+          role: 'assistant',
+          content: result.answer || result.componentCode || '',
+          reasoning: result.reasoning,
+        };
       }
-
-      const assistantMessage: ChatMessage = {
-        id: generateId(),
-        role: 'assistant',
-        content: result.answer || result.componentCode || '',
-        reasoning: result.reasoning,
-      };
 
       setMessages((prev: ChatMessage[]) => [...prev, assistantMessage]);
 
@@ -290,10 +316,16 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
               </div>
             )}
             {messages.map((msg) => (
-              <ChatMessageDisplay key={msg.id} message={msg} />
+              <EnhancedChatMessage
+                key={msg.id}
+                content={msg.content}
+                role={msg.role as 'user' | 'assistant'}
+                isEnhanced={msg.isEnhanced}
+                enhancedData={msg.enhancedData}
+              />
             ))}
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
-              <ChatMessageDisplay message={{ id: 'loading', role: 'assistant', content: '' }} isLoading={true} />
+              <EnhancedChatMessage role="assistant" content="" isLoading={true} />
             )}
           </div>
         </ScrollArea>
@@ -438,6 +470,14 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
                     onClick={() => {
                       if (isListening) {
                         stopListening();
+                        // SMALL DELAY TO LET TRANSCRIPT FINISH AND THEN SUBMIT
+                        setTimeout(async () => {
+                          if (input.trim()) {
+                            // We need to pass the actual event or mock it
+                            const mockEvent = { preventDefault: () => { } } as any;
+                            await handleSubmit(mockEvent);
+                          }
+                        }, 600);
                       } else {
                         startListening();
                       }
