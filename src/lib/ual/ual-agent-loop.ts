@@ -13,13 +13,54 @@ export class UALAgentLoop {
         this.initDesktopBridge();
     }
 
+    public isBridgeConnected(): boolean {
+        return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+    }
+
     // Initialize connection to local desktop bridge
     private initDesktopBridge() {
         if (typeof WebSocket !== 'undefined') {
             this.ws = new WebSocket('ws://localhost:3001');
             this.ws.onopen = () => console.log('🔌 Connected to Desktop Bridge');
+            this.ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                const resolver = this.pendingRequests.get(data.id);
+                if (resolver) {
+                    resolver(data);
+                    this.pendingRequests.delete(data.id);
+                }
+            };
             this.ws.onerror = (e) => console.log('⚠️ Desktop Bridge Offline (Run: node src/server/desktop-bridge.js)');
         }
+    }
+
+    private pendingRequests = new Map<string, (val: any) => void>();
+
+    private async executeLocalAction(payload: any): Promise<UALResult> {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+            throw new Error("Bridge offline");
+        }
+
+        const id = Math.random().toString(36).substring(7);
+        const promise = new Promise<any>((resolve) => {
+            this.pendingRequests.set(id, resolve);
+        });
+
+        this.ws.send(JSON.stringify({ ...payload, id }));
+
+        const response = await promise;
+
+        if (response.status === 'error') {
+            return { success: false, error: response.error, steps: [] };
+        }
+
+        return {
+            success: true,
+            screenshot: response.data?.screenshot,
+            domTree: response.data?.domTree,
+            data: response.data,
+            steps: [`Local Action Success: ${payload.type}`]
+        };
     }
 
     async run(
@@ -95,39 +136,37 @@ export class UALAgentLoop {
                     let result: UALResult;
                     const action = nextAction as any;
 
-                    // DESKTOP ACTION HANDLER
-                    if (action.type.startsWith('desktop_') || (action.type === 'click' && action.x !== undefined) || (action.type === 'type' && !action.selector)) {
-                        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                            const payload: any = { type: 'UNKNOWN', ...action };
-
-                            // Map Planner Actions to Bridge Commands
-                            if (action.type === 'desktop_run') {
-                                payload.type = 'RUN_TERMINAL';
-                                payload.command = action.command;
+                    // PREFER LOCAL BRIDGE FOR ALL ACTIONS
+                    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                        try {
+                            if (action.type === 'navigate') {
+                                result = await this.executeLocalAction({ type: 'BROWSER_NAVIGATE', url: action.url });
+                            } else if (action.type === 'click') {
+                                if (action.x !== undefined) {
+                                    result = await this.executeLocalAction({ type: 'MOUSE_MOVE', x: action.x, y: action.y });
+                                } else {
+                                    result = await this.executeLocalAction({ type: 'BROWSER_CLICK', selector: action.selector });
+                                }
+                            } else if (action.type === 'type') {
+                                if (action.selector) {
+                                    result = await this.executeLocalAction({ type: 'BROWSER_TYPE', selector: action.selector, text: action.value || action.text });
+                                } else {
+                                    result = await this.executeLocalAction({ type: 'TYPE', text: action.value || action.text });
+                                }
+                            } else if (action.type === 'desktop_run') {
+                                result = await this.executeLocalAction({ type: 'RUN_TERMINAL', command: action.command });
                             } else if (action.type === 'desktop_key') {
-                                payload.type = 'KEY_PRESS';
-                                payload.key = action.key;
-                            } else if (action.type === 'click' && action.x !== undefined) {
-                                this.ws.send(JSON.stringify({ type: 'MOUSE_MOVE', x: action.x, y: action.y }));
-                                await new Promise(r => setTimeout(r, 100));
-                                payload.type = 'CLICK';
-                            } else if (action.type === 'desktop_type' || (action.type === 'type' && !action.selector)) {
-                                payload.type = 'TYPE';
-                                payload.text = action.text || action.value;
+                                result = await this.executeLocalAction({ type: 'KEY_PRESS', key: action.key });
+                            } else {
+                                // Fallback for other standard actions
+                                result = await this.executeLocalAction({ type: 'BROWSER_OBSERVE' });
                             }
-
-                            this.ws.send(JSON.stringify(payload));
-                            result = {
-                                success: true,
-                                steps: [`Desktop action: ${action.type}`],
-                                data: { title: 'Desktop Action Executed', url: 'desktop://', text: 'Action completed' }
-                            };
-                            await new Promise(r => setTimeout(r, 800));
-                        } else {
-                            result = { success: false, error: 'Desktop Bridge not connected', steps: [] };
+                        } catch (e: any) {
+                            console.error("Local execution failed, falling back to server:", e);
+                            result = await this.client.executeTask({ goal, sessionId, actions: [nextAction] });
                         }
                     } else {
-                        // STANDARD BROWSER ACTION
+                        // STANDARD REMOTE BROWSER ACTION
                         result = await this.client.executeTask({ goal, sessionId, actions: [nextAction] });
                     }
 
@@ -236,6 +275,9 @@ export class UALAgentLoop {
 
     stop() {
         this.isRunning = false;
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            // Optional: send a stop signal to the browser if needed
+        }
     }
 
     private async evaluateProgress(goal: string, result: UALResult): Promise<boolean> {

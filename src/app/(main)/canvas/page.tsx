@@ -22,6 +22,8 @@ export default function CanvasPage() {
     const [hasLiveBrowser, setHasLiveBrowser] = useState(false);
     const [error, setError] = useState('');
     const [currentTime, setCurrentTime] = useState<string>('');
+    const [bridgeConnected, setBridgeConnected] = useState(false);
+    const [browserType, setBrowserType] = useState<'chromium' | 'firefox' | 'webkit'>('chromium');
 
     const agentRef = useRef<UALAgentLoop | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -34,31 +36,43 @@ export default function CanvasPage() {
         return () => clearInterval(t);
     }, []);
 
-    // Poll for live browser view from server
+    // Check Desktop Bridge Status
     useEffect(() => {
-        if (!isRunning && !hasLiveBrowser) return;
+        const checkBridge = setInterval(() => {
+            const isOnline = agentRef.current?.isBridgeConnected() || false;
+            setBridgeConnected(isOnline);
+        }, 2000);
+        return () => clearInterval(checkBridge);
+    }, []);
+
+    // Poll for live browser view (Prefer Bridge, fallback to API)
+    useEffect(() => {
+        if (!isRunning) return;
 
         const interval = setInterval(async () => {
             try {
-                const res = await fetch('/api/ual/browser');
-                if (res.ok) {
-                    const blob = await res.blob();
-                    if (blob.size > 0) {
-                        const url = URL.createObjectURL(blob);
-                        setBrowserScreenshot(prev => {
-                            if (prev) URL.revokeObjectURL(prev);
-                            return url;
-                        });
-                        setHasLiveBrowser(true);
+                // If bridge connected, screenshot comes from UALAgentLoop via onStep
+                // If not, we poll the API as fallback
+                if (!bridgeConnected) {
+                    const res = await fetch('/api/ual/browser');
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        if (blob.size > 0) {
+                            const url = URL.createObjectURL(blob);
+                            setBrowserScreenshot(prev => {
+                                if (prev) URL.revokeObjectURL(prev);
+                                return url;
+                            });
+                        }
                     }
                 }
             } catch (e) {
                 console.error("Polling error", e);
             }
-        }, 1000); // 1fps update
+        }, 1000);
 
         return () => clearInterval(interval);
-    }, [isRunning, hasLiveBrowser]);
+    }, [isRunning, bridgeConnected]);
 
     useEffect(() => {
         agentRef.current = new UALAgentLoop();
@@ -134,21 +148,29 @@ export default function CanvasPage() {
                     {/* Quick Stats HUD - Only visible on desktop */}
                     <div className="hidden md:flex gap-6">
                         <div className="flex flex-col">
-                            <span className="text-[9px] uppercase text-white/20 font-bold tracking-wider">Status</span>
+                            <span className="text-[9px] uppercase text-white/20 font-bold tracking-wider">Bridge</span>
                             <div className="flex items-center gap-1.5">
-                                <div className={cn("h-1.5 w-1.5 rounded-full animate-pulse", isRunning ? "bg-emerald-500" : "bg-amber-500")} />
-                                <span className={cn("text-[10px] font-mono", isRunning ? "text-emerald-500" : "text-amber-500")}>
-                                    {isRunning ? "OPERATIONAL" : "STANDBY"}
+                                <div className={cn("h-1.5 w-1.5 rounded-full", bridgeConnected ? "bg-emerald-500 animate-pulse" : "bg-red-500")} />
+                                <span className={cn("text-[10px] font-mono", bridgeConnected ? "text-emerald-500" : "text-red-500")}>
+                                    {bridgeConnected ? "CONNECTED" : "OFFLINE"}
                                 </span>
                             </div>
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[9px] uppercase text-white/20 font-bold tracking-wider">Engine</span>
-                            <span className="text-[10px] font-mono text-white/60">PLAYWRIGHT INTEL</span>
+                            <span className="text-[10px] font-mono text-white/60">LOCAL INTEL</span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[9px] uppercase text-white/20 font-bold tracking-wider">Uptime</span>
-                            <span className="text-[10px] font-mono text-white/60">{currentTime || "00:00:00"}</span>
+                            <span className="text-[9px] uppercase text-white/20 font-bold tracking-wider">Browser</span>
+                            <select
+                                value={browserType}
+                                onChange={(e) => setBrowserType(e.target.value as any)}
+                                className="bg-transparent text-[10px] font-mono text-white/60 border-0 p-0 focus:ring-0 cursor-pointer"
+                            >
+                                <option value="chromium">CHROMIUM</option>
+                                <option value="firefox">FIREFOX</option>
+                                <option value="webkit">WEBKIT</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -319,9 +341,14 @@ export default function CanvasPage() {
                                 <div className="absolute inset-0 bg-blue-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition duration-500"></div>
                                 <Globe className="h-8 w-8 text-white/20 group-hover:text-blue-400 transition duration-500" />
                             </div>
-                            <div className="text-center">
-                                <h3 className="text-xl font-bold text-white/40 tracking-tight">Viewport Offline</h3>
-                                <p className="text-sm text-white/20 font-light mt-2">Initialize UAL agent to establish visual link.</p>
+                            <div className="text-center max-w-sm px-6">
+                                <h3 className="text-xl font-bold text-white/40 tracking-tight">System Offline</h3>
+                                <p className="text-[11px] text-white/20 font-light mt-3 leading-relaxed">
+                                    Local Bridge disconnected. To enable autonomous browser intelligence on your PC, run the following in your terminal:
+                                </p>
+                                <div className="mt-4 bg-white/5 border border-white/10 rounded-lg p-3 group/cmd cursor-copy hover:border-blue-500/30 transition-all">
+                                    <code className="text-[10px] text-blue-400 font-mono">node src/server/desktop-bridge.js</code>
+                                </div>
                             </div>
                         </div>
                     ) : (
