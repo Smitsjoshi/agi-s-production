@@ -76,7 +76,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ScrollArea } from '../ui/scroll-area';
 import { Input } from '../ui/input';
-import { askAi } from '@/app/actions';
+import { askAi, scrapeWebPage } from '@/app/actions';
 import { generateWorkflowAction, GeneratedWorkflow } from '@/app/actions/workflow-actions';
 import { cn } from '@/lib/utils';
 // import { Loader2, Play, Wand2, X } from 'lucide-react'; // Merged above
@@ -363,45 +363,48 @@ const ReactFlowInner = () => {
                 const nodeTitle = node.data.title;
                 const prompt = config.prompt || node.data.description;
 
-                await new Promise(r => setTimeout(r, 600)); // Visual delay
-
                 try {
-                    // SUPER NODE LOGIC
-                    if (nodeTitle.includes("Math") || nodeTitle.includes("Calculator") || nodeTitle.includes("Validator")) {
-                        // REAL LOGIC EXECUTION
-                        // "Calculates (Likes / Views) * 100"
-                        // Mocking data if missing, or parsing context
-                        output = "Logic Pass: 98% Score (Simulated)";
-                        if (contextString.includes("Views")) {
-                            // Try to regex parse numbers
-                            output = "Calculated Metric: 4.2% based on inputs.";
+                    // 1. INTEGRATION NODES (Web/API)
+                    if (nodeTitle.includes("Researcher") || nodeTitle.includes("Scraper") || (config.url && config.url.startsWith('http'))) {
+                        const targetUrl = config.url || (contextString.match(/https?:\/\/[^\s]+/) || [])[0];
+                        if (targetUrl) {
+                            const webRes = await scrapeWebPage(targetUrl);
+                            if (webRes.success) {
+                                output = `[WEB RESULT from ${targetUrl}]:\n${webRes.data?.substring(0, 1000)}...`;
+                            } else {
+                                throw new Error(`Scrape Failed: ${webRes.error}`);
+                            }
                         }
-                    } else if (nodeTitle.includes("Logic") || nodeTitle.includes("Router") || nodeTitle.includes("Switch")) {
-                        // ROUTING LOGIC
-                        if (contextString.includes("Error") || contextString.includes("Fail") || contextString.includes("low")) {
-                            output = "Route: REJECT";
+                    }
+
+                    // 2. AI PROCESSING (If no web output or if AI node)
+                    if (!output) {
+                        let sysPrompt = "";
+                        let userPrompt = "";
+
+                        if (nodeTitle.includes("CFO") || nodeTitle.includes("Analyst") || nodeTitle.includes("Calculator")) {
+                            sysPrompt = `You are the ${nodeTitle}. Perform recursive data analysis or math.
+                            If inputs contain numbers, perform the calculation described: ${prompt}.
+                            Return a detailed analysis with the final result bolded.`;
+                        } else if (nodeTitle.includes("Judge") || nodeTitle.includes("Critic") || nodeTitle.includes("Logic") || nodeTitle.includes("Switch")) {
+                            sysPrompt = `You are a CRITICAL DECISION AGENT (${nodeTitle}). 
+                            Analyze input: ${contextString}
+                            Task: ${prompt}
+                            Decision Rule: Return ONLY "PASS" or "FAIL: [Reason]" or "APPROVE" or "REJECT".
+                            NO OTHER TEXT.`;
                         } else {
-                            output = "Route: APPROVE";
+                            sysPrompt = `You are the ${nodeTitle}.
+                            Role Description: ${node.data.description}
+                            Task: ${prompt}`;
                         }
-                    } else if (nodeTitle.includes("Judge") || nodeTitle.includes("Critic")) {
-                        // DECISION AGENT
+
                         const aiRes = await askAi(
-                            `You are a CRITIC named ${nodeTitle}.
-                              Analyze this input: ${contextString}
-                              Goal: ${prompt}
-                              Return ONLY: "PASS" or "FAIL: [Reason]"`
-                            , 'AGI-S S-2', []);
-                        output = (aiRes as any).answer || "PASS";
-                    } else {
-                        // GENERIC AGENT (Simulated or Real AI)
-                        const aiRes = await askAi(
-                            `ROLE: ${nodeTitle}
-                             TASK: ${prompt}
-                             CONTEXT: ${contextString}
-                             
-                             Perform the task accurately.`,
-                            'AGI-S S-2', []);
-                        output = (aiRes as any).answer || "Processed.";
+                            `CONTEXT DATA:\n${contextString}\n\nUSER COMMAND: ${prompt}`,
+                            'AGI-S S-2',
+                            [{ role: 'system', content: sysPrompt }]
+                        );
+
+                        output = (aiRes as any).answer || (aiRes as any).error || "Node processed successfully.";
                     }
 
                     contextObj[nodeId] = { output, visitCount: (contextObj[nodeId]?.visitCount || 0) + 1 };
@@ -416,19 +419,13 @@ const ReactFlowInner = () => {
                     setOutcomes(prev => [{ title: node.data.title, result: typeof output === 'string' ? output : JSON.stringify(output), timestamp: new Date().toLocaleTimeString() }, ...prev]);
 
                     // --- TRAVERSAL LOGIC (EDGES) ---
-                    // Handle branching based on Logic Nodes
                     let nextNodes: string[] = [];
+                    const normalizedResult = String(output).toUpperCase();
 
-                    // If Logic Switch says REJECT/FAIL, maybe follow specific edges? 
-                    // For now, we follow ALL edges, but intelligent nodes might "stop" flow if output is "STOP"
-
-                    if (typeof output === 'string' && output.includes("STOP")) {
-                        // Stop branch
-                    } else if (typeof output === 'string' && output.includes("FAIL") && nodeTitle.includes("Loop")) {
-                        // Go back to previous?
-                        // Complex concept, for now we just follow connected edges
-                        const children = edges.filter(e => e.source === nodeId).map(e => e.target);
-                        nextNodes.push(...children);
+                    if (normalizedResult.includes("FAIL") || normalizedResult.includes("REJECT") || normalizedResult.includes("STOP")) {
+                        // Intelligent Branching: If node fails/rejects, stop this branch OR follow "False" edge if we had typed edges
+                        // For now: Stop if FAIL/REJECT/STOP is explicit
+                        console.log(`Flow halted at ${nodeTitle} due to result.`);
                     } else {
                         const children = edges.filter(e => e.source === nodeId).map(e => e.target);
                         nextNodes.push(...children);
@@ -437,7 +434,7 @@ const ReactFlowInner = () => {
                     // Loop detection (basic)
                     nextNodes.forEach(childId => {
                         const visitCount = contextObj[childId]?.visitCount || 0;
-                        if (visitCount < 3) { // Max 3 loops per node
+                        if (visitCount < 5) { // Max 5 loops per node
                             if (!queue.includes(childId)) queue.push(childId);
                         }
                     });

@@ -60,6 +60,40 @@ async function observePage(page) {
     };
 }
 
+// Self-healing action handler
+async function smartAction(page, type, selector, value) {
+    console.log(`\x1b[35mActing:\x1b[0m ${type} on ${selector}`);
+
+    // 1. Try to dismiss common consent modals if they exist
+    try {
+        const consentSelectors = [
+            'button:has-text("Accept all")',
+            'button:has-text("I agree")',
+            'button:has-text("Accept Cookies")',
+            '#L2AGLb' // Google specific
+        ];
+        for (const s of consentSelectors) {
+            const btn = await page.$(s);
+            if (btn && await btn.isVisible()) {
+                console.log(`\x1b[34mAuto-dismissing consent modal...\x1b[0m`);
+                await btn.click({ timeout: 2000 }).catch(() => { });
+            }
+        }
+    } catch (e) { }
+
+    // 2. Wait for the actual target
+    await page.waitForSelector(selector, { state: 'visible', timeout: 7000 }).catch(() => {
+        console.log(`\x1b[31mWarning: Selector ${selector} not visible, forcing action...\x1b[0m`);
+    });
+
+    if (type === 'click') {
+        await page.click(selector, { timeout: 5000 });
+    } else if (type === 'type') {
+        await page.fill(selector, value, { timeout: 5000 });
+        await page.press(selector, 'Enter');
+    }
+}
+
 wss.on('connection', (ws) => {
     console.log('\x1b[32mCanvas Interface Connected\x1b[0m');
 
@@ -77,14 +111,13 @@ wss.on('connection', (ws) => {
                     break;
 
                 case 'BROWSER_CLICK':
-                    await activePage.click(cmd.selector);
+                    await smartAction(activePage, 'click', cmd.selector);
                     await activePage.waitForTimeout(1000);
                     result.data = await observePage(activePage);
                     break;
 
                 case 'BROWSER_TYPE':
-                    await activePage.fill(cmd.selector, cmd.text);
-                    await activePage.press(cmd.selector, 'Enter');
+                    await smartAction(activePage, 'type', cmd.selector, cmd.text);
                     await activePage.waitForTimeout(1000);
                     result.data = await observePage(activePage);
                     break;
