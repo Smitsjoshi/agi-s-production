@@ -21,6 +21,7 @@ export interface WebAction {
 export interface UALResult {
     success: boolean;
     screenshot?: string;
+    domTree?: any;
     data?: any;
     error?: string;
     steps: string[];
@@ -119,7 +120,8 @@ export class UALClient {
 
                         const result = await response.json();
                         if (result.screenshot) screenshot = result.screenshot;
-                        if (result.text) lastData = result; // Capture page context if returned
+                        if (result.domTree) lastData = { ...lastData, domTree: result.domTree };
+                        if (result.text) lastData = { ...lastData, text: result.text, title: result.title, url: result.url };
 
                         steps.push(`Executed ${action.type}: Success`);
                     } else {

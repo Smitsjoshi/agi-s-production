@@ -127,6 +127,11 @@ STRATEGY OVERRIDE:
 `;
         }
 
+        // Format the interactive elements for the planning brain
+        const elementsText = context?.domTree && Array.isArray(context.domTree)
+            ? context.domTree.map((el: any) => `- ${el.tag}${el.id ? '#' + el.id : ''} [role="${el.role || 'none'}"]: "${el.text || ''}" (Selector: ${el.selector || el.tag + (el.id ? '#' + el.id : '')})`).join('\n')
+            : "No interactive elements detected yet.";
+
         const prompt = `You are an AUTONOMOUS WEB AGENT PLANNER.
 Your job: Convert user goals into EXECUTABLE browser actions.
 
@@ -135,7 +140,10 @@ USER GOAL: "${goal}"
 CURRENT STATE:
 URL: ${context?.url || 'about:blank'}
 Title: ${context?.title || 'Unknown'}
-Page Text: ${context?.text?.substring(0, 300) || 'Empty page'}
+Page Content Snippet: ${context?.text?.substring(0, 500) || 'Empty page'}
+
+INTERACTIVE ELEMENTS (Choose from these for 'click' or 'type' actions):
+${elementsText}
 
 ACTION HISTORY (What you have already done):
 ${historyText}

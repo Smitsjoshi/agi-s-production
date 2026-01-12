@@ -10,7 +10,8 @@ import {
     Maximize2, Zap, Radio, Command
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { UALAgentLoop, AgentStep } from '@/lib/ual/ual-agent-loop';
+import { UALAgentLoop } from '@/lib/ual/ual-agent-loop';
+import { AgentStep, WebAction } from '@/lib/universal-action-layer';
 
 export default function CanvasPage() {
     const [goal, setGoal] = useState('');
@@ -143,7 +144,7 @@ export default function CanvasPage() {
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[9px] uppercase text-white/20 font-bold tracking-wider">Engine</span>
-                            <span className="text-[10px] font-mono text-white/60">PUPPETEER CORE</span>
+                            <span className="text-[10px] font-mono text-white/60">PLAYWRIGHT INTEL</span>
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[9px] uppercase text-white/20 font-bold tracking-wider">Uptime</span>
@@ -274,7 +275,7 @@ export default function CanvasPage() {
                                     {/* Action Chips */}
                                     {step.actions && (
                                         <div className="grid gap-1 mt-2">
-                                            {step.actions.map((action, aidx) => (
+                                            {step.actions.map((action: WebAction, aidx: number) => (
                                                 <div key={aidx} className="bg-white/5 border border-white/5 rounded px-2 py-1.5 flex items-center gap-2 text-[10px] font-mono text-white/50 group/action hover:bg-white/10 transition-colors cursor-default">
                                                     <ChevronRight className="h-3 w-3 text-white/20 group-hover/action:text-white/50" />
                                                     <span className={cn(

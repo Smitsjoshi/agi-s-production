@@ -18,31 +18,29 @@ export async function POST(req: NextRequest) {
         switch (action) {
             case 'navigate':
                 if (!url) return NextResponse.json({ error: 'URL required for navigation' }, { status: 400 });
-                const pageInfo = await engine.navigate(url);
-                result = { message: 'Navigated successfully', ...pageInfo };
+                result = await engine.navigate(url);
                 break;
 
             case 'execute':
                 // Pass the raw action object to the engine
-                await engine.executeAction({ type: body.type, selector, value, key });
-                const screenshotBuffer = await engine.getScreenshot();
-                result = {
-                    message: 'Action executed',
-                    screenshot: screenshotBuffer.toString('base64')
-                };
+                result = await engine.executeAction({ type: body.type, selector, value, url: body.url, key });
                 break;
 
             case 'launch':
                 // Explicit launch trigger
                 await engine.launch();
-                result = { message: 'Browser launched' };
+                result = { success: true, message: 'Browser launched' };
+                break;
+
+            case 'observe':
+                result = await engine.observe();
                 break;
 
             default:
                 return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
         }
 
-        return NextResponse.json({ success: true, ...result });
+        return NextResponse.json({ ...result });
 
     } catch (error: any) {
         console.error('[Browser API] Error:', error);
@@ -54,16 +52,19 @@ export async function GET(req: NextRequest) {
     // Screenshot endpoint for polling
     try {
         const engine = BrowserEngine.getInstance();
-        const screenshot = await engine.getScreenshot();
+        const obs = await engine.observe();
 
-        return new NextResponse(screenshot as any, {
+        if (!obs.screenshot) throw new Error("No screenshot available");
+
+        const buffer = Buffer.from(obs.screenshot, 'base64');
+
+        return new NextResponse(buffer as any, {
             headers: {
                 'Content-Type': 'image/jpeg',
                 'Cache-Control': 'no-store, max-age=0',
             },
         });
     } catch (error: any) {
-        // If no browser open, return a placeholder or 404
-        return NextResponse.json({ error: 'Browser not active' }, { status: 404 });
+        return NextResponse.json({ error: 'Browser not active or no screenshot' }, { status: 404 });
     }
 }
