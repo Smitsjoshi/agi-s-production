@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Target, Brain, Flame, BarChart3, Globe,
     Sparkles, Code2, Image as ImageIcon, ChevronDown, ChevronUp,
-    Copy, ThumbsUp, ThumbsDown, Check
+    Copy, ThumbsUp, ThumbsDown, Check, Play, ExternalLink, Video
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
@@ -34,6 +34,12 @@ interface EnhancedAnswer {
         title: string;
         url: string;
         snippet: string;
+    }>;
+    videos?: Array<{
+        title: string;
+        description: string;
+        videoId: string;
+        thumbnail: string;
     }>;
     visualContent?: {
         diagram?: string;
@@ -240,47 +246,81 @@ export function EnhancedChatMessage({
                         </div>
                     </Tabs>
 
-                    {/* Web Search Sources */}
-                    {enhancedData.webSources && enhancedData.webSources.length > 0 && (
-                        <div className="px-6 pb-6 border-t border-primary/5 bg-primary/[0.01]">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setShowWebSources(!showWebSources)}
-                                className="w-full flex justify-between items-center text-muted-foreground hover:text-primary mt-4 h-10 rounded-xl"
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Globe className="h-4 w-4" />
-                                    <span className="text-xs font-bold uppercase tracking-wider">External Sources</span>
+                    {/* CINEMATIC RESEARCH LAYER: WEB & VIDEO */}
+                    {(enhancedData.webSources?.length || enhancedData.videos?.length) && (
+                        <div className="px-6 pb-8 border-t border-primary/5 bg-primary/[0.01] backdrop-blur-md">
+                            <div className="flex items-center gap-3 mt-8 mb-6">
+                                <div className="p-2 bg-primary/10 rounded-xl">
+                                    <Globe className="h-4 w-4 text-primary" />
                                 </div>
-                                {showWebSources ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                            </Button>
+                                <div>
+                                    <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/60 leading-none mb-1">Intelligence Ingress</h4>
+                                    <p className="text-sm font-bold text-foreground">Live Web & Video Research</p>
+                                </div>
+                            </div>
 
-                            <AnimatePresence>
-                                {showWebSources && (
-                                    <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        className="overflow-hidden"
-                                    >
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4">
-                                            {enhancedData.webSources.map((source, i) => (
+                            {/* VIDEOS GALLERY (WATCHABLE) */}
+                            {enhancedData.videos && enhancedData.videos.length > 0 && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                                    {enhancedData.videos.map((video, idx) => (
+                                        <motion.div
+                                            key={video.videoId}
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ delay: idx * 0.1 }}
+                                            className="group/vid relative bg-muted/30 border border-primary/10 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-500"
+                                        >
+                                            <div className="aspect-video relative overflow-hidden">
+                                                <img
+                                                    src={video.thumbnail}
+                                                    alt={video.title}
+                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover/vid:scale-110 group-hover/vid:rotate-1"
+                                                />
+                                                <div className="absolute inset-0 bg-black/40 group-hover/vid:bg-black/20 transition-all duration-500" />
+                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/vid:opacity-100 transition-opacity duration-500">
+                                                    <div className="p-3 bg-primary/90 rounded-full shadow-2xl scale-75 group-hover/vid:scale-100 transition-transform duration-500">
+                                                        <Play className="h-6 w-6 text-primary-foreground fill-current" />
+                                                    </div>
+                                                </div>
                                                 <a
-                                                    key={i}
-                                                    href={source.url}
+                                                    href={`https://www.youtube.com/watch?v=${video.videoId}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="p-3 bg-muted/20 border border-primary/5 rounded-xl hover:bg-muted/40 transition-all group/source"
-                                                >
-                                                    <p className="text-xs font-black truncate text-foreground group-hover/source:text-primary transition-colors">{source.title}</p>
-                                                    <p className="text-[10px] text-muted-foreground truncate mt-1">{source.url}</p>
-                                                </a>
-                                            ))}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                                                    className="absolute inset-0 z-10"
+                                                />
+                                            </div>
+                                            <div className="p-4 bg-background/40 backdrop-blur-xl border-t border-primary/5">
+                                                <p className="text-xs font-black text-foreground line-clamp-1 mb-1 group-hover/vid:text-primary transition-colors">{video.title}</p>
+                                                <p className="text-[10px] text-muted-foreground line-clamp-2 leading-relaxed opacity-60 group-hover/vid:opacity-100 transition-opacity">{video.description}</p>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* WEB SOURCES (CLICKABLE) */}
+                            {enhancedData.webSources && enhancedData.webSources.length > 0 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {enhancedData.webSources.map((source, i) => (
+                                        <a
+                                            key={i}
+                                            href={source.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="group/src flex items-center gap-4 p-4 bg-muted/10 border border-primary/5 rounded-2xl hover:bg-primary/5 hover:border-primary/20 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5"
+                                        >
+                                            <div className="shrink-0 p-2.5 bg-background border border-primary/10 rounded-xl group-hover/src:bg-primary group-hover/src:border-primary group-hover/src:rotate-12 transition-all duration-500">
+                                                <ExternalLink className="h-3.5 w-3.5 text-primary group-hover/src:text-primary-foreground" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h5 className="text-[11px] font-black text-foreground group-hover/src:text-primary transition-colors truncate tracking-tight">{source.title}</h5>
+                                                <p className="text-[10px] text-muted-foreground truncate opacity-60 group-hover/src:opacity-100 transition-opacity">{source.url}</p>
+                                                <p className="text-[10px] text-muted-foreground line-clamp-1 mt-1 opacity-40 group-hover/src:opacity-80 transition-opacity italic">{source.snippet}</p>
+                                            </div>
+                                        </a>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </Card>

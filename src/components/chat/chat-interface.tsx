@@ -18,6 +18,8 @@ import { Slider } from '../ui/slider';
 import { useSound } from '@/hooks/use-sound';
 import { Logo } from '../logo';
 import { useSpeechToText } from '@/hooks/use-speech-to-text';
+import { FuturisticBackground } from '../futuristic-background';
+import { Check } from 'lucide-react';
 
 const AI_MODE_DETAILS: Record<AiMode, { icon: React.ElementType, description: string, isPersona?: boolean }> = {
   'AGI-S S-1': { icon: Cpu, description: 'The Bigger Persona. 120B parameters for deep reasoning and complex logic.' },
@@ -228,6 +230,9 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
     setMessages((prev: ChatMessage[]) => [...prev, userMessage]);
     setIsLoading(true);
 
+    // Clear input immediately to prevent double submissions
+    setInput("");
+
     // Play sound safely
     try {
       playSendSound();
@@ -311,11 +316,13 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
   }
 
   return (
-    <div className="flex h-full flex-col relative tour-chat-interface overflow-hidden">
+    <div className="grid grid-rows-[1fr_auto] h-full relative tour-chat-interface overflow-hidden bg-background">
+      <FuturisticBackground />
+
       {/* 1. MESSAGES AREA (Scrollable) */}
-      <div className="flex-1 relative overflow-hidden">
+      <div className="relative z-10 overflow-hidden h-full">
         <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
-          <div className="p-4 md:p-6 space-y-8 max-w-4xl mx-auto pb-[280px]"> {/* Large bottom padding for the static input bar */}
+          <div className="p-4 md:p-6 space-y-8 max-w-4xl mx-auto pb-10">
             {(messages.length === 0 && !isLoading) ? (
               <div className="flex flex-col items-center justify-center h-[60vh] text-center opacity-40 hover:opacity-100 transition-opacity duration-700">
                 <Logo className="h-12 w-auto mb-6 grayscale opacity-80" />
@@ -336,15 +343,17 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
                 {isLoading && (
                   <EnhancedChatMessage role="assistant" content="" isLoading={true} currentDetailLevel={detailLevel[0]} />
                 )}
+                <div className="h-4" /> {/* Tiny buffer */}
               </>
             )}
           </div>
         </ScrollArea>
       </div>
 
-      {/* 2. STATIC INPUT AREA (Gemini/ChatGPT Style) */}
-      <div className="absolute bottom-0 left-0 right-0 z-30 pt-10 pb-4 bg-gradient-to-t from-background via-background/95 to-transparent pointer-events-none">
-        <div className="max-w-4xl mx-auto w-full px-4 md:px-6 pointer-events-auto">
+      {/* 2. STATIC INPUT BAR (Strictly Fixed) */}
+      <div className="relative z-50 w-full bg-gradient-to-t from-background via-background/95 to-transparent pt-10 pb-6 px-4">
+        <div className="mx-auto w-full max-w-4xl relative">
+          {/* SLASH COMMAND POPOVER (Positioned above static bar) */}
           {slashCommandOpen && (
             <div className="absolute bottom-full left-0 mb-4 w-64 bg-popover border rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-bottom-2 backdrop-blur-xl border-primary/20">
               <div className="p-3 border-b border-primary/10 text-[10px] font-black uppercase tracking-widest text-primary/60">
@@ -377,7 +386,7 @@ export function ChatInterface({ agentId, agentConfig }: ChatInterfaceProps = {})
               </ScrollArea>
             </div>
           )}
-          <div className="relative rounded-2xl border border-primary/10 bg-background/80 backdrop-blur-3xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all shadow-2xl shadow-primary/5 overflow-hidden">
+          <div className="relative rounded-2xl border border-primary/10 bg-background/40 backdrop-blur-3xl focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all shadow-2xl shadow-primary/5 overflow-hidden">
             {/* COMPACT INTEGRATED REFINEMENT SLIDER */}
             <div className="px-5 py-3 border-b border-primary/5 bg-primary/[0.01] flex items-center justify-between gap-6">
               <div className="flex items-center gap-2 shrink-0">
