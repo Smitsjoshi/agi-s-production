@@ -11,30 +11,43 @@ export default function LandingPage() {
       title: 'Crucible',
       description: 'Adversarial simulation engine for rigorous strategy testing.',
       icon: <Cpu className="h-6 w-6 text-purple-400" />,
-      href: '/crucible',
+      href: '/login', // Restricted access
       color: 'from-purple-500/20 to-blue-500/20'
     },
     {
       title: 'Synthesis',
       description: 'Multi-source intelligence fusion and deep research analysis.',
       icon: <Brain className="h-6 w-6 text-green-400" />,
-      href: '/synthesis',
+      href: '/login', // Restricted access
       color: 'from-green-500/20 to-emerald-500/20'
     },
     {
       title: 'Vision',
       description: 'Advanced visual processing and real-time environment analysis.',
       icon: <Search className="h-6 w-6 text-blue-400" />,
-      href: '/vision',
+      href: '/login', // Restricted access
       color: 'from-blue-500/20 to-cyan-500/20'
     },
     {
       title: 'Catalyst',
       description: 'Autonomous agent swarm orchestration and deployment.',
       icon: <Zap className="h-6 w-6 text-amber-400" />,
-      href: '/catalyst',
+      href: '/login', // Restricted access
       color: 'from-amber-500/20 to-orange-500/20'
     }
+  ];
+
+  const logos = [
+    // Vercel
+    <svg key="vercel" viewBox="0 0 1155 1000" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/50 hover:text-white transition-colors"><path d="M577.344 0L1154.69 1000H0L577.344 0Z" fill="currentColor" /></svg>,
+    // Next.js
+    <svg key="next" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/50 hover:text-white transition-colors"><path mask="url(#mask0)" d="M90 0C40.2944 0 0 40.2944 0 90C0 139.706 40.2944 180 90 180C139.706 180 180 139.706 180 90C180 40.2944 139.706 0 90 0ZM37.9404 121.229C40.7303 112.592 53.6491 112.441 53.6491 86.852V60.9231H64.9961V88.9487C64.9961 97.4523 58.7495 102.771 52.8844 118.064L105.155 58.7563H119.349L64.269 146.516C49.9547 140.245 38.6534 130.347 30.6775 118.23L37.9404 121.229ZM145.474 132.84C137.498 143.203 126.96 151.05 114.996 156.467V88.8052C114.996 79.7997 122.915 76.8453 125.869 76.8453C128.823 76.8453 131.777 79.2215 131.777 88.8052V132.84H145.474ZM90 168.077C46.8682 168.077 11.9231 133.132 11.9231 90C11.9231 46.8682 46.8682 11.9231 90 11.9231C133.132 11.9231 168.077 46.8682 168.077 90C168.077 133.132 133.132 168.077 90 168.077Z" fill="currentColor" /></svg>,
+    // Microsoft
+    <svg key="ms" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/50 hover:text-white transition-colors"><path d="M0 0H10.7486V10.7486H0V0Z" fill="currentColor" /><path d="M12.2514 0H23V10.7486H12.2514V0Z" fill="currentColor" /><path d="M0 12.2514H10.7486V23H0V12.2514Z" fill="currentColor" /><path d="M12.2514 12.2514H23V23H12.2514V12.2514Z" fill="currentColor" /></svg>,
+    // GitHub
+    <svg key="github" viewBox="0 0 98 96" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/50 hover:text-white transition-colors"><path fillRule="evenodd" clipRule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" fill="currentColor" /></svg>,
+    // AWS
+    <svg key="aws" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/50 hover:text-white transition-colors"><path d="M11.666 4.417c-2.43 0-4.634.619-6.324 1.7C3.96 7.003 3.69 7.397 3.84 7.733c.125.321.465.441.745.336 1.62-.841 3.73-1.372 5.861-1.372 5.17 0 9.07 2.112 9.07 5.823v.406h-2.31c-3.83 0-6.91 1.251-6.91 4.542 0 1.94 1.28 3.421 3.3 3.421 2.22 0 3.73-1.42 4.46-3.021l.13.11c.36.431.81.791 1.48.791.73 0 1.93-.36 2.65-.95l-.65-1.371c-.35.26-.81.44-1.12.44-.39 0-.49-.24-.49-.78V12.5c0-4.832-4.9-8.083-11.16-8.083zm0 14.473c-1.11 0-1.72-.51-1.72-1.471 0-1.741 2.01-2.221 4.54-2.221h2.24v1.891c-.69 1.15-2.22 1.8-5.06 1.8z" fill="currentColor" /></svg>
   ];
 
   return (
@@ -98,6 +111,44 @@ export default function LandingPage() {
             </Link>
           </div>
         </motion.div>
+      </section>
+
+      {/* Logo Marquee Section */}
+      <section className="border-y border-white/5 bg-black/50 overflow-hidden py-12 relative">
+        <div className="mx-auto max-w-7xl px-6 mb-8 text-center">
+          <p className="text-sm font-medium uppercase tracking-widest text-gray-500">Trusted by industry leaders</p>
+        </div>
+        <div className="relative flex overflow-hidden group">
+          <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-black via-black/80 to-transparent z-10" />
+          <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-black via-black/80 to-transparent z-10" />
+
+          <motion.div
+            className="flex gap-24 items-center whitespace-nowrap"
+            animate={{ x: [0, -1000] }}
+            transition={{
+              repeat: Infinity,
+              duration: 30,
+              ease: "linear",
+            }}
+          >
+            {/* Loop 1 */}
+            {logos.map((logo, i) => (
+              <div key={`l1-${i}`} className="opacity-70 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0">{logo}</div>
+            ))}
+            {/* Loop 2 */}
+            {logos.map((logo, i) => (
+              <div key={`l2-${i}`} className="opacity-70 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0">{logo}</div>
+            ))}
+            {/* Loop 3 */}
+            {logos.map((logo, i) => (
+              <div key={`l3-${i}`} className="opacity-70 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0">{logo}</div>
+            ))}
+            {/* Loop 4 */}
+            {logos.map((logo, i) => (
+              <div key={`l4-${i}`} className="opacity-70 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0">{logo}</div>
+            ))}
+          </motion.div>
+        </div>
       </section>
 
       {/* Feature Grid */}
