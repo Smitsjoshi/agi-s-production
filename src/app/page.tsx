@@ -75,10 +75,10 @@ export default function LandingPage() {
           <div className="flex items-center gap-8">
             <Link href="/" className="text-xl font-bold tracking-tight text-white hover:text-cyan-400 transition-colors">AGI-S</Link>
             <div className="hidden items-center gap-6 text-sm font-medium text-gray-400 md:flex">
-              <button onClick={handleComingSoon('Research')} className="hover:text-white transition-colors">Research</button>
-              <button onClick={handleComingSoon('API')} className="hover:text-white transition-colors">API</button>
-              <button onClick={handleComingSoon('Enterprise')} className="hover:text-white transition-colors">Enterprise</button>
-              <button onClick={handleComingSoon('Safety')} className="hover:text-white transition-colors">Safety</button>
+              <Link href="/research" className="hover:text-white transition-colors">Research</Link>
+              <Link href="/api" className="hover:text-white transition-colors">API</Link>
+              <Link href="/enterprise" className="hover:text-white transition-colors">Enterprise</Link>
+              <Link href="/safety" className="hover:text-white transition-colors">Safety</Link>
             </div>
           </div>
           <div className="flex items-center gap-4">

@@ -42,12 +42,7 @@ export default function AuthPage() {
                 // await signUp(email, password, name);
                 toast({ title: 'Account Created', description: 'Welcome to the future.' });
             }
-            // Force redirect to admin for demonstration, or check email logic here
-            if (email.includes('admin') || true) { // Allow all for demo
-                router.push('/admin');
-            } else {
-                router.push('/ask');
-            }
+            router.push('/');
         } catch (error: any) {
             console.error(error);
             toast({
