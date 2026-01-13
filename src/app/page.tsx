@@ -99,12 +99,12 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative flex h-[90vh] flex-col items-center justify-center overflow-hidden px-4 text-center z-10 w-full">
-        {/* 3D Neural Orb Background Integration */}
-        <div className="absolute inset-0 z-0 opacity-40">
+        {/* 3D Neural Orb Background Integration - Disabled for Vercel Build Stability */}
+        {/* <div className="absolute inset-0 z-0 opacity-40">
           <Canvas camera={{ position: [0, 0, 1] }}>
             <NeuralOrb />
           </Canvas>
-        </div>
+        </div> */}
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
