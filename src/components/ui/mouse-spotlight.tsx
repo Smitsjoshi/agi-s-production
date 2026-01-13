@@ -19,20 +19,20 @@ export function MouseSpotlight() {
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, [mouseX, mouseY]);
 
-    if (!mounted) return null;
-
-    return (
-        <motion.div
-            className="pointer-events-none fixed inset-0 z-30 transition-opacity duration-300"
-            style={{
-                background: useMotionTemplate`
+    const background = useMotionTemplate`
           radial-gradient(
             600px circle at ${mouseX}px ${mouseY}px,
             rgba(255, 255, 255, 0.04),
             transparent 80%
           )
-        `,
-            }}
+        `;
+
+    if (!mounted) return null;
+
+    return (
+        <motion.div
+            className="pointer-events-none fixed inset-0 z-30 transition-opacity duration-300"
+            style={{ background }}
         />
     );
 }
