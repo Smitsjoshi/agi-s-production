@@ -71,7 +71,7 @@ export default function PrismBackground() {
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 z-0 pointer-events-none filter blur-[60px]" // High blur creates the prism/aurora effect
+            className="fixed inset-0 z-0 pointer-events-none opacity-60 mix-blend-screen" // Increased opacity and added mix-blend-screen for better visibility
         />
     );
 }

@@ -52,25 +52,14 @@ export default function LandingPage() {
     }
   ];
 
+  /* Interactive Logos with Links */
   const logos = [
-    <svg key="vercel" viewBox="0 0 1155 1000" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/40 hover:text-white transition-colors duration-300"><path d="M577.344 0L1154.69 1000H0L577.344 0Z" fill="currentColor" /></svg>,
-    <svg key="next" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/40 hover:text-white transition-colors duration-300"><path mask="url(#mask0)" d="M90 0C40.2944 0 0 40.2944 0 90C0 139.706 40.2944 180 90 180C139.706 180 180 139.706 180 90C180 40.2944 139.706 0 90 0ZM37.9404 121.229C40.7303 112.592 53.6491 112.441 53.6491 86.852V60.9231H64.9961V88.9487C64.9961 97.4523 58.7495 102.771 52.8844 118.064L105.155 58.7563H119.349L64.269 146.516C49.9547 140.245 38.6534 130.347 30.6775 118.23L37.9404 121.229ZM145.474 132.84C137.498 143.203 126.96 151.05 114.996 156.467V88.8052C114.996 79.7997 122.915 76.8453 125.869 76.8453C128.823 76.8453 131.777 79.2215 131.777 88.8052V132.84H145.474ZM90 168.077C46.8682 168.077 11.9231 133.132 11.9231 90C11.9231 46.8682 46.8682 11.9231 90 11.9231C133.132 11.9231 168.077 46.8682 168.077 90C168.077 133.132 133.132 168.077 90 168.077Z" fill="currentColor" /></svg>,
-    <svg key="react" viewBox="-11.5 -10.23174 23 20.46348" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/40 hover:text-white transition-colors duration-300">
-      <circle cx="0" cy="0" r="2.05" fill="currentColor" />
-      <g stroke="currentColor" strokeWidth="1" fill="none">
-        <ellipse rx="11" ry="4.2" />
-        <ellipse rx="11" ry="4.2" transform="rotate(60)" />
-        <ellipse rx="11" ry="4.2" transform="rotate(120)" />
-      </g>
-    </svg>,
-    <svg key="stripe" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/40 hover:text-white transition-colors duration-300">
-      <path d="M14 26.5455V14H18.9091V26.5455H14Z" fill="currentColor" />
-      <path d="M21.0909 26.5455V14H26V26.5455H21.0909Z" fill="currentColor" />
-    </svg>, // Placeholder Stripe-ish
-    <Github key="gh" className="h-8 w-8 text-white/40 hover:text-white transition-colors duration-300" />,
-    <svg key="openai" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/40 hover:text-white transition-colors duration-300">
-      <path d="M22.2819 9.82116C22.1842 9.04944 21.9056 8.30799 21.4729 7.66632C21.0402 7.02466 20.4678 6.50426 19.7996 6.15456C19.1314 5.80486 18.3892 5.63738 17.6433 5.66779C16.8974 5.6982 16.1729 5.92548 15.5385 6.32832L15.5385 6.32832C15.8698 5.28919 15.8335 4.18002 15.4357 3.16439C15.0379 2.14876 14.3001 1.28045 13.3308 0.686866C12.3615 0.0932822 11.2119 -0.193642 10.0526 0.149177C8.89328 0.491996 7.85237 1.15585 7.08412 2.04351L5.96912 3.32768L5.96912 3.32896C5.07185 3.01896 4.10255 3.03362 3.21203 3.37059C2.32152 3.70756 1.55955 4.34812 1.04313 5.19324C0.526715 6.03837 0.285093 7.04213 0.355606 8.0499C0.426119 9.05767 0.804859 10.0135 1.43292 10.771L2.54792 12.0565L2.5492 12.0552C1.98634 12.6358 1.56447 13.334 1.32049 14.0906C1.07651 14.8472 1.01831 15.6397 1.15104 16.4009C1.28377 17.1622 1.60288 17.8688 2.08053 18.4601C2.55818 19.0514 3.17937 19.5088 3.88912 19.7915L3.88912 19.7915C3.55909 20.831 3.59604 21.9403 3.99419 22.9561C4.39234 23.9719 5.12999 24.8404 6.09935 25.4343C7.06871 26.0282 8.21839 26.3155 9.37775 25.9729C10.5371 25.6303 11.5781 24.9667 12.3467 24.0792L13.4617 22.795L13.4604 22.7937C14.3572 23.1027 15.3259 23.0874 16.2158 22.7502C17.1057 22.4129 17.8672 21.7724 18.3835 20.9274C18.9 20.0825 19.1418 19.0791 19.0718 18.0718C19.0018 17.0645 18.6236 16.1091 17.9961 15.352L16.8903 14.0754" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    { component: <svg viewBox="0 0 1155 1000" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/40 hover:text-white transition-colors duration-300"><path d="M577.344 0L1154.69 1000H0L577.344 0Z" fill="currentColor" /></svg>, href: "https://vercel.com" },
+    { component: <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/40 hover:text-white transition-colors duration-300"><path mask="url(#mask0)" d="M90 0C40.2944 0 0 40.2944 0 90C0 139.706 40.2944 180 90 180C139.706 180 180 139.706 180 90C180 40.2944 139.706 0 90 0ZM37.9404 121.229C40.7303 112.592 53.6491 112.441 53.6491 86.852V60.9231H64.9961V88.9487C64.9961 97.4523 58.7495 102.771 52.8844 118.064L105.155 58.7563H119.349L64.269 146.516C49.9547 140.245 38.6534 130.347 30.6775 118.23L37.9404 121.229ZM145.474 132.84C137.498 143.203 126.96 151.05 114.996 156.467V88.8052C114.996 79.7997 122.915 76.8453 125.869 76.8453C128.823 76.8453 131.777 79.2215 131.777 88.8052V132.84H145.474ZM90 168.077C46.8682 168.077 11.9231 133.132 11.9231 90C11.9231 46.8682 46.8682 11.9231 90 11.9231C133.132 11.9231 168.077 46.8682 168.077 90C168.077 133.132 133.132 168.077 90 168.077Z" fill="currentColor" /></svg>, href: "https://nextjs.org" },
+    { component: <svg viewBox="-11.5 -10.23174 23 20.46348" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/40 hover:text-white transition-colors duration-300"><circle cx="0" cy="0" r="2.05" fill="currentColor" /><g stroke="currentColor" strokeWidth="1" fill="none"><ellipse rx="11" ry="4.2" /><ellipse rx="11" ry="4.2" transform="rotate(60)" /><ellipse rx="11" ry="4.2" transform="rotate(120)" /></g></svg>, href: "https://react.dev" },
+    { component: <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/40 hover:text-white transition-colors duration-300"><path d="M14 26.5455V14H18.9091V26.5455H14Z" fill="currentColor" /><path d="M21.0909 26.5455V14H26V26.5455H21.0909Z" fill="currentColor" /></svg>, href: "https://stripe.com" },
+    { component: <Github className="h-8 w-8 text-white/40 hover:text-white transition-colors duration-300" />, href: "https://github.com" },
+    { component: <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto text-white/40 hover:text-white transition-colors duration-300"><path d="M22.2819 9.82116C22.1842 9.04944 21.9056 8.30799 21.4729 7.66632C21.0402 7.02466 20.4678 6.50426 19.7996 6.15456C19.1314 5.80486 18.3892 5.63738 17.6433 5.66779C16.8974 5.6982 16.1729 5.92548 15.5385 6.32832L15.5385 6.32832C15.8698 5.28919 15.8335 4.18002 15.4357 3.16439C15.0379 2.14876 14.3001 1.28045 13.3308 0.686866C12.3615 0.0932822 11.2119 -0.193642 10.0526 0.149177C8.89328 0.491996 7.85237 1.15585 7.08412 2.04351L5.96912 3.32768L5.96912 3.32896C5.07185 3.01896 4.10255 3.03362 3.21203 3.37059C2.32152 3.70756 1.55955 4.34812 1.04313 5.19324C0.526715 6.03837 0.285093 7.04213 0.355606 8.0499C0.426119 9.05767 0.804859 10.0135 1.43292 10.771L2.54792 12.0565L2.5492 12.0552C1.98634 12.6358 1.56447 13.334 1.32049 14.0906C1.07651 14.8472 1.01831 15.6397 1.15104 16.4009C1.28377 17.1622 1.60288 17.8688 2.08053 18.4601C2.55818 19.0514 3.17937 19.5088 3.88912 19.7915L3.88912 19.7915C3.55909 20.831 3.59604 21.9403 3.99419 22.9561C4.39234 23.9719 5.12999 24.8404 6.09935 25.4343C7.06871 26.0282 8.21839 26.3155 9.37775 25.9729C10.5371 25.6303 11.5781 24.9667 12.3467 24.0792L13.4617 22.795L13.4604 22.7937C14.3572 23.1027 15.3259 23.0874 16.2158 22.7502C17.1057 22.4129 17.8672 21.7724 18.3835 20.9274C18.9 20.0825 19.1418 19.0791 19.0718 18.0718C19.0018 17.0645 18.6236 16.1091 17.9961 15.352L16.8903 14.0754" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>, href: "https://openai.com" }
   ];
 
   return (
@@ -153,7 +142,17 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl px-6 mb-6 text-center">
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Trusted by industry leaders</p>
         </div>
-        <InfiniteMarquee items={logos} speed={35} />
+        <div className="max-w-5xl mx-auto px-6 group">
+          <InfiniteMarquee
+            items={logos.map((l, i) => (
+              <a key={i} href={l.href} target="_blank" rel="noopener noreferrer" className="block transform transition-transform hover:scale-110">
+                {l.component}
+              </a>
+            ))}
+            speed={40}
+            pauseOnHover={true}
+          />
+        </div>
       </section>
 
       {/* Feature Grid */}
