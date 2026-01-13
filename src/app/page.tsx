@@ -8,6 +8,8 @@ import PrismBackground from '@/components/ui/prism-background';
 import { InfiniteMarquee } from '@/components/ui/infinite-marquee';
 import { MouseSpotlight } from '@/components/ui/mouse-spotlight';
 import { useToast } from '@/hooks/use-toast';
+import { Canvas } from '@react-three/fiber';
+import NeuralOrb from '@/components/3d/neural-orb';
 
 export default function LandingPage() {
   const { toast } = useToast();
@@ -107,12 +109,19 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative flex h-[90vh] flex-col items-center justify-center overflow-hidden px-4 text-center z-10">
+      <section className="relative flex h-[90vh] flex-col items-center justify-center overflow-hidden px-4 text-center z-10 w-full">
+        {/* 3D Neural Orb Background Integration */}
+        <div className="absolute inset-0 z-0 opacity-40">
+          <Canvas camera={{ position: [0, 0, 1] }}>
+            <NeuralOrb />
+          </Canvas>
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative max-w-4xl"
+          className="relative z-10 max-w-4xl"
         >
           <div className="mb-4 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-cyan-300 backdrop-blur-md">
             <span className="flex h-2 w-2 rounded-full bg-cyan-400 mr-2 animate-pulse"></span>
