@@ -24,10 +24,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </Link>
                 </nav>
                 <div className="absolute bottom-4 left-4 right-4">
-                    <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-400 hover:bg-white/10 hover:text-red-300 transition-colors">
+                    <button
+                        onClick={async () => {
+                            try {
+                                await import('@/lib/firebase/auth').then(mod => mod.logOut());
+                                window.location.href = '/';
+                            } catch (e) {
+                                console.error('Logout failed', e);
+                            }
+                        }}
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-400 hover:bg-white/10 hover:text-red-300 transition-colors"
+                    >
                         <LogOut className="h-5 w-5" />
                         Logout
-                    </Link>
+                    </button>
                 </div>
             </aside>
 

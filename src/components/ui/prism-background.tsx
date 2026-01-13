@@ -71,7 +71,7 @@ export default function PrismBackground() {
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 z-0 pointer-events-none opacity-60 mix-blend-screen" // Increased opacity and added mix-blend-screen for better visibility
+            className="fixed inset-0 z-[1] pointer-events-none opacity-80 mix-blend-screen"
         />
     );
 }
