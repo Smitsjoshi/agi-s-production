@@ -1,16 +1,3 @@
-
-'use client';
-
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
-import { signIn } from '@/lib/firebase/auth';
-import { useToast } from '@/hooks/use-toast';
-
 'use client';
 
 import { useState } from 'react';
