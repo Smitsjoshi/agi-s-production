@@ -3,13 +3,12 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Brain, Cpu, Zap, Search, ChevronRight, Github, Code, Terminal, Cloud } from 'lucide-react';
+import { ArrowRight, Brain, Cpu, Zap, Search, ChevronRight, Github, Code, Terminal, Cloud, Shield, Database, Server } from 'lucide-react';
 import PrismBackground from '@/components/ui/prism-background';
+import NetworkBackground from '@/components/ui/network-background';
 import { InfiniteMarquee } from '@/components/ui/infinite-marquee';
 import { MouseSpotlight } from '@/components/ui/mouse-spotlight';
 import { useToast } from '@/hooks/use-toast';
-import { Canvas } from '@react-three/fiber';
-import NeuralOrb from '@/components/3d/neural-orb';
 
 export default function LandingPage() {
   const { toast } = useToast();
@@ -67,6 +66,7 @@ export default function LandingPage() {
 
       {/* Visual Effects - Canvas is fixed z-1 */}
       <PrismBackground />
+      <NetworkBackground />
       <MouseSpotlight />
 
       {/* Navigation - z-50 */}
@@ -98,14 +98,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative flex h-[90vh] flex-col items-center justify-center overflow-hidden px-4 text-center z-10 w-full">
-        {/* 3D Neural Orb Background Integration - Disabled for Vercel Build Stability */}
-        {/* <div className="absolute inset-0 z-0 opacity-40">
-          <Canvas camera={{ position: [0, 0, 1] }}>
-            <NeuralOrb />
-          </Canvas>
-        </div> */}
-
+      <section className="relative flex h-[95vh] flex-col items-center justify-center overflow-hidden px-4 text-center z-10 w-full pt-16">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -114,24 +107,27 @@ export default function LandingPage() {
         >
           <div className="mb-4 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-cyan-300 backdrop-blur-md">
             <span className="flex h-2 w-2 rounded-full bg-cyan-400 mr-2 animate-pulse"></span>
-            v2.0 Now Available
+            System Online: v2.4 (Ollama/Groq)
           </div>
-          <h1 className="mb-8 text-5xl font-bold leading-tight tracking-tighter md:text-7xl lg:text-8xl">
-            Introducing <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 animate-gradient-x">Superintelligence.</span>
+          <h1 className="mb-8 text-5xl font-bold leading-tight tracking-tighter md:text-8xl lg:text-9xl">
+            Thinking <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 animate-gradient-x">Autonomously.</span>
           </h1>
-          <p className="mb-10 text-xl text-gray-400 md:text-2xl font-light">
-            An interface for the next generation of cognitive tasks.
+          <p className="mb-10 text-xl text-gray-400 md:text-2xl font-light max-w-2xl mx-auto">
+            The world's first active inference platform. Not a chatbot. A digital daemon that lives on your server.
           </p>
 
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link href="/ask">
-              <div className="group relative flex h-14 w-full min-w-[320px] items-center justify-between overflow-hidden rounded-full bg-white px-6 transition-all hover:bg-gray-200 sm:w-auto shadow-2xl shadow-cyan-900/20">
-                <span className="text-lg font-medium text-black">What can I help with?</span>
+              <div className="group relative flex h-14 w-full min-w-[320px] items-center justify-between overflow-hidden rounded-full bg-white px-6 transition-all hover:bg-gray-200 sm:w-auto shadow-2xl shadow-cyan-900/20 cursor-pointer">
+                <span className="text-lg font-medium text-black">Initiate Sequence</span>
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black text-white transition-transform group-hover:scale-110 group-hover:rotate-45">
                   <ArrowRight className="h-4 w-4" />
                 </div>
               </div>
+            </Link>
+            <Link href="/login">
+              <Button variant="ghost" className="text-white hover:text-cyan-400 hover:bg-white/5 h-14 px-6 text-lg">Documentation</Button>
             </Link>
           </div>
         </motion.div>
@@ -140,7 +136,7 @@ export default function LandingPage() {
       {/* Logo Marquee Section */}
       <section className="border-y border-white/5 bg-black/40 backdrop-blur-sm overflow-hidden py-10 relative z-10">
         <div className="mx-auto max-w-7xl px-6 mb-6 text-center">
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Trusted by industry leaders</p>
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Powering Next-Gen Infrastructure</p>
         </div>
         <div className="max-w-5xl mx-auto px-6 group">
           <InfiniteMarquee
@@ -155,16 +151,40 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Feature Grid */}
+      {/* Live Intelligence Stats */}
+      <section className="py-24 px-6 relative z-10 border-b border-white/5 bg-zinc-950/30">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+              <div className="text-4xl font-bold text-white mb-2">12ms</div>
+              <div className="text-xs uppercase tracking-wider text-gray-500">Inference Latency</div>
+            </div>
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+              <div className="text-4xl font-bold text-cyan-400 mb-2">∞</div>
+              <div className="text-xs uppercase tracking-wider text-gray-500">Context Window</div>
+            </div>
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+              <div className="text-4xl font-bold text-emerald-400 mb-2">100%</div>
+              <div className="text-xs uppercase tracking-wider text-gray-500">Local Privacy</div>
+            </div>
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+              <div className="text-4xl font-bold text-purple-400 mb-2">L5</div>
+              <div className="text-xs uppercase tracking-wider text-gray-500">Autonomy Level</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Grid (The Platform) */}
       <section className="py-24 px-6 relative z-10">
         <div className="mx-auto max-w-7xl">
           <div className="mb-12 flex items-end justify-between">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Core Capabilities</h2>
-              <p className="mt-2 text-gray-400">Advanced systems for complex problem solving.</p>
+              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">The Ecosystem</h2>
+              <p className="mt-2 text-gray-400">A unified operating system for artificial intelligence.</p>
             </div>
             <Link href="/login" className="hidden text-sm text-gray-400 hover:text-white md:flex items-center gap-1 transition-colors">
-              View all research <ChevronRight className="h-4 w-4" />
+              Explore Modules <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
 
@@ -197,57 +217,46 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stories / Mock Section */}
-      <section className="border-t border-white/10 bg-zinc-950/50 backdrop-blur-lg py-24 px-6 relative z-10">
+      {/* Bento Grid / Infrastructure Section */}
+      <section className="py-24 px-6 relative z-10 bg-black/50">
         <div className="mx-auto max-w-7xl">
-          <h2 className="mb-12 text-3xl font-bold tracking-tight md:text-4xl">Latest Updates</h2>
-          <div className="grid gap-8 md:grid-cols-2">
-            <Link href="/login">
-              <div className="group cursor-pointer overflow-hidden rounded-2xl bg-zinc-900 border border-white/5 hover:border-white/20 transition-all duration-300">
-                <div className="aspect-video w-full bg-gradient-to-br from-purple-900/50 to-pink-900/50 transition-transform duration-700 group-hover:scale-105 flex items-center justify-center">
-                  <div className="text-purple-300/20">
-                    <Terminal className="h-24 w-24" />
-                  </div>
+          <h2 className="text-3xl font-bold tracking-tight md:text-4xl mb-12 text-center">Infrastructure Layer</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+            {/* Large Block */}
+            <div className="md:col-span-2 rounded-3xl border border-white/10 bg-zinc-900/50 p-8 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-50 group-hover:opacity-100 transition-opacity" />
+              <div className="relative z-10">
+                <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center mb-6">
+                  <Server className="text-blue-400 h-5 w-5" />
                 </div>
-                <div className="p-6">
-                  <div className="mb-2 text-xs font-medium uppercase tracking-wider text-purple-400">Release</div>
-                  <h3 className="text-2xl font-bold leading-tight group-hover:underline decoration-white/30 underline-offset-4">AGI-S v2.0 Released</h3>
-                  <p className="mt-2 text-gray-400">Introducing the Ghost Protocol and enhanced stealth capabilities for autonomous agents.</p>
+                <h3 className="text-2xl font-bold mb-2">Distributed Concept Graphs</h3>
+                <p className="text-gray-400 max-w-md">AGI-S uses a novel GraphRAG architecture to store memories not just as text, but as connected concepts. It learns the relationships between your projects automonously.</p>
+                <div className="mt-8 h-32 w-full bg-black/30 rounded-xl border border-white/5 flex items-center justify-center">
+                  <span className="text-xs font-mono text-blue-400/50">simulating_graph_connection... [OK]</span>
                 </div>
               </div>
-            </Link>
+            </div>
 
-            <div className="space-y-8">
-              <Link href="/login" className="group cursor-pointer flex gap-6 items-start p-4 rounded-xl hover:bg-white/5 transition-all">
-                <div className="h-24 w-32 flex-shrink-0 rounded-lg bg-zinc-800 bg-gradient-to-br from-blue-900/30 to-cyan-900/30 flex items-center justify-center">
-                  <Code className="h-8 w-8 text-blue-400/50" />
+            {/* Stacked Blocks */}
+            <div className="space-y-6">
+              <div className="rounded-3xl border border-white/10 bg-zinc-900/50 p-8 relative overflow-hidden group">
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Shield className="text-green-400 h-5 w-5" />
+                    <h3 className="text-lg font-bold">Ghost Protocol</h3>
+                  </div>
+                  <p className="text-sm text-gray-400">Military-grade stealth for web scraping. 99.9% Undetectable by anti-bot measures.</p>
                 </div>
-                <div>
-                  <div className="mb-1 text-xs font-medium uppercase tracking-wider text-blue-400">Research</div>
-                  <h3 className="text-lg font-bold group-hover:text-blue-300 transition-colors">Neural Architecture Search</h3>
-                  <p className="mt-1 text-sm text-gray-400 line-clamp-2">Optimizing model weights for local inference on consumer hardware with 99% accuracy.</p>
+              </div>
+              <div className="rounded-3xl border border-white/10 bg-zinc-900/50 p-8 relative overflow-hidden group">
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Database className="text-amber-400 h-5 w-5" />
+                    <h3 className="text-lg font-bold">Local First</h3>
+                  </div>
+                  <p className="text-sm text-gray-400">Your data never leaves your machine. Full GDPR compliance by default.</p>
                 </div>
-              </Link>
-              <Link href="/login" className="group cursor-pointer flex gap-6 items-start p-4 rounded-xl hover:bg-white/5 transition-all">
-                <div className="h-24 w-32 flex-shrink-0 rounded-lg bg-zinc-800 bg-gradient-to-br from-green-900/30 to-emerald-900/30 flex items-center justify-center">
-                  <Cloud className="h-8 w-8 text-green-400/50" />
-                </div>
-                <div>
-                  <div className="mb-1 text-xs font-medium uppercase tracking-wider text-green-400">Safety</div>
-                  <h3 className="text-lg font-bold group-hover:text-green-300 transition-colors">Alignment & Control</h3>
-                  <p className="mt-1 text-sm text-gray-400 line-clamp-2">New protocols for ensuring agent actions remain within strict user-defined boundaries.</p>
-                </div>
-              </Link>
-              <Link href="/login" className="group cursor-pointer flex gap-6 items-start p-4 rounded-xl hover:bg-white/5 transition-all">
-                <div className="h-24 w-32 flex-shrink-0 rounded-lg bg-zinc-800 bg-gradient-to-br from-amber-900/30 to-orange-900/30 flex items-center justify-center">
-                  <Zap className="h-8 w-8 text-amber-400/50" />
-                </div>
-                <div>
-                  <div className="mb-1 text-xs font-medium uppercase tracking-wider text-amber-400">Product</div>
-                  <h3 className="text-lg font-bold group-hover:text-amber-300 transition-colors">The Universal Action Layer</h3>
-                  <p className="mt-1 text-sm text-gray-400 line-clamp-2">Deep dive into the UAL architecture that powers autonomous web interactions.</p>
-                </div>
-              </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -259,36 +268,36 @@ export default function LandingPage() {
           <div>
             <div className="mb-6 font-bold text-xl">AGI-S</div>
             <div className="flex flex-col gap-3 text-gray-500">
-              <Link href="#" className="hover:text-white transition-colors">About Us</Link>
-              <Link href="#" className="hover:text-white transition-colors">Careers</Link>
-              <Link href="#" className="hover:text-white transition-colors">Security</Link>
+              <Link href="#" className="hover:text-white transition-colors">Manifesto</Link>
+              <Link href="#" className="hover:text-white transition-colors">System Status</Link>
+              <Link href="#" className="hover:text-white transition-colors">Security Audit</Link>
               <Link href="#" className="hover:text-white transition-colors">Legal</Link>
             </div>
           </div>
           <div>
-            <div className="mb-6 font-bold text-white">Research</div>
+            <div className="mb-6 font-bold text-white">Platform</div>
             <div className="flex flex-col gap-3 text-gray-500">
-              <Link href="#" className="hover:text-white transition-colors">Overview</Link>
-              <Link href="#" className="hover:text-white transition-colors">Index</Link>
-              <Link href="#" className="hover:text-white transition-colors">GPT-4</Link>
-              <Link href="#" className="hover:text-white transition-colors">DALL-E 3</Link>
+              <Link href="#" className="hover:text-white transition-colors">Architecture</Link>
+              <Link href="#" className="hover:text-white transition-colors">Neural Weights</Link>
+              <Link href="#" className="hover:text-white transition-colors">Safety Protocols</Link>
+              <Link href="#" className="hover:text-white transition-colors">Roadmap</Link>
             </div>
           </div>
           <div>
-            <div className="mb-6 font-bold text-white">API</div>
+            <div className="mb-6 font-bold text-white">Developers</div>
             <div className="flex flex-col gap-3 text-gray-500">
-              <Link href="#" className="hover:text-white transition-colors">Overview</Link>
-              <Link href="#" className="hover:text-white transition-colors">Pricing</Link>
-              <Link href="#" className="hover:text-white transition-colors">Docs</Link>
-              <Link href="#" className="hover:text-white transition-colors">Status</Link>
+              <Link href="#" className="hover:text-white transition-colors">Neural Link</Link>
+              <Link href="#" className="hover:text-white transition-colors">Webhooks</Link>
+              <Link href="#" className="hover:text-white transition-colors">SDK</Link>
+              <Link href="#" className="hover:text-white transition-colors">Community</Link>
             </div>
           </div>
           <div>
-            <div className="mb-6 font-bold text-white">Social</div>
+            <div className="mb-6 font-bold text-white">Connect</div>
             <div className="flex flex-col gap-3 text-gray-500">
-              <Link href="#" className="hover:text-white transition-colors">Twitter</Link>
               <Link href="#" className="hover:text-white transition-colors">GitHub</Link>
-              <Link href="#" className="hover:text-white transition-colors">YouTube</Link>
+              <Link href="#" className="hover:text-white transition-colors">Discord</Link>
+              <Link href="#" className="hover:text-white transition-colors">Twitter</Link>
               <Link href="#" className="hover:text-white transition-colors">LinkedIn</Link>
             </div>
           </div>
