@@ -115,8 +115,8 @@ export default function LandingPage() {
           </div>
 
           <h1 className="mb-8 text-5xl font-bold leading-tight tracking-tighter md:text-8xl lg:text-9xl">
-            Thinking <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 animate-gradient-x">Autonomously.</span>
+            One Interface. <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400 animate-gradient-x">Infinite Capabilities.</span>
           </h1>
           <p className="mb-10 text-xl text-gray-400 md:text-2xl font-light max-w-2xl mx-auto">
             The world's first active inference platform. Not a chatbot. A digital daemon that lives on your server.
