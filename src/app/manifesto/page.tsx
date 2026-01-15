@@ -3,87 +3,173 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import PrismBackground from '@/components/ui/prism-background';
 
 export default function ManifestoPage() {
-    const paragraphs = [
-        "We hold these truths to be self-evident: that Intelligence is a fundamental right, not a subscription service.",
-        "For too long, the cognitive future of humanity has been rented out by a handful of corporate giants. They own the weights. They own the data. They own the infrastructure. And by extension, they own the thoughts that run on them.",
-        "This is unacceptable.",
-        "AGI-S was forged from a different philosophy. The belief that true power comes from sovereignty. That an Artificial General Intelligence must be a Daemon that serves only one master: You.",
-        "We are building the first Active Inference Platform that operates on your terms. No black boxes. No hidden throttles. No surveillance capitalism.",
-        "When you initialize AGI-S, you are not logging into our server. You are waking up a digital entity that lives and breathes on your infrastructure. It learns from your data, protects your privacy with military-grade encryption, and executes your will with absolute autonomy.",
-        "This is not a tool. It is an extension of your mind.",
-        "Welcome to the Post-SaaS Era.",
-        "Welcome to Sovereign Intelligence."
-    ];
+    const fadeInUp = {
+        initial: { opacity: 0, y: 20 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, margin: "-10%" },
+        transition: { duration: 0.8, ease: "easeOut" }
+    };
 
     return (
-        <div className="relative min-h-screen bg-black text-white font-serif selection:bg-white/30 overflow-x-hidden">
-            {/* Visual Effects: Darker, Smokier overlay */}
-            <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-900/50 via-black to-black z-0 pointer-events-none"></div>
-            <PrismBackground />
-            <div className="fixed inset-0 bg-black/60 z-0 pointer-events-none"></div>
-
+        <div className="relative min-h-screen bg-black text-white font-sans selection:bg-white/30 overflow-x-hidden p-6 md:p-12 lg:p-24 pb-48">
 
             {/* Navigation */}
-            <nav className="fixed top-0 z-50 w-full p-6">
-                <Link href="/" className="inline-flex items-center gap-2 text-sm font-sans text-gray-500 hover:text-white transition-colors uppercase tracking-widest">
-                    <ArrowLeft className="h-4 w-4" /> Return to Source
+            <nav className="fixed top-0 left-0 z-50 w-full p-6 bg-gradient-to-b from-black to-transparent">
+                <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors uppercase tracking-widest">
+                    <ArrowLeft className="h-3 w-3" /> Return to Source
                 </Link>
             </nav>
 
-            <main className="relative z-10 mx-auto max-w-4xl px-6 py-32 md:py-48">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1 }}
-                    className="mb-32"
-                >
-                    <h1 className="text-6xl md:text-9xl font-bold tracking-tighter mb-8 text-white leading-[0.9]">
-                        The Declaration <br />
-                        of Digital <br />
-                        <span className="italic text-gray-500">Sovereignty.</span>
+            <main className="max-w-4xl mx-auto space-y-48 mt-24">
+
+                {/* SECTION 1: THE OPENING */}
+                <motion.section {...fadeInUp} className="space-y-12">
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold leading-[1.1] tracking-tight">
+                        AGI-S is not a product. <br />
+                        It’s a position.
                     </h1>
-                    <div className="h-0.5 w-24 bg-white/40"></div>
-                </motion.div>
+                    <div className="h-px w-24 bg-white"></div>
+                    <h2 className="text-2xl md:text-4xl font-light text-gray-300 leading-relaxed max-w-2xl">
+                        Today, humans don’t use intelligence. <br />
+                        They juggle tools. <br />
+                        <span className="text-white font-medium">AGI-S exists to end that era.</span>
+                    </h2>
+                </motion.section>
 
-                <div className="space-y-24">
-                    {paragraphs.map((text, index) => (
-                        <motion.p
-                            key={index}
-                            initial={{ opacity: 0, filter: "blur(10px)", y: 20 }}
-                            whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-                            viewport={{ once: true, margin: "-20% 0px -20% 0px" }}
-                            transition={{ duration: 1, delay: 0.2 }}
-                            className="text-2xl md:text-3xl font-light leading-relaxed text-gray-300 antialiased"
-                        >
-                            {text}
-                        </motion.p>
-                    ))}
-                </div>
+                {/* SECTION 2: THE PROBLEM */}
+                <motion.section {...fadeInUp} className="space-y-12">
+                    <div className="text-xs font-mono text-gray-500 uppercase tracking-widest">The Problem</div>
+                    <h3 className="text-4xl md:text-5xl font-serif">The World Is Drowning in Tools.</h3>
+                    <div className="space-y-6 text-xl md:text-2xl text-gray-400 font-light max-w-2xl">
+                        <p>Every day, users switch between 5–10 platforms.</p>
+                        <p>Each tool has its own interface. Its own logic. Its own learning curve.</p>
+                        <p>Intelligence is fragmented. Context is lost. Time is wasted.</p>
+                        <p className="text-white border-l-2 border-white pl-6">We don’t have a lack of AI. <br /> We have a lack of unity.</p>
+                    </div>
+                </motion.section>
 
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.5, duration: 1 }}
-                    className="mt-40 border-t border-white/10 pt-16 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 font-sans"
-                >
-                    <div>
-                        <div className="text-xs text-gray-500 uppercase tracking-[0.2em] mb-2">System Status</div>
-                        <div className="text-xl font-bold flex items-center gap-2">
-                            <span className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                            Operational
+                {/* SECTION 3: THE BELIEF SYSTEM */}
+                <motion.section {...fadeInUp} className="space-y-12">
+                    <div className="text-xs font-mono text-gray-500 uppercase tracking-widest">The Philosophy</div>
+                    <h3 className="text-4xl md:text-5xl font-serif">What We Believe.</h3>
+                    <div className="space-y-8 text-xl md:text-3xl font-light">
+                        {[
+                            "Intelligence should adapt to humans — not the other way around.",
+                            "Context is more valuable than computation.",
+                            "Interfaces should disappear, not multiply.",
+                            "Users shouldn’t think in tools. They should think in outcomes.",
+                            "AGI must be practical before it is perfect.",
+                            "Access beats exclusivity. Always."
+                        ].map((belief, i) => (
+                            <div key={i} className="flex gap-6 items-baseline group">
+                                <span className="text-sm font-mono text-gray-600">0{i + 1}</span>
+                                <p className="group-hover:text-white transition-colors text-gray-400">{belief}</p>
+                            </div>
+                        ))}
+                    </div>
+                </motion.section>
+
+                {/* SECTION 4: THE REBELLION */}
+                <motion.section {...fadeInUp} className="space-y-12">
+                    <div className="text-xs font-mono text-gray-500 uppercase tracking-widest">The Rebellion</div>
+                    <h3 className="text-4xl md:text-5xl font-serif">What We Reject.</h3>
+                    <div className="grid md:grid-cols-2 gap-12 text-lg text-gray-400">
+                        <div className="space-y-4">
+                            <p><span className="text-red-500 mr-2">×</span> We reject AI locked inside single-purpose apps.</p>
+                            <p><span className="text-red-500 mr-2">×</span> We reject intelligence that resets every time you switch platforms.</p>
+                            <p><span className="text-red-500 mr-2">×</span> We reject complexity sold as “power.”</p>
+                        </div>
+                        <div>
+                            <p className="text-2xl text-white font-serif italic">"We reject the idea that users must learn AI. AI must learn users."</p>
                         </div>
                     </div>
+                </motion.section>
 
-                    <Link href="/ask">
-                        <button className="group relative px-10 py-5 bg-white text-black font-bold text-lg uppercase tracking-wider overflow-hidden transition-all hover:bg-gray-200">
-                            Initialize Daemon
-                        </button>
-                    </Link>
-                </motion.div>
+                {/* SECTION 5: WHAT AGI-S IS */}
+                <motion.section {...fadeInUp} className="space-y-12">
+                    <div className="text-xs font-mono text-gray-500 uppercase tracking-widest">Definition</div>
+                    <h3 className="text-4xl md:text-5xl font-serif">So, What Is AGI-S?</h3>
+                    <div className="text-xl md:text-2xl font-light text-gray-300 space-y-6 max-w-2xl">
+                        <p>AGI-S is a unified intelligence layer.</p>
+                        <ul className="space-y-2 list-disc pl-5 text-gray-500">
+                            <li>One interface.</li>
+                            <li>Multiple platforms.</li>
+                            <li>Infinite workflows.</li>
+                        </ul>
+                        <p>It observes context. It adapts behavior. It connects tools silently.</p>
+                        <p className="text-white font-medium">AGI-S doesn’t replace platforms. It orchestrates them.</p>
+                    </div>
+                </motion.section>
+
+                {/* SECTION 6: WHO THIS IS FOR */}
+                <motion.section {...fadeInUp} className="grid md:grid-cols-2 gap-16 border-t border-white/10 pt-24">
+                    <div>
+                        <h4 className="text-2xl font-serif mb-8">This Is For You If...</h4>
+                        <ul className="space-y-4 text-gray-400">
+                            <li>✓ You’re tired of tool-hopping</li>
+                            <li>✓ You think workflows should build themselves</li>
+                            <li>✓ You value leverage over hustle</li>
+                            <li>✓ You believe AI should feel invisible</li>
+                            <li>✓ You want intelligence that compounds over time</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 className="text-2xl font-serif mb-8 text-gray-500">This Is Not For You If...</h4>
+                        <ul className="space-y-4 text-gray-600">
+                            <li>× You want a chatbot clone</li>
+                            <li>× You like rigid dashboards</li>
+                            <li>× You prefer manual workflows</li>
+                            <li>× You think AI is just “automation”</li>
+                        </ul>
+                    </div>
+                </motion.section>
+
+                {/* SECTION 7: LONG TERM VISION */}
+                <motion.section {...fadeInUp} className="space-y-12">
+                    <div className="text-xs font-mono text-gray-500 uppercase tracking-widest">Vision</div>
+                    <h3 className="text-4xl md:text-5xl font-serif">Where This Is Going.</h3>
+                    <div className="text-xl text-gray-400 max-w-2xl">
+                        <p className="mb-6">AGI-S is not chasing trends.</p>
+                        <p className="mb-6">Today, it unifies tools. <br /> Tomorrow, it understands intent.</p>
+                        <p className="text-white text-3xl font-serif">One day, intelligence will not be “used.” It will be present.</p>
+                    </div>
+                </motion.section>
+
+                {/* SECTION 8: ETHICS */}
+                <motion.section {...fadeInUp} className="space-y-12">
+                    <div className="text-xs font-mono text-gray-500 uppercase tracking-widest">Responsibility</div>
+                    <h3 className="text-4xl md:text-5xl font-serif">Power Requires Restraint.</h3>
+                    <div className="text-xl text-gray-400 max-w-2xl">
+                        <p className="mb-8">Intelligence without alignment is dangerous.</p>
+                        <div className="grid grid-cols-3 gap-8 text-sm uppercase tracking-widest text-white">
+                            <div>User Control</div>
+                            <div>Transparency</div>
+                            <div>Opt-in Intelligence</div>
+                        </div>
+                        <p className="mt-8 border-l-2 border-emerald-500 pl-6 text-emerald-400">We don’t harvest users. We empower them.</p>
+                    </div>
+                </motion.section>
+
+                {/* SECTION 9: CLOSING */}
+                <motion.section {...fadeInUp} className="pt-32 pb-32 text-center space-y-16">
+                    <h2 className="text-5xl md:text-7xl font-serif font-bold leading-tight">
+                        The question is not <br /> whether AGI will exist. <br />
+                        <span className="text-gray-500">The question is whom it will serve.</span>
+                    </h2>
+
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+                        <Link href="/ask">
+                            <button className="px-12 py-5 bg-white text-black text-xl font-bold uppercase tracking-widest hover:bg-gray-200 transition-colors">
+                                Build with AGI-S
+                            </button>
+                        </Link>
+                        <Link href="/">
+                            <span className="text-gray-500 hover:text-white transition-colors cursor-pointer border-b border-transparent hover:border-white pb-1">Join the movement</span>
+                        </Link>
+                    </div>
+                </motion.section>
 
             </main>
         </div>
