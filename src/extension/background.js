@@ -39,9 +39,7 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
         // Forward other commands (CLICK, TYPE, PRESS, READ) to the active tab
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (tabs[0]?.id) {
-                chrome.tabs.sendMessage(tabs[0].id, message, (response) => {
-                    sendResponse(response);
-                });
+                sendMessageWithRetry(tabs[0].id, message, sendResponse);
             } else {
                 sendResponse({ error: 'NO_ACTIVE_TAB' });
             }
@@ -49,26 +47,48 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
         return true;
     }
 
-    // HIVE_STORE: Store data from Tab A
-    if (message.type === 'HIVE_STORE') {
-        HIVE_CONTEXT[message.key] = message.value;
-        sendResponse({ status: 'STORED' });
-    }
+    // ... (HIVE handlers remain) ...
 
-    // HIVE_FETCH: Retrieve data for Tab B
-    if (message.type === 'HIVE_FETCH') {
-        sendResponse({ status: 'RETRIEVED', data: HIVE_CONTEXT[message.key] });
-    }
+});
 
-    // BROADCAST: Send message to ALL tabs (e.g., "HUD_ON")
-    if (message.type === 'BROADCAST') {
-        chrome.tabs.query({}, (tabs) => {
-            tabs.forEach(tab => {
-                if (tab.id) {
-                    chrome.tabs.sendMessage(tab.id, message);
-                }
-            });
+// Helper: Retry sending message to tab (handles slow loading content scripts)
+function sendMessageWithRetry(tabId, message, sendResponse, attempt = 1) {
+    chrome.tabs.sendMessage(tabId, message, (response) => {
+        if (chrome.runtime.lastError) {
+            console.warn(`[UAL] Attempt ${attempt} failed:`, chrome.runtime.lastError.message);
+            if (attempt < 5) {
+                setTimeout(() => {
+                    sendMessageWithRetry(tabId, message, sendResponse, attempt + 1);
+                }, 1000 * attempt); // Linear backoff: 1s, 2s, 3s, 4s
+            } else {
+                sendResponse({ error: 'CONNECTION_FAILED', details: chrome.runtime.lastError.message });
+            }
+        } else {
+            sendResponse(response);
+        }
+    });
+}
+
+// HIVE_STORE: Store data from Tab A
+if (message.type === 'HIVE_STORE') {
+    HIVE_CONTEXT[message.key] = message.value;
+    sendResponse({ status: 'STORED' });
+}
+
+// HIVE_FETCH: Retrieve data for Tab B
+if (message.type === 'HIVE_FETCH') {
+    sendResponse({ status: 'RETRIEVED', data: HIVE_CONTEXT[message.key] });
+}
+
+// BROADCAST: Send message to ALL tabs (e.g., "HUD_ON")
+if (message.type === 'BROADCAST') {
+    chrome.tabs.query({}, (tabs) => {
+        tabs.forEach(tab => {
+            if (tab.id) {
+                chrome.tabs.sendMessage(tab.id, message);
+            }
         });
-        sendResponse({ status: 'BROADCAST_SENT' });
-    }
+    });
+    sendResponse({ status: 'BROADCAST_SENT' });
+}
 });
