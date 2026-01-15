@@ -33,7 +33,7 @@ export default function PricingPage() {
             </div>
 
             {/* Tiers Grid */}
-            <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto px-6 mb-24 w-full">
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-[1400px] mx-auto px-6 mb-24 w-full">
 
                 {/* TIER 1: STUDENT */}
                 <motion.div
@@ -126,22 +126,37 @@ export default function PricingPage() {
                     </Link>
                 </motion.div>
 
-            </div>
-
-            {/* API Usage Note */}
-            <div className="relative z-10 max-w-3xl mx-auto px-6 text-center mb-16">
-                <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-4 text-left">
-                    <HelpCircle className="h-6 w-6 text-gray-400 shrink-0 mt-1" />
-                    <div>
-                        <h4 className="font-bold text-white mb-2">How does pricing work with APIs?</h4>
-                        <p className="text-sm text-gray-400 leading-relaxed">
-                            AGI-S is the <strong>Operating System</strong>. We charge for the software and the orchestration engine.
-                            The actual "thinking" (LLM Inference) is paid directly by you to providers like OpenAI or Groq via your own API Keys.
-                            This ensures <strong>you own your intelligence</strong> and we never mark up token costs.
+                {/* TIER 4: ENTERPRISE (New) */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                    className="relative flex flex-col rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 hover:bg-white/10 transition-all group"
+                >
+                    <div className="mb-6">
+                        <h3 className="text-xl font-bold text-white mb-2">Enterprise</h3>
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-4xl font-bold">Custom</span>
+                        </div>
+                        <p className="text-sm text-gray-400 mt-4 leading-relaxed">
+                            For organizations requiring private instances and dedicated support.
                         </p>
                     </div>
-                </div>
+                    <div className="flex-1 space-y-4 mb-8 border-t border-white/5 pt-8">
+                        <Feature icon={Building2} text="Private Cloud Deployment" active={true} />
+                        <Feature icon={Shield} text="SSO & Advanced Security" active={true} />
+                        <Feature icon={Database} text="Custom Model Fine-tuning" active={true} />
+                        <Feature icon={Globe} text="Unlimited Bandwidth" active={true} />
+                        <Feature icon={Zap} text="24/7 Dedicated Engineer" active={true} />
+                    </div>
+                    <Link href="/enterprise">
+                        <Button className="w-full bg-white text-black hover:bg-gray-200 font-bold">
+                            Contact Sales
+                        </Button>
+                    </Link>
+                </motion.div>
+
             </div>
+
+
 
             {/* Enterprise/Contact */}
             <div className="text-center relative z-10">
