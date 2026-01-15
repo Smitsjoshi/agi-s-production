@@ -3,6 +3,12 @@
 
 console.log("AGI-S Ghost Protocol: Active");
 
+// Announce presence to the web app
+window.dispatchEvent(new CustomEvent('AGIS_GHOST_READY', {
+    detail: { version: '1.0.0', status: 'ACTIVE' }
+}));
+window.AGIS_GHOST_ACTIVE = true;
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'EXECUTE') {
         const { action, selector, value } = message;

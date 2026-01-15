@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { useSound } from '@/hooks/use-sound';
 import { Button } from '../ui/button';
 import { useSession } from '@/hooks/use-session';
+import { GhostStatus } from '@/components/ghost/ghost-status';
 
 type NavItem = {
   href: string;
@@ -191,6 +192,9 @@ export function MainSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
+        <div className="px-2 mb-2">
+          <GhostStatus />
+        </div>
         <UserNav />
       </SidebarFooter>
     </Sidebar>
