@@ -22,6 +22,21 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
 
     // EXECUTE: Run action on Active Tab
     if (message.type === 'EXECUTE') {
+        const { action, value, selector } = message;
+
+        // NEW TAB HANDLING for NAVIGATE
+        if (action === 'NAVIGATE') {
+            const url = value || selector;
+            if (url) {
+                chrome.tabs.create({ url: url.startsWith('http') ? url : `https://${url}` });
+                sendResponse({ status: 'SUCCESS', message: 'Opened new tab' });
+            } else {
+                sendResponse({ status: 'ERROR', message: 'No URL provided' });
+            }
+            return true; // Async response
+        }
+
+        // Forward other commands (CLICK, TYPE, PRESS, READ) to the active tab
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (tabs[0]?.id) {
                 chrome.tabs.sendMessage(tabs[0].id, message, (response) => {

@@ -55,7 +55,9 @@ export default function OrbitPage() {
 
             for (const action of plan.actions) {
                 setStatus(`Action: ${action.type} ${action.selector || ''}`);
-                dispatchUAL(action.type.toUpperCase(), action.selector, action.value);
+                // Fix: The Planner returns 'url' for navigate, but 'value' for type. We map 'url' to 'value' here.
+                const effectiveValue = action.value || action.url;
+                dispatchUAL(action.type.toUpperCase(), action.selector, effectiveValue);
                 await new Promise(r => setTimeout(r, 1000)); // Pacing
             }
 
