@@ -19,10 +19,10 @@ export function useGhostProtocol() {
 
         // Listen for the announcement event
         const handleGhostReady = () => setIsConnected(true);
-        window.addEventListener('AGIS_GHOST_READY', handleGhostReady);
+        window.addEventListener('AGIS_UAL_READY', handleGhostReady);
 
         return () => {
-            window.removeEventListener('AGIS_GHOST_READY', handleGhostReady);
+            window.removeEventListener('AGIS_UAL_READY', handleGhostReady);
         };
     }, []);
 
