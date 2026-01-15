@@ -31,56 +31,82 @@ const toggleHUD = (enable) => {
         const host = document.createElement('div');
         host.id = 'agi-s-hud-host';
         host.style.position = 'fixed';
-        host.style.top = '0';
-        host.style.left = '0';
-        host.style.width = '100vw';
-        host.style.height = '100vh';
-        host.style.pointerEvents = 'none'; // Click through
-        host.style.zIndex = '9999999';
+        host.style.bottom = '20px';
+        host.style.right = '20px';
+        host.style.zIndex = '2147483647'; // Max Z-Index
+        host.style.fontFamily = 'monospace';
 
         const shadow = host.attachShadow({ mode: 'open' });
 
         // CSS
         const style = document.createElement('style');
         style.textContent = `
-            .hud-container {
-                position: absolute;
-                top: 20px;
-                right: 20px;
+            .orb {
+                width: 40px;
+                height: 40px;
                 background: rgba(0, 0, 0, 0.8);
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 12px;
-                padding: 12px;
-                color: white;
-                font-family: monospace;
-                pointer-events: auto;
+                border: 1px solid #06b6d4; /* Cyan-500 */
+                border-radius: 50%;
                 display: flex;
                 align-items: center;
-                gap: 10px;
-                box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
-                animation: slideIn 0.5s ease-out;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+                transition: all 0.3s ease;
+                overflow: hidden;
+                white-space: nowrap;
+                position: relative;
             }
-            .pulse { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite; }
-            @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-            @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-            .btn {
-                background: rgba(255,255,255,0.1); border: none; color: white; padding: 4px 8px; 
-                border-radius: 4px; cursor: pointer; font-size: 10px; text-transform: uppercase;
+            .orb:hover {
+                width: 180px;
+                border-radius: 20px;
+                background: rgba(0, 0, 0, 0.95);
+                padding: 0 12px;
+                justify-content: flex-start;
             }
-            .btn:hover { background: rgba(255,255,255,0.2); }
+            .icon {
+                min-width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .pulse-dot {
+                width: 8px;
+                height: 8px;
+                background: #06b6d4;
+                border-radius: 50%;
+                animation: pulse 2s infinite;
+            }
+            .content {
+                opacity: 0;
+                margin-left: 8px;
+                color: #06b6d4;
+                font-size: 12px;
+                font-weight: bold;
+                transition: opacity 0.2s 0.1s;
+                pointer-events: none;
+            }
+            .orb:hover .content {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+            
+            .meta { font-size: 9px; color: #666; margin-top: 2px; }
         `;
 
         // UI
         const container = document.createElement('div');
-        container.className = 'hud-container';
+        container.className = 'orb';
         container.innerHTML = `
-            <div class="pulse"></div>
-            <div>
-                <div style="font-size: 10px; opacity: 0.5; text-transform: uppercase;">AGI-S Connected</div>
-                <div style="font-size: 12px; font-weight: bold;">NEURAL HUD ACTIVE</div>
+            <div class="icon">
+                <div class="pulse-dot"></div>
             </div>
-            <button class="btn" id="analyze-btn">Analyze</button>
+            <div class="content">
+                <div>SOVEREIGN OS</div>
+                <div class="meta">HIVE MIND: CONNECTED</div>
+            </div>
         `;
 
         shadow.appendChild(style);
@@ -88,11 +114,10 @@ const toggleHUD = (enable) => {
         document.body.appendChild(host);
         hudOverlay = host;
 
-        // Listeners inside Shadow DOM
-        shadow.getElementById('analyze-btn').addEventListener('click', () => {
-            console.log("AGI-S HUD: Analyzing Page...");
-            // Send context back to background -> dashboard
-            // In V3, content scripts can't notify background easily? They can.
+        // Interaction
+        container.addEventListener('click', () => {
+            console.log("[AGI-S] HUD Clicked - Initiating Inspection Mode...");
+            // Future: Open Analysis Modal
         });
 
     } else if (!enable && hudOverlay) {
@@ -100,6 +125,9 @@ const toggleHUD = (enable) => {
         hudOverlay = null;
     }
 };
+
+// AUTO-ACTIVATE ON LOAD
+setTimeout(() => toggleHUD(true), 500);
 
 // --- MESSAGE LISTENER ---
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
