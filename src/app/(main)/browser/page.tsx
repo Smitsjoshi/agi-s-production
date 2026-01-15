@@ -6,7 +6,7 @@ import { useGhostProtocol } from '@/hooks/use-ghost-protocol';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Globe, Command, Zap, Search, MousePointer, Type, Eye } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 export default function BrowserPage() {
     const { isConnected } = useGhostProtocol();

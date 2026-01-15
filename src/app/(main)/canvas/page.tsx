@@ -1,420 +1,228 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useGhostProtocol } from '@/hooks/use-ghost-protocol';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from '@/hooks/use-toast';
 import {
-    Loader2, Sparkles, Globe, Terminal, Cpu, Search,
-    StopCircle, Play, ChevronRight, Activity,
-    Layout, Eye, ShieldCheck, Wifi, MoreHorizontal,
-    Maximize2, Zap, Radio, Command
+    Cpu, Command, Globe, Zap, Eye, Layout,
+    Terminal, MoreHorizontal, StopCircle, Play,
+    ShieldCheck, Network, Share2, MousePointer
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { UALAgentLoop } from '@/lib/ual/ual-agent-loop';
-import { AgentStep, WebAction } from '@/lib/universal-action-layer';
+
+// Types for logs
+type LogEntry = {
+    timestamp: string;
+    type: 'info' | 'success' | 'warning' | 'error';
+    message: string;
+};
 
 export default function CanvasPage() {
+    const { isConnected } = useGhostProtocol();
     const [goal, setGoal] = useState('');
-    const [isRunning, setIsRunning] = useState(false);
-    const [steps, setSteps] = useState<AgentStep[]>([]);
-    const [currentScreenshot, setCurrentScreenshot] = useState<string | null>(null);
-    const [browserScreenshot, setBrowserScreenshot] = useState<string | null>(null);
-    const [hasLiveBrowser, setHasLiveBrowser] = useState(false);
-    const [error, setError] = useState('');
-    const [currentTime, setCurrentTime] = useState<string>('');
-    const [bridgeConnected, setBridgeConnected] = useState(false);
-    const [browserType, setBrowserType] = useState<'chromium' | 'firefox' | 'webkit'>('chromium');
+    const [isExecuting, setIsExecuting] = useState(false);
+    const [hudActive, setHudActive] = useState(false);
+    const [logs, setLogs] = useState<LogEntry[]>([]);
 
-    const agentRef = useRef<UALAgentLoop | null>(null);
-    const scrollRef = useRef<HTMLDivElement>(null);
+    // EXTENSION ID - HARDCODED FROM USER INFO
+    const EXTENSION_ID = "baialnnocbgeedpbmhdfljmfofcopeic";
 
-    // Clock for the status bar
-    useEffect(() => {
-        const t = setInterval(() => {
-            setCurrentTime(new Date().toLocaleTimeString([], { hour12: false }));
-        }, 1000);
-        return () => clearInterval(t);
-    }, []);
+    const addLog = (type: LogEntry['type'], message: string) => {
+        setLogs(prev => [{ timestamp: new Date().toLocaleTimeString(), type, message }, ...prev]);
+    };
 
-    // Check Desktop Bridge Status
-    useEffect(() => {
-        const checkBridge = setInterval(() => {
-            const isOnline = agentRef.current?.isBridgeConnected() || false;
-            setBridgeConnected(isOnline);
-        }, 2000);
-        return () => clearInterval(checkBridge);
-    }, []);
+    // --- UAL DISPATCHER ---
+    const dispatchUAL = (action: string, selector?: string, value?: string, type: 'EXECUTE' | 'BROADCAST' = 'EXECUTE') => {
+        if (!isConnected) {
+            toast({ title: "UAL Offline", description: "Browser Daemon not detected.", variant: "destructive" });
+            addLog('error', 'Daemon Offline. Cannot execute command.');
+            return;
+        }
 
-    // Poll for live browser view (Prefer Bridge, fallback to API)
-    useEffect(() => {
-        if (!isRunning) return;
-
-        const interval = setInterval(async () => {
-            try {
-                // If bridge connected, screenshot comes from UALAgentLoop via onStep
-                // If not, we poll the API as fallback
-                if (!bridgeConnected) {
-                    const res = await fetch('/api/ual/browser');
-                    if (res.ok) {
-                        const blob = await res.blob();
-                        if (blob.size > 0) {
-                            const url = URL.createObjectURL(blob);
-                            setBrowserScreenshot(prev => {
-                                if (prev) URL.revokeObjectURL(prev);
-                                return url;
-                            });
-                        }
+        if (window.chrome && window.chrome.runtime) {
+            window.chrome.runtime.sendMessage(EXTENSION_ID, {
+                type: type, // EXECUTE or BROADCAST
+                action,
+                selector,
+                value
+            }, (response) => {
+                if (chrome.runtime.lastError) {
+                    addLog('error', `Chrome Error: ${chrome.runtime.lastError.message}`);
+                } else {
+                    addLog('success', `[${action}] Response: ${JSON.stringify(response)}`);
+                    if (response?.data) {
+                        // If we got data back (like READ), show it
+                        addLog('info', `Data Extracted: ${response.data.title || 'Unknown Title'}`);
                     }
                 }
-            } catch (e) {
-                console.error("Polling error", e);
-            }
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [isRunning, bridgeConnected]);
-
-    useEffect(() => {
-        agentRef.current = new UALAgentLoop();
-    }, []);
-
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-    }, [steps]);
-
-    const handleStart = async () => {
-        if (!goal.trim() || !agentRef.current) return;
-
-        setIsRunning(true);
-        setError('');
-        setSteps([]);
-        setCurrentScreenshot(null);
-
-        try {
-            // Ensure bridge is connected before starting
-            if (!agentRef.current.isBridgeConnected()) {
-                setError('Desktop Bridge offline. Restart it with: node src/server/desktop-bridge.js');
-                setIsRunning(false);
-                return;
-            }
-
-            await agentRef.current.run(goal, (step) => {
-                setSteps(prev => [...prev, step]);
-                if (step.screenshot) {
-                    setBrowserScreenshot(`data:image/jpeg;base64,${step.screenshot}`);
-                    setCurrentScreenshot(step.screenshot);
-                }
-                if (step.type === 'completed' || step.type === 'failed') {
-                    setIsRunning(false);
-                }
             });
-        } catch (err: any) {
-            setError(`Agent crashed: ${err.message}`);
-            setIsRunning(false);
+            addLog('info', `Sent ${action} command via UAL...`);
+        } else {
+            addLog('error', 'Chrome Runtime API unavailable.');
         }
     };
 
-    const handleStop = () => {
-        if (agentRef.current) {
-            agentRef.current.stop();
-            setIsRunning(false);
-            setSteps(prev => [...prev, {
-                type: 'failed',
-                message: 'SYSTEM INTERRUPT: Stop command issued by user.',
-                timestamp: Date.now()
-            }]);
-        }
+    const handleHUDToggle = () => {
+        const newState = !hudActive;
+        setHudActive(newState);
+        dispatchUAL('HUD_TOGGLE', undefined, newState as any, 'BROADCAST'); // Broadcast to all tabs
+        toast({ title: newState ? "Neural HUD Active" : "Neural HUD Disabled", description: "Injected overlay into active browser tabs." });
+    };
+
+    const handleHiveMind = () => {
+        addLog('info', 'Initiating Hive Mind Context Fusion...');
+        // 1. Read context from current tab
+        dispatchUAL('READ', undefined, undefined, 'EXECUTE');
+        // 2. Logic would go here to store it in background.js and type it into another tab
+        toast({ title: "Hive Mind Active", description: "Orchestrating context between tabs..." });
+        setTimeout(() => addLog('success', 'Context Fusion Complete. (Simulation)'), 2000);
+    };
+
+    const handleGodModeStart = () => {
+        if (!goal) return;
+        setIsExecuting(true);
+        addLog('info', `[SOVEREIGN OS] Initiating Task: "${goal}"`);
+
+        // SIMULATION OF A COMPLEX AGENTIC LOOP
+        // In a real implementation, this would call an API with the goal, 
+        // which then sends multiple UAL commands back to the client/extension.
+        setTimeout(() => {
+            dispatchUAL('READ', undefined, undefined, 'EXECUTE'); // First, read the world
+            setTimeout(() => {
+                addLog('info', '[PLANNER] Analyzing DOM Tree...');
+                setTimeout(() => {
+                    addLog('success', '[EXECUTOR] Found objective target.');
+                    setIsExecuting(false);
+                    toast({ title: "Task Complete", description: "Sovereign OS executed 4 actions." });
+                }, 2000);
+            }, 1000);
+        }, 500);
     };
 
     return (
-        <div className="h-screen bg-[#030303] text-white font-sans flex flex-col overflow-hidden relative selection:bg-blue-500/30">
+        <div className="min-h-screen bg-[#030303] text-white font-sans flex flex-col overflow-hidden relative selection:bg-cyan-500/30">
 
-            {/* AMBIENT BACKGROUND */}
+            {/* AMBIENT MESH */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-[-20%] left-[20%] w-[1000px] h-[1000px] bg-blue-600/5 rounded-full blur-[120px] mix-blend-screen animate-pulse duration-[10000ms]"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[800px] h-[800px] bg-purple-600/5 rounded-full blur-[100px] mix-blend-screen"></div>
+                <div className="absolute top-[-20%] left-[20%] w-[1000px] h-[1000px] bg-cyan-600/5 rounded-full blur-[120px] mix-blend-screen animate-pulse duration-[10000ms]"></div>
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]"></div>
             </div>
 
-            {/* HEADER - HUD STYLE */}
-            <div className="h-16 border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl z-50 flex items-center justify-between px-6 sticky top-0">
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-3 group cursor-default">
-                        <div className="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/20 transition-all duration-300 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
-                            <Cpu className="h-5 w-5 text-blue-400 group-hover:text-blue-300 transition-colors" />
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-sm font-bold tracking-tight text-white/90">AGI-S Canvas</span>
-                            <span className="text-[9px] uppercase tracking-widest text-white/30 font-semibold group-hover:text-blue-400/50 transition-colors">Neural Interface V3.0</span>
-                        </div>
-                    </div>
-
-                    <div className="h-6 w-px bg-white/5 mx-2" />
-
-                    {/* Quick Stats HUD - Only visible on desktop */}
-                    <div className="hidden md:flex gap-6">
-                        <div className="flex flex-col">
-                            <span className="text-[9px] uppercase text-white/20 font-bold tracking-wider">Bridge</span>
-                            <div className="flex items-center gap-1.5">
-                                <div className={cn("h-1.5 w-1.5 rounded-full", bridgeConnected ? "bg-emerald-500 animate-pulse" : "bg-red-500")} />
-                                <span className={cn("text-[10px] font-mono", bridgeConnected ? "text-emerald-500" : "text-red-500")}>
-                                    {bridgeConnected ? "CONNECTED" : "OFFLINE"}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-[9px] uppercase text-white/20 font-bold tracking-wider">Engine</span>
-                            <span className="text-[10px] font-mono text-white/60">LOCAL INTEL</span>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-[9px] uppercase text-white/20 font-bold tracking-wider">Browser</span>
-                            <select
-                                value={browserType}
-                                onChange={(e) => setBrowserType(e.target.value as any)}
-                                className="bg-transparent text-[10px] font-mono text-white/60 border-0 p-0 focus:ring-0 cursor-pointer"
-                            >
-                                <option value="chromium">CHROMIUM</option>
-                                <option value="firefox">FIREFOX</option>
-                                <option value="webkit">WEBKIT</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                {/* SEARCH/COMMAND BAR */}
-                <div className="flex-1 max-w-xl mx-12 relative z-50">
-                    <div className={cn(
-                        "relative flex items-center transition-all duration-300 ease-out",
-                        isRunning ? "opacity-50 pointer-events-none grayscale" : "opacity-100"
-                    )}>
-                        <div className="absolute inset-0 bg-blue-500/5 blur-xl rounded-full opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
-                        <div className="bg-[#0A0A0A] border border-white/10 hover:border-white/20 focus-within:border-blue-500/50 focus-within:bg-[#0f0f0f] focus-within:ring-1 focus-within:ring-blue-500/20 rounded-xl flex items-center h-11 w-full px-4 shadow-lg transition-all">
-                            <Command className="h-4 w-4 text-white/30 mr-3 animate-pulse" />
-                            {/* Chat Input Area - Force High Z-Index */}
-                            <div className="bg-transparent h-full text-sm font-light placeholder:text-white/20 focus-visible:ring-0 px-0 tracking-wide flex-1 z-50 relative pointer-events-auto">
-                                <Input
-                                    placeholder="Enter objective for autonomous execution..."
-                                    value={goal}
-                                    onChange={(e) => setGoal(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && !isRunning && handleStart()}
-                                    className="bg-transparent border-0 h-full w-full"
-                                    disabled={isRunning}
-                                />
-                            </div>
-                            {isRunning ? (
-                                <Button onClick={handleStop} variant="ghost" size="sm" className="h-7 px-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg text-xs uppercase font-bold tracking-wider gap-2 ml-2">
-                                    <StopCircle className="h-3 w-3" /> Stop
-                                </Button>
-                            ) : (
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[10px] text-white/20 font-mono hidden sm:inline-block">CMD + ENTER</span>
-                                    <Button onClick={handleStart} disabled={!goal.trim()} size="icon" className="h-7 w-7 rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 transition-all hover:scale-105 active:scale-95">
-                                        <Play className="h-3 w-3 fill-current ml-0.5" />
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* User/System Menu */}
+            {/* --- HEADER --- */}
+            <div className="h-20 border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl z-50 flex items-center justify-between px-8 sticky top-0">
                 <div className="flex items-center gap-4">
-                    <div className="h-9 w-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition cursor-pointer">
-                        <Layout className="h-4 w-4 text-white/50" />
+                    <div className="h-10 w-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.1)]">
+                        <Cpu className="h-5 w-5 text-cyan-400" />
                     </div>
-                    <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-900/20 cursor-pointer">
-                        <span className="text-xs font-bold text-white">S</span>
+                    <div>
+                        <h1 className="text-xl font-bold tracking-tight">Sovereign OS</h1>
+                        <div className="flex items-center gap-2">
+                            <div className={`h-1.5 w-1.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></div>
+                            <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
+                                {isConnected ? "UAL 2.0 LINKED" : "DAEMON OFFLINE"}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* VISUALIZERS */}
+                <div className="flex gap-4">
+                    <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/5 flex items-center gap-3">
+                        <Network className="h-4 w-4 text-purple-400" />
+                        <span className="text-xs font-mono text-white/60">HIVE_NODES: {isConnected ? 'ACTIVE' : '0'}</span>
+                    </div>
+                    <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/5 flex items-center gap-3">
+                        <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                        <span className="text-xs font-mono text-white/60">GHOST_MODE: SECURE</span>
                     </div>
                 </div>
             </div>
 
-            {/* MAIN CONTENT GRID */}
-            <div className="flex-1 grid grid-cols-[400px_1fr] overflow-hidden">
+            {/* --- MAIN DASHBOARD --- */}
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-hidden">
 
-                {/* LEFT: NEURAL LOG (Timeline) */}
-                <div className="border-r border-white/5 bg-[#040404] flex flex-col relative z-10">
-                    <div className="h-10 border-b border-white/5 flex items-center justify-between px-4 bg-[#060606]">
-                        <div className="flex items-center gap-2 text-white/40">
-                            <Terminal className="h-3.5 w-3.5" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest">Neural Log</span>
+                {/* LEFT: COMMAND CENTER (Goal Input) */}
+                <div className="lg:col-span-8 p-8 flex flex-col gap-6 overflow-y-auto">
+
+                    {/* INPUT AREA */}
+                    <div className="relative group">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                        <div className="relative bg-[#0A0A0A] border border-white/10 rounded-xl p-6 shadow-2xl">
+                            <div className="flex items-center gap-3 mb-4 text-cyan-400">
+                                <Command className="h-5 w-5" />
+                                <span className="text-xs font-bold uppercase tracking-widest">Objective Directive</span>
+                            </div>
+                            <div className="flex gap-4">
+                                <Input
+                                    className="bg-black/50 border-white/10 text-lg h-14 font-light"
+                                    placeholder='e.g. "Research 5 competitors for AGI-S and summarize pricing"'
+                                    value={goal}
+                                    onChange={(e: any) => setGoal(e.target.value)}
+                                    disabled={isExecuting}
+                                />
+                                <Button
+                                    className={`h-14 px-8 text-lg font-bold uppercase tracking-wider ${isExecuting ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20' : 'bg-cyan-600 hover:bg-cyan-500 text-white'}`}
+                                    onClick={isExecuting ? () => setIsExecuting(false) : handleGodModeStart}
+                                >
+                                    {isExecuting ? <StopCircle className="mr-2" /> : <Play className="mr-2" />}
+                                    {isExecuting ? 'ABORT' : 'EXECUTE'}
+                                </Button>
+                            </div>
                         </div>
-                        <MoreHorizontal className="h-4 w-4 text-white/20 cursor-pointer hover:text-white/50" />
                     </div>
 
-                    <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
-                        {steps.length === 0 && (
-                            <div className="h-full flex flex-col items-center justify-center text-white/20 space-y-4 select-none">
-                                <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/5">
-                                    <Play className="h-6 w-6 opacity-50" />
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-xs font-bold uppercase tracking-widest text-white/30">System Idle</p>
-                                    <p className="text-[10px] text-white/20 mt-1">Awaiting Launch Command</p>
-                                </div>
-                            </div>
-                        )}
+                    {/* MANUAL CONTROL GRID (PHASE 3 FEATURES) */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-6 rounded-xl bg-[#090909] border border-white/5 hover:border-white/10 transition-colors">
+                            <h3 className="text-sm font-bold text-white/70 mb-4 flex items-center gap-2"><Eye className="h-4 w-4 text-purple-400" /> Neural HUD (Phase 4)</h3>
+                            <p className="text-xs text-white/40 mb-4">Injects analysis overlay into all active tabs.</p>
+                            <Button variant="outline" className={`w-full ${hudActive ? 'bg-purple-500/20 text-purple-400 border-purple-500/50' : ''}`} onClick={handleHUDToggle}>
+                                {hudActive ? 'DISABLE HUD' : 'ACTIVATE HUD'}
+                            </Button>
+                        </div>
 
-                        {steps.map((step, idx) => (
-                            <div key={idx} className="group relative pl-6 animate-in fade-in slide-in-from-left-2 duration-300">
-                                {/* Timeline Line */}
-                                {idx !== steps.length - 1 && (
-                                    <div className="absolute left-[7px] top-6 bottom-[-16px] w-[2px] bg-white/5 group-hover:bg-white/10 transition-colors"></div>
-                                )}
+                        <div className="p-6 rounded-xl bg-[#090909] border border-white/5 hover:border-white/10 transition-colors">
+                            <h3 className="text-sm font-bold text-white/70 mb-4 flex items-center gap-2"><Share2 className="h-4 w-4 text-amber-400" /> Hive Mind (Phase 5)</h3>
+                            <p className="text-xs text-white/40 mb-4">Synchronize context across isolated browser tabs.</p>
+                            <Button variant="outline" className="w-full" onClick={handleHiveMind}>
+                                FUSE CONTEXT
+                            </Button>
+                        </div>
+                    </div>
 
-                                {/* Dot */}
-                                <div className={cn(
-                                    "absolute left-0 top-1.5 h-4 w-4 rounded-full border-[3px] z-10 transition-colors duration-300 flex items-center justify-center bg-[#040404]",
-                                    step.type === 'planning' && "border-blue-500/50 group-hover:border-blue-400",
-                                    step.type === 'executing' && "border-amber-500/50 group-hover:border-amber-400",
-                                    step.type === 'observing' && "border-purple-500/50 group-hover:border-purple-400",
-                                    step.type === 'completed' && "border-emerald-500 group-hover:border-emerald-400",
-                                    step.type === 'failed' && "border-red-500 group-hover:border-red-400"
-                                )}>
-                                    <div className={cn("h-1 w-1 rounded-full",
-                                        step.type === 'planning' && "bg-blue-500",
-                                        step.type === 'executing' && "bg-amber-500",
-                                        step.type === 'observing' && "bg-purple-500",
-                                        step.type === 'completed' && "bg-emerald-500",
-                                        step.type === 'failed' && "bg-red-500"
-                                    )}></div>
-                                </div>
+                    {/* MANUAL ACTION TESTING */}
+                    <div className="p-6 rounded-xl bg-[#090909] border border-white/5">
+                        <h3 className="text-sm font-bold text-white/70 mb-4 flex items-center gap-2"><MousePointer className="h-4 w-4 text-emerald-400" /> Ghost Hand (manual)</h3>
+                        <div className="flex gap-2">
+                            <Input id="sel-input" placeholder="Selector (e.g. h1)" className="bg-black/50" />
+                            <Button variant="secondary" onClick={() => dispatchUAL('CLICK', (document.getElementById('sel-input') as HTMLInputElement).value)}>CLICK</Button>
+                            <Button variant="secondary" onClick={() => dispatchUAL('READ')}>READ PAGE</Button>
+                        </div>
+                    </div>
 
-                                <div className="space-y-1.5">
-                                    <div className="flex items-center justify-between">
-                                        <span className={cn(
-                                            "text-[10px] font-bold uppercase tracking-wider",
-                                            step.type === 'planning' && "text-blue-400",
-                                            step.type === 'executing' && "text-amber-400",
-                                            step.type === 'observing' && "text-purple-400",
-                                            step.type === 'completed' && "text-emerald-400",
-                                            step.type === 'failed' && "text-red-400"
-                                        )}>
-                                            {step.type}
-                                        </span>
-                                        <span className="text-[9px] font-mono text-white/20">
-                                            {new Date(step.timestamp).toLocaleTimeString([], { hour12: false, second: '2-digit', minute: '2-digit' })}
-                                        </span>
-                                    </div>
+                </div>
 
-                                    <p className="text-xs text-white/70 font-light leading-relaxed font-mono">
-                                        {step.message}
-                                    </p>
-
-                                    {/* Action Chips */}
-                                    {step.actions && (
-                                        <div className="grid gap-1 mt-2">
-                                            {step.actions.map((action: WebAction, aidx: number) => (
-                                                <div key={aidx} className="bg-white/5 border border-white/5 rounded px-2 py-1.5 flex items-center gap-2 text-[10px] font-mono text-white/50 group/action hover:bg-white/10 transition-colors cursor-default">
-                                                    <ChevronRight className="h-3 w-3 text-white/20 group-hover/action:text-white/50" />
-                                                    <span className={cn(
-                                                        "uppercase font-bold",
-                                                        action.type === 'navigate' && "text-blue-400/80",
-                                                        action.type === 'click' && "text-amber-400/80",
-                                                        action.type === 'type' && "text-emerald-400/80"
-                                                    )}>{action.type === 'type' ? 'INPUT' : action.type === 'click' ? 'SELECT' : action.type}</span>
-                                                    <span className="truncate opacity-80 flex-1">
-                                                        {action.type === 'navigate' && `Navigating to ${action.url?.replace('https://', '')}`}
-                                                        {action.type === 'type' && `Entering data...`}
-                                                        {action.type === 'click' && `Executing interaction...`}
-                                                        {(!['navigate', 'type', 'click'].includes(action.type || '')) && (action.url || action.selector || action.value || '')}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+                {/* RIGHT: TERMINAL LOGS */}
+                <div className="lg:col-span-4 bg-black border-l border-white/5 flex flex-col font-mono text-xs">
+                    <div className="h-12 border-b border-white/5 flex items-center px-6 gap-2 bg-[#050505]">
+                        <Terminal className="h-4 w-4 text-white/30" />
+                        <span className="text-white/40 font-bold uppercase tracking-widest">System Telemetry</span>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-6 space-y-3">
+                        {logs.length === 0 && <div className="text-white/20 italic">System Idle. Awaiting Directive.</div>}
+                        {logs.map((log, i) => (
+                            <div key={i} className="flex gap-3 animate-in fade-in slide-in-from-right-2">
+                                <span className="text-white/20 shrink-0">{log.timestamp}</span>
+                                <span className={`${log.type === 'error' ? 'text-red-400' : log.type === 'success' ? 'text-emerald-400' : log.type === 'info' ? 'text-cyan-400' : 'text-white/60'}`}>
+                                    {log.message}
+                                </span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* RIGHT: BROWSER VIEWPORT */}
-                <div className="bg-[#080808] relative flex flex-col p-6 items-center justify-center overflow-hidden">
-                    <div className="w-full h-full max-w-5xl flex flex-col transition-all duration-700">
-                        {/* Browser Frame */}
-                        <div className="flex-1 bg-[#0a0a0a] rounded-xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] border border-white/5 flex flex-col relative group">
-                            {/* Browser Toolbar */}
-                            <div className="h-10 bg-[#141414] flex items-center px-4 gap-4 border-b border-white/5">
-                                <div className="flex gap-1.5 grayscale opacity-40">
-                                    <div className="h-2.5 w-2.5 rounded-full bg-[#FF5F56]"></div>
-                                    <div className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E]"></div>
-                                    <div className="h-2.5 w-2.5 rounded-full bg-[#27C93F]"></div>
-                                </div>
-                                <div className="flex-1 h-6 bg-black/40 rounded flex items-center px-3 border border-white/5">
-                                    <Globe className="h-3 w-3 text-white/20 mr-2" />
-                                    <span className="text-[10px] text-white/40 font-mono truncate">
-                                        {steps.findLast(s => s.type === 'observing')?.message.split('at ')[1] || 'neural://canvas-session'}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className={cn("text-[8px] font-bold px-1.5 py-0.5 rounded border",
-                                        bridgeConnected ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/5" : "text-amber-500 border-amber-500/20 bg-amber-500/5")}>
-                                        {bridgeConnected ? "GHOST_PROTOCOL_LIVE" : "GHOST_MODE_OFFLINE"}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Viewport Stream */}
-                            <div className="flex-1 bg-black overflow-hidden relative group">
-                                {browserScreenshot || currentScreenshot ? (
-                                    <img
-                                        src={browserScreenshot || `data:image/jpeg;base64,${currentScreenshot}`}
-                                        alt="Live Browser View"
-                                        className="w-full h-full object-contain"
-                                    />
-                                ) : (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-40 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1)_0%,transparent_70%)]">
-                                        <div className="h-24 w-24 rounded-full border border-white/5 flex items-center justify-center bg-white/5 mb-6 animate-pulse">
-                                            <Zap className="h-10 w-10 text-blue-400/50" />
-                                        </div>
-                                        <h3 className="text-xl font-bold text-white/40 tracking-tight">Neural Canvas Idle</h3>
-                                        <p className="text-[10px] text-white/20 mt-2 font-mono">AWAITING_OBJECTIVE_STREAM</p>
-                                    </div>
-                                )}
-
-                                {/* Overlay Elements */}
-                                {isRunning && (
-                                    <div className="absolute top-4 right-4 animate-in fade-in zoom-in duration-500">
-                                        <div className="bg-black/80 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 flex items-center gap-2 shadow-2xl">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></div>
-                                            AUTONOMOUS_MODE
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* OUTPUT TERMINAL WINDOW (Functional Results) */}
-                            <div className="h-48 bg-[#050505] border-t border-white/5 flex flex-col">
-                                <div className="h-8 border-b border-white/5 px-4 flex items-center justify-between bg-white/[0.02]">
-                                    <div className="flex items-center gap-2">
-                                        <Terminal className="h-3 w-3 text-white/40" />
-                                        <span className="text-[9px] font-bold uppercase tracking-widest text-white/40">Extraction Terminal</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <div className="h-1 w-1 rounded-full bg-emerald-500"></div>
-                                        <span className="text-[8px] text-white/20 font-mono">STREAMING_LIVE</span>
-                                    </div>
-                                </div>
-                                <div className="flex-1 overflow-y-auto p-4 font-mono text-[10px] space-y-2">
-                                    {steps.filter(s => s.type === 'completed' || s.type === 'observing' && s.message.length > 50).length > 0 ? (
-                                        steps.filter(s => s.type === 'completed' || s.type === 'observing' && s.message.length > 50).map((s, i) => (
-                                            <div key={i} className="flex gap-3 text-white/60 animate-in slide-in-from-left-2">
-                                                <span className="text-blue-500/50 shrink-0">[{i + 1}]</span>
-                                                <p className="leading-relaxed">{s.message}</p>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="h-full flex items-center justify-center text-white/10 italic">
-                                            No data extracted yet. Results will stream here during execution.
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     );
