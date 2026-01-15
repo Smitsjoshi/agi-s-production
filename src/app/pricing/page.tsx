@@ -2,12 +2,26 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Zap, Cpu, Crown, Globe, Shield } from 'lucide-react';
+import { Check, Zap, Cpu, Crown, Globe, Shield, Activity, HardDrive, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PrismBackground from '@/components/ui/prism-background';
+import Link from 'next/link';
 
 export default function PricingPage() {
     const [tier, setTier] = useState(1); // 0: Spark, 1: Nexus, 2: Omni
+    // Custom Slider State
+    const [researchLoad, setResearchLoad] = useState(2000);
+    const [videoMins, setVideoMins] = useState(45);
+    const [storageGB, setStorageGB] = useState(50);
+
+    const calculateCustomPrice = () => {
+        // Basic algo for demo
+        const base = 0;
+        const researchCost = (researchLoad / 1000) * 5;
+        const videoCost = (videoMins / 60) * 10;
+        const storageCost = (storageGB / 10) * 2;
+        return (base + researchCost + videoCost + storageCost).toFixed(0);
+    };
 
     const tiers = [
         {
@@ -59,8 +73,14 @@ export default function PricingPage() {
     const currentTier = tiers[tier];
 
     return (
-        <div className="relative min-h-screen bg-black text-white font-sans selection:bg-cyan-500/30 overflow-hidden flex flex-col items-center justify-center">
+        <div className="relative min-h-screen bg-black text-white font-sans selection:bg-cyan-500/30 overflow-hidden flex flex-col items-center pt-24 pb-24">
             <PrismBackground />
+
+            {/* Navigation */}
+            <nav className="fixed top-0 z-50 w-full p-6 flex justify-between items-center bg-black/50 backdrop-blur-md border-b border-white/5">
+                <Link href="/" className="font-bold text-xl tracking-tight">AGI-S</Link>
+                <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors">Return to Console</Link>
+            </nav>
 
             {/* Header */}
             <div className="relative z-10 text-center mb-16 px-4">
@@ -100,7 +120,7 @@ export default function PricingPage() {
             </div>
 
             {/* Card Container */}
-            <div className="relative z-10 w-full max-w-md px-6 perspective-1000">
+            <div className="relative z-10 w-full max-w-md px-6 perspective-1000 mb-24">
                 <AnimatePresence mode='wait'>
                     <motion.div
                         key={tier}
@@ -159,15 +179,72 @@ export default function PricingPage() {
                         >
                             {tier === 0 ? "Initialize System" : "Allocate Resources"}
                         </Button>
-
-                        <div className="mt-6 text-center">
-                            <p className="text-xs text-gray-500">
-                                {tier === 0 ? "No credit card required." : "Secure encryption via Stripe."}
-                            </p>
-                        </div>
-
                     </motion.div>
                 </AnimatePresence>
+            </div>
+
+            {/* Custom Resource Allocator */}
+            <div className="relative z-10 w-full max-w-4xl px-6 mb-24">
+                <div className="rounded-3xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-8 md:p-12">
+                    <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
+                        <Activity className="h-6 w-6 text-white" />
+                        Or Construct Your Matrix
+                    </h2>
+
+                    <div className="grid gap-12 md:grid-cols-2">
+                        <div className="space-y-10">
+                            {/* Research Slider */}
+                            <div>
+                                <div className="flex justify-between mb-4">
+                                    <label className="text-sm text-gray-400 flex items-center gap-2"><Globe className="h-4 w-4" /> Deep Research (Pages/Mo)</label>
+                                    <span className="font-mono text-cyan-400 font-bold">{researchLoad.toLocaleString()}</span>
+                                </div>
+                                <input
+                                    type="range" min="100" max="10000" step="100"
+                                    value={researchLoad} onChange={(e) => setResearchLoad(Number(e.target.value))}
+                                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                                />
+                            </div>
+
+                            {/* Video Slider */}
+                            <div>
+                                <div className="flex justify-between mb-4">
+                                    <label className="text-sm text-gray-400 flex items-center gap-2"><Video className="h-4 w-4" /> Video Rendering (Mins/Mo)</label>
+                                    <span className="font-mono text-purple-400 font-bold">{videoMins}</span>
+                                </div>
+                                <input
+                                    type="range" min="0" max="300" step="5"
+                                    value={videoMins} onChange={(e) => setVideoMins(Number(e.target.value))}
+                                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                                />
+                            </div>
+
+                            {/* Storage Slider */}
+                            <div>
+                                <div className="flex justify-between mb-4">
+                                    <label className="text-sm text-gray-400 flex items-center gap-2"><HardDrive className="h-4 w-4" /> Neural Storage (GB)</label>
+                                    <span className="font-mono text-emerald-400 font-bold">{storageGB} GB</span>
+                                </div>
+                                <input
+                                    type="range" min="5" max="1000" step="5"
+                                    value={storageGB} onChange={(e) => setStorageGB(Number(e.target.value))}
+                                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col justify-center items-center p-8 bg-white/5 rounded-2xl border border-white/10 relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5"></div>
+                            <div className="relative z-10 text-center w-full">
+                                <div className="text-xs text-gray-500 uppercase tracking-widest mb-2">Estimated Monthly Load</div>
+                                <div className="text-6xl font-bold mb-2">${calculateCustomPrice()}<span className="text-lg text-gray-500">.00</span></div>
+                                <div className="text-sm text-gray-400 mb-8">~ ₹{(Number(calculateCustomPrice()) * 85).toLocaleString()} / mo</div>
+
+                                <Button className="w-full h-12 bg-white text-black hover:bg-gray-200 font-bold">Initialize Custom Core</Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>

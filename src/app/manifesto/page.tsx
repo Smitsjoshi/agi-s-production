@@ -19,12 +19,16 @@ export default function ManifestoPage() {
     ];
 
     return (
-        <div className="relative min-h-screen bg-black text-white font-sans selection:bg-white/30 overflow-x-hidden">
+        <div className="relative min-h-screen bg-black text-white font-serif selection:bg-white/30 overflow-x-hidden">
+            {/* Visual Effects: Darker, Smokier overlay */}
+            <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-900/50 via-black to-black z-0 pointer-events-none"></div>
             <PrismBackground />
+            <div className="fixed inset-0 bg-black/60 z-0 pointer-events-none"></div>
+
 
             {/* Navigation */}
             <nav className="fixed top-0 z-50 w-full p-6">
-                <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-white transition-colors">
+                <Link href="/" className="inline-flex items-center gap-2 text-sm font-sans text-gray-500 hover:text-white transition-colors uppercase tracking-widest">
                     <ArrowLeft className="h-4 w-4" /> Return to Source
                 </Link>
             </nav>
@@ -34,24 +38,25 @@ export default function ManifestoPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1 }}
-                    className="mb-24"
+                    className="mb-32"
                 >
-                    <h1 className="text-5xl md:text-8xl font-bold tracking-tighter mb-6 bg-gradient-to-b from-white to-gray-500 bg-clip-text text-transparent">
-                        The Declaration of <br />
-                        Digital Sovereignty.
+                    <h1 className="text-6xl md:text-9xl font-bold tracking-tighter mb-8 text-white leading-[0.9]">
+                        The Declaration <br />
+                        of Digital <br />
+                        <span className="italic text-gray-500">Sovereignty.</span>
                     </h1>
-                    <div className="h-1 w-24 bg-white/20 rounded-full"></div>
+                    <div className="h-0.5 w-24 bg-white/40"></div>
                 </motion.div>
 
-                <div className="space-y-16">
+                <div className="space-y-24">
                     {paragraphs.map((text, index) => (
                         <motion.p
                             key={index}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
-                            transition={{ duration: 0.8, delay: index * 0.1 }}
-                            className="text-xl md:text-3xl font-light leading-relaxed text-gray-300 md:leading-relaxed"
+                            initial={{ opacity: 0, filter: "blur(10px)", y: 20 }}
+                            whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                            viewport={{ once: true, margin: "-20% 0px -20% 0px" }}
+                            transition={{ duration: 1, delay: 0.2 }}
+                            className="text-2xl md:text-3xl font-light leading-relaxed text-gray-300 antialiased"
                         >
                             {text}
                         </motion.p>
@@ -63,17 +68,19 @@ export default function ManifestoPage() {
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.5, duration: 1 }}
-                    className="mt-32 border-t border-white/10 pt-16 flex flex-col md:flex-row justify-between items-start md:items-center gap-8"
+                    className="mt-40 border-t border-white/10 pt-16 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 font-sans"
                 >
                     <div>
-                        <div className="text-sm text-gray-500 uppercase tracking-widest mb-2">System Status</div>
-                        <div className="text-2xl font-bold">Operational</div>
+                        <div className="text-xs text-gray-500 uppercase tracking-[0.2em] mb-2">System Status</div>
+                        <div className="text-xl font-bold flex items-center gap-2">
+                            <span className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                            Operational
+                        </div>
                     </div>
 
                     <Link href="/ask">
-                        <button className="group relative px-8 py-4 bg-white text-black rounded-full font-bold text-lg overflow-hidden transition-all hover:scale-105">
-                            <span className="relative z-10">Initialize Daemon</span>
-                            <div className="absolute inset-0 bg-gray-200 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
+                        <button className="group relative px-10 py-5 bg-white text-black font-bold text-lg uppercase tracking-wider overflow-hidden transition-all hover:bg-gray-200">
+                            Initialize Daemon
                         </button>
                     </Link>
                 </motion.div>

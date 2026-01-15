@@ -42,7 +42,7 @@ export default function AuthPage() {
                 // await signUp(email, password, name);
                 toast({ title: 'Account Created', description: 'Welcome to the future.' });
             }
-            router.push('/');
+            router.push('/ask');
         } catch (error: any) {
             console.error(error);
             toast({
