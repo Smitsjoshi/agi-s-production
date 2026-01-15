@@ -137,8 +137,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 else window.scrollTo({ top: value || 0, behavior: 'smooth' });
                 sendResponse({ status: 'SUCCESS' });
             }
+            else if (action === 'NAVIGATE') {
+                window.location.href = value || selector; // API puts URL in value or selector
+                sendResponse({ status: 'SUCCESS', message: 'Navigating...' });
+            }
+            else if (action === 'PRESS') {
+                // value = 'Enter' etc.
+                const key = value || 'Enter';
+                const eventOpts = { bubbles: true, cancelable: true, key: key, code: key, view: window };
+                (el || document.activeElement).dispatchEvent(new KeyboardEvent('keydown', eventOpts));
+                (el || document.activeElement).dispatchEvent(new KeyboardEvent('keypress', eventOpts));
+                (el || document.activeElement).dispatchEvent(new KeyboardEvent('keyup', eventOpts));
+                sendResponse({ status: 'SUCCESS' });
+            }
             else {
-                sendResponse({ status: 'ERROR', message: 'Unknown Action' });
+                sendResponse({ status: 'ERROR', message: 'Unknown Action: ' + action });
             }
 
         } catch (e) {
