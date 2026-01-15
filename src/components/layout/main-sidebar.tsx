@@ -62,6 +62,7 @@ const createNavItems: NavItem[] = [
 ];
 
 const productivityNavItems: NavItem[] = [
+  { href: '/browser', icon: Globe, label: 'Browser', description: 'Direct Neural Interface to the Web.', locked: false },
   { href: '/synthesis', icon: BookCheck, label: 'Synthesis', description: 'Your AI Data Analyst & Report Generator.', locked: false },
   { href: '/blueprint', icon: Workflow, label: 'Blueprint', description: 'Deconstructs goals into actionable plans with tools.', locked: true },
 ];
