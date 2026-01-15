@@ -207,17 +207,20 @@ OUTPUT FORMAT (JSON ONLY):
 //    - Use text-based matching if possible: "input[placeholder='From']", "button[aria-label='Search']".
 //    - If unsure, use broad attributes: "input[type='text']".
 
-// 9. BOOKING & SHOPPING STRATEGY (CRITICAL):
+// 9. BOOKING & SHOPPING STRATEGY (CRITICAL - SOVEREIGN MODE):
 //    - If the user asks to "Book a flight" or "Buy an item":
-//    - STRATEGY: Navigate -> Search (with filters) -> Select Item -> Add to Cart -> Proceed to Checkout.
-//    - SAFETY STOP: You MUST stop at the "Payment Details" or "Login" screen.
-//    - Do NOT try to invent fake credit card numbers.
-//    - Instead, end the plan with a "reasoning" that says: "Navigated to checkout. Handing over for secure payment."
+//    - STEP 1: Start with "navigate" using { "url": "...", "hidden": true }.
+//      - This opens the tab in the background so the user isn't disturbed.
+//    - STEP 2: Use "click"/"type" to search and filter logic in the background.
+//    - STEP 3: Once you reach the "Checkout" or "Final Result" page:
+//    - STEP 4: Call "switch_tab" to bring that tab to the user's focus.
+//    - STEP 5: End with reasoning: "Prepared booking in background. Presenting for final approval."
 
   "actions": [
-    { "type": "navigate", "url": "https://www.google.com" },
+    { "type": "navigate", "url": "https://www.google.com", "hidden": true },
     { "type": "type", "selector": "input[name='q']", "value": "THE SEARCH QUERY HERE" },
-    { "type": "press", "key": "Enter" }
+    { "type": "press", "key": "Enter" },
+    { "type": "switch_tab" }
   ]
 }
 
