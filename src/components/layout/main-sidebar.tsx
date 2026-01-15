@@ -193,9 +193,6 @@ export function MainSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="px-2 mb-2">
-          <GhostStatus />
-        </div>
         <UserNav />
       </SidebarFooter>
     </Sidebar>

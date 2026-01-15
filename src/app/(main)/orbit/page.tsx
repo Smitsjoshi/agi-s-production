@@ -136,16 +136,7 @@ export default function OrbitPage() {
                                 {status}
                             </motion.div>
                         ) : (
-                            !isConnected && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="flex items-center gap-2 text-xs font-mono text-red-500/50"
-                                >
-                                    <div className="h-1.5 w-1.5 rounded-full bg-red-500"></div>
-                                    DAEMON LINK REQUIRED
-                                </motion.div>
-                            )
+                            null
                         )}
                     </AnimatePresence>
                 </div>
