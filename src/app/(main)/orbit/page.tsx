@@ -1,251 +1,153 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGhostProtocol } from '@/hooks/use-ghost-protocol';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import {
-    Cpu, Command, Globe, Zap, Eye, Layout,
-    Terminal, MoreHorizontal, StopCircle, Play,
-    ShieldCheck, Network, Share2, MousePointer
-} from 'lucide-react';
+import { Globe, Command, Sparkles, Zap, ArrowRight, Activity } from 'lucide-react';
 
-// Types for logs
-type LogEntry = {
-    timestamp: string;
-    type: 'info' | 'success' | 'warning' | 'error';
-    message: string;
-};
-
-export default function CanvasPage() {
+export default function OrbitPage() {
     const { isConnected } = useGhostProtocol();
     const [goal, setGoal] = useState('');
     const [isExecuting, setIsExecuting] = useState(false);
-    const [hudActive, setHudActive] = useState(false);
-    const [logs, setLogs] = useState<LogEntry[]>([]);
+    const [status, setStatus] = useState('');
 
-    // EXTENSION ID - HARDCODED FROM USER INFO
     const EXTENSION_ID = "baialnnocbgeedpbmhdfljmfofcopeic";
 
-    const addLog = (type: LogEntry['type'], message: string) => {
-        setLogs(prev => [{ timestamp: new Date().toLocaleTimeString(), type, message }, ...prev]);
-    };
-
-    // --- UAL DISPATCHER ---
-    const dispatchUAL = (action: string, selector?: string, value?: string, type: 'EXECUTE' | 'BROADCAST' = 'EXECUTE') => {
-        if (!isConnected) {
-            toast({ title: "UAL Offline", description: "Browser Daemon not detected.", variant: "destructive" });
-            addLog('error', 'Daemon Offline. Cannot execute command.');
-            return;
-        }
-
+    // Autonomous UAL Dispatcher
+    const dispatchUAL = (action: string, selector?: string, value?: string) => {
         if (window.chrome && window.chrome.runtime) {
             window.chrome.runtime.sendMessage(EXTENSION_ID, {
-                type: type, // EXECUTE or BROADCAST
+                type: 'EXECUTE',
                 action,
                 selector,
                 value
             }, (response) => {
-                if (chrome.runtime.lastError) {
-                    addLog('error', `Chrome Error: ${chrome.runtime.lastError.message}`);
-                } else {
-                    addLog('success', `[${action}] Response: ${JSON.stringify(response)}`);
-                    if (response?.data) {
-                        // If we got data back (like READ), show it
-                        addLog('info', `Data Extracted: ${response.data.title || 'Unknown Title'}`);
-                    }
+                if (response?.data) {
+                    console.log("UAL Data:", response.data);
                 }
             });
-            addLog('info', `Sent ${action} command via UAL...`);
-        } else {
-            addLog('error', 'Chrome Runtime API unavailable.');
         }
     };
 
-    const handleHUDToggle = () => {
-        const newState = !hudActive;
-        setHudActive(newState);
-        dispatchUAL('HUD_TOGGLE', undefined, newState as any, 'BROADCAST'); // Broadcast to all tabs
-        toast({ title: newState ? "Neural HUD Active" : "Neural HUD Disabled", description: "Injected overlay into active browser tabs." });
-    };
-
-    const handleHiveMind = () => {
-        addLog('info', 'Initiating Hive Mind Context Fusion...');
-        // 1. Read context from current tab
-        dispatchUAL('READ', undefined, undefined, 'EXECUTE');
-        // 2. Logic would go here to store it in background.js and type it into another tab
-        toast({ title: "Hive Mind Active", description: "Orchestrating context between tabs..." });
-        setTimeout(() => addLog('success', 'Context Fusion Complete. (Simulation)'), 2000);
-    };
-
-    const handleGodModeStart = async () => {
-        if (!goal) return;
+    const handleExecute = async () => {
+        if (!goal.trim()) return;
         setIsExecuting(true);
-        addLog('info', `[SOVEREIGN OS] Initiating Task: "${goal}"`);
+        setStatus('Initializing Sovereign Agent...');
 
         try {
-            // 1. Snapshot the current state (Real Scan)
-            addLog('info', '[SENSOR] Scanning active tab...');
-            // In a full implementation, we'd wait for the READ response. 
-            // For now, we'll send the goal to the Planner API directly.
-
+            // 1. Send Goal to Planner API
             const response = await fetch('/api/ual/plan', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ goal })
             });
 
-            if (!response.ok) throw new Error('Planner API failed');
+            if (!response.ok) throw new Error('Planning Failed');
 
+            setStatus('Analysing Strategy...');
             const plan = await response.json();
-            addLog('success', `[PLANNER] Generated ${plan.actions.length} step strategy.`);
 
-            // 2. Execute Real Actions
-            let i = 0;
+            // 2. Execute Plan
+            setStatus(`Executing ${plan.actions.length} Actions...`);
+
             for (const action of plan.actions) {
-                i++;
-                addLog('info', `[EXECUTOR] Step ${i}: ${action.type} ${action.selector || ''}`);
-
-                // Dispatch to Real Extension
-                dispatchUAL(action.type.toUpperCase(), action.selector, action.value, 'EXECUTE');
-
-                // Artificial delay for visual pacing (so it doesn't happen instantly)
-                await new Promise(r => setTimeout(r, 1000));
+                setStatus(`Action: ${action.type} ${action.selector || ''}`);
+                dispatchUAL(action.type.toUpperCase(), action.selector, action.value);
+                await new Promise(r => setTimeout(r, 1000)); // Pacing
             }
 
-            addLog('success', '[SOVEREIGN OS] Mission Accomplished.');
-            toast({ title: "Task Complete", description: `Executed ${plan.actions.length} autonomous actions.` });
+            setStatus('Mission Complete');
+            toast({ title: "Objective Complete", description: "All autonomous actions executed successfully." });
+            setGoal('');
 
         } catch (error: any) {
-            addLog('error', `[FAILURE] ${error.message}`);
-            toast({ title: "Execution Failed", description: error.message, variant: "destructive" });
+            setStatus('Execution Interrupted');
+            toast({ title: "Error", description: error.message, variant: "destructive" });
         } finally {
             setIsExecuting(false);
+            setTimeout(() => setStatus(''), 3000);
         }
     };
 
     return (
-        <div className="min-h-screen bg-[#030303] text-white font-sans flex flex-col overflow-hidden relative selection:bg-cyan-500/30">
+        <div className="h-[calc(100vh-4rem)] bg-[#030303] text-white font-sans flex flex-col items-center justify-center relative overflow-hidden selection:bg-cyan-500/30">
 
-            {/* AMBIENT MESH */}
+            {/* AMBIENT BACKGROUND */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-[-20%] left-[20%] w-[1000px] h-[1000px] bg-cyan-600/5 rounded-full blur-[120px] mix-blend-screen animate-pulse duration-[10000ms]"></div>
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[120px] mix-blend-screen animate-pulse duration-[5000ms]"></div>
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.05]"></div>
             </div>
 
-            {/* --- HEADER --- */}
-            <div className="h-20 border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl z-50 flex items-center justify-between px-8 sticky top-0">
-                <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.1)]">
-                        <Globe className="h-5 w-5 text-cyan-400" />
+            <div className="w-full max-w-3xl px-6 relative z-10 flex flex-col gap-8">
+
+                {/* HEADLINE */}
+                <div className="text-center space-y-4">
+                    <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-white/5 border border-white/10 mb-2 shadow-2xl">
+                        <Globe className="h-8 w-8 text-cyan-400" />
                     </div>
-                    <div>
-                        <h1 className="text-xl font-bold tracking-tight">Orbit</h1>
-                        <div className="flex items-center gap-2">
-                            <div className={`h-1.5 w-1.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></div>
-                            <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
-                                {isConnected ? "UAL 2.0 LINKED" : "DAEMON OFFLINE"}
-                            </span>
-                        </div>
+                    <h1 className="text-4xl md:text-6xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
+                        Orbit
+                    </h1>
+                    <p className="text-lg text-white/40 font-light max-w-lg mx-auto">
+                        One prompt to control the entire web.
+                    </p>
+                </div>
+
+                {/* MAIN INPUT */}
+                <div className="relative group">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 via-purple-500 to-emerald-500 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
+                    <div className="relative bg-[#0A0A0A] border border-white/10 rounded-xl p-2 flex items-center shadow-2xl">
+                        <Command className="h-5 w-5 text-white/30 ml-4 mr-2" />
+                        <Input
+                            className="bg-transparent border-0 text-xl h-16 font-light placeholder:text-white/20 focus-visible:ring-0"
+                            placeholder="What should I do on the web?"
+                            value={goal}
+                            onChange={(e) => setGoal(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && !isExecuting && handleExecute()}
+                            disabled={isExecuting}
+                            autoFocus
+                        />
+                        <Button
+                            className={`h-14 px-6 rounded-lg text-sm font-bold uppercase tracking-wider transition-all
+                                ${isExecuting ? 'bg-white/5 text-white/50 cursor-not-allowed' : 'bg-white text-black hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.3)]'}
+                            `}
+                            onClick={handleExecute}
+                            disabled={isExecuting || !goal.trim()}
+                        >
+                            {isExecuting ? <Activity className="animate-spin h-5 w-5" /> : <ArrowRight className="h-5 w-5" />}
+                        </Button>
                     </div>
                 </div>
 
-                {/* VISUALIZERS */}
-                <div className="flex gap-4">
-                    <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/5 flex items-center gap-3">
-                        <Network className="h-4 w-4 text-purple-400" />
-                        <span className="text-xs font-mono text-white/60">HIVE_NODES: {isConnected ? 'ACTIVE' : '0'}</span>
-                    </div>
-                    <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/5 flex items-center gap-3">
-                        <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                        <span className="text-xs font-mono text-white/60">GHOST_MODE: SECURE</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* --- MAIN DASHBOARD --- */}
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-hidden">
-
-                {/* LEFT: COMMAND CENTER (Goal Input) */}
-                <div className="lg:col-span-8 p-8 flex flex-col gap-6 overflow-y-auto">
-
-                    {/* INPUT AREA */}
-                    <div className="relative group">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                        <div className="relative bg-[#0A0A0A] border border-white/10 rounded-xl p-6 shadow-2xl">
-                            <div className="flex items-center gap-3 mb-4 text-cyan-400">
-                                <Command className="h-5 w-5" />
-                                <span className="text-xs font-bold uppercase tracking-widest">Objective Directive</span>
-                            </div>
-                            <div className="flex gap-4">
-                                <Input
-                                    className="bg-black/50 border-white/10 text-lg h-14 font-light"
-                                    placeholder='e.g. "Research 5 competitors for AGI-S and summarize pricing"'
-                                    value={goal}
-                                    onChange={(e: any) => setGoal(e.target.value)}
-                                    disabled={isExecuting}
-                                />
-                                <Button
-                                    className={`h-14 px-8 text-lg font-bold uppercase tracking-wider ${isExecuting ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20' : 'bg-cyan-600 hover:bg-cyan-500 text-white'}`}
-                                    onClick={isExecuting ? () => setIsExecuting(false) : handleGodModeStart}
+                {/* STATUS INDICATOR (Minimal) */}
+                <div className="h-8 flex items-center justify-center">
+                    <AnimatePresence mode="wait">
+                        {status ? (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="flex items-center gap-2 text-sm font-mono text-cyan-400"
+                            >
+                                <Sparkles className="h-3 w-3" />
+                                {status}
+                            </motion.div>
+                        ) : (
+                            !isConnected && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="flex items-center gap-2 text-xs font-mono text-red-500/50"
                                 >
-                                    {isExecuting ? <StopCircle className="mr-2" /> : <Play className="mr-2" />}
-                                    {isExecuting ? 'ABORT' : 'EXECUTE'}
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* MANUAL CONTROL GRID (PHASE 3 FEATURES) */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="p-6 rounded-xl bg-[#090909] border border-white/5 hover:border-white/10 transition-colors">
-                            <h3 className="text-sm font-bold text-white/70 mb-4 flex items-center gap-2"><Eye className="h-4 w-4 text-purple-400" /> Neural HUD (Phase 4)</h3>
-                            <p className="text-xs text-white/40 mb-4">Injects analysis overlay into all active tabs.</p>
-                            <Button variant="outline" className={`w-full ${hudActive ? 'bg-purple-500/20 text-purple-400 border-purple-500/50' : ''}`} onClick={handleHUDToggle}>
-                                {hudActive ? 'DISABLE HUD' : 'ACTIVATE HUD'}
-                            </Button>
-                        </div>
-
-                        <div className="p-6 rounded-xl bg-[#090909] border border-white/5 hover:border-white/10 transition-colors">
-                            <h3 className="text-sm font-bold text-white/70 mb-4 flex items-center gap-2"><Share2 className="h-4 w-4 text-amber-400" /> Hive Mind (Phase 5)</h3>
-                            <p className="text-xs text-white/40 mb-4">Synchronize context across isolated browser tabs.</p>
-                            <Button variant="outline" className="w-full" onClick={handleHiveMind}>
-                                FUSE CONTEXT
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* MANUAL ACTION TESTING */}
-                    <div className="p-6 rounded-xl bg-[#090909] border border-white/5">
-                        <h3 className="text-sm font-bold text-white/70 mb-4 flex items-center gap-2"><MousePointer className="h-4 w-4 text-emerald-400" /> Ghost Hand (manual)</h3>
-                        <div className="flex gap-2">
-                            <Input id="sel-input" placeholder="Selector (e.g. h1)" className="bg-black/50" />
-                            <Button variant="secondary" onClick={() => dispatchUAL('CLICK', (document.getElementById('sel-input') as HTMLInputElement).value)}>CLICK</Button>
-                            <Button variant="secondary" onClick={() => dispatchUAL('READ')}>READ PAGE</Button>
-                        </div>
-                    </div>
-
-                </div>
-
-                {/* RIGHT: TERMINAL LOGS */}
-                <div className="lg:col-span-4 bg-black border-l border-white/5 flex flex-col font-mono text-xs">
-                    <div className="h-12 border-b border-white/5 flex items-center px-6 gap-2 bg-[#050505]">
-                        <Terminal className="h-4 w-4 text-white/30" />
-                        <span className="text-white/40 font-bold uppercase tracking-widest">System Telemetry</span>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-6 space-y-3">
-                        {logs.length === 0 && <div className="text-white/20 italic">System Idle. Awaiting Directive.</div>}
-                        {logs.map((log, i) => (
-                            <div key={i} className="flex gap-3 animate-in fade-in slide-in-from-right-2">
-                                <span className="text-white/20 shrink-0">{log.timestamp}</span>
-                                <span className={`${log.type === 'error' ? 'text-red-400' : log.type === 'success' ? 'text-emerald-400' : log.type === 'info' ? 'text-cyan-400' : 'text-white/60'}`}>
-                                    {log.message}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
+                                    <div className="h-1.5 w-1.5 rounded-full bg-red-500"></div>
+                                    DAEMON LINK REQUIRED
+                                </motion.div>
+                            )
+                        )}
+                    </AnimatePresence>
                 </div>
 
             </div>
