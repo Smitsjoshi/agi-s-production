@@ -145,9 +145,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 // value = 'Enter' etc.
                 const key = value || 'Enter';
                 const eventOpts = { bubbles: true, cancelable: true, key: key, code: key, view: window };
-                (el || document.activeElement).dispatchEvent(new KeyboardEvent('keydown', eventOpts));
-                (el || document.activeElement).dispatchEvent(new KeyboardEvent('keypress', eventOpts));
-                (el || document.activeElement).dispatchEvent(new KeyboardEvent('keyup', eventOpts));
+                const target = el || document.activeElement;
+
+                target.dispatchEvent(new KeyboardEvent('keydown', eventOpts));
+                target.dispatchEvent(new KeyboardEvent('keypress', eventOpts));
+                target.dispatchEvent(new KeyboardEvent('keyup', eventOpts));
+
+                // ROBUSTNESS: If Enter, also try to submit the form if it belongs to one
+                if (key === 'Enter' && target.form) {
+                    target.form.requestSubmit();
+                }
+
                 sendResponse({ status: 'SUCCESS' });
             }
             else {

@@ -56,13 +56,21 @@ export default function OrbitPage() {
             for (const action of plan.actions) {
                 setStatus(`Action: ${action.type} ${action.selector || ''}`);
                 // Fix: The Planner returns 'url' for navigate, but 'value' for type. We map 'url' to 'value' here.
-                const effectiveValue = action.value || action.url;
-                dispatchUAL(action.type.toUpperCase(), action.selector, effectiveValue);
+                let effectiveValue = action.value || action.url;
+                let effectiveAction = action.type.toUpperCase();
+
+                // MAP 'DESKTOP_KEY' -> 'PRESS' for Browser
+                if (effectiveAction === 'DESKTOP_KEY') {
+                    effectiveAction = 'PRESS';
+                    effectiveValue = action.key || 'Enter'; // Planner usually puts key in 'key' prop
+                }
+
+                dispatchUAL(effectiveAction, action.selector, effectiveValue);
 
                 // INTELLIGENT PACING:
                 // If we found a NAVIGATE action, we MUST wait for the page to load (5 seconds).
                 // Otherwise, standard 1s pacing.
-                const delay = action.type.toUpperCase() === 'NAVIGATE' ? 5000 : 1000;
+                const delay = effectiveAction === 'NAVIGATE' ? 5000 : 1000;
                 await new Promise(r => setTimeout(r, delay));
             }
 
