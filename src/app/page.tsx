@@ -318,7 +318,7 @@ export default function LandingPage() {
           <div>
             <div className="mb-6 font-bold text-xl">AGI-S</div>
             <div className="flex flex-col gap-3 text-gray-500">
-              <Link href="#" className="hover:text-white transition-colors">Manifesto</Link>
+              <Link href="/manifesto" className="hover:text-white transition-colors">Manifesto</Link>
               <Link href="#" className="hover:text-white transition-colors">System Status</Link>
               <Link href="#" className="hover:text-white transition-colors">Security Audit</Link>
               <Link href="#" className="hover:text-white transition-colors">Legal</Link>

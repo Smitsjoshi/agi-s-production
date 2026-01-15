@@ -1,287 +1,175 @@
-
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, X, Shield, Video, BrainCircuit, Users, Building, Sparkles } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
-import Link from 'next/link';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Slider } from '@/components/ui/slider';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, Zap, Cpu, Crown, Globe, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import PrismBackground from '@/components/ui/prism-background';
 
-const pages = [
-    { id: 'knowledgeChat', name: 'Core AI: General Chat & Task Automation', tiers: [{ name: 'Low', price: 60 }, { name: 'Medium', price: 120 }, { name: 'High', price: 180 }] },
-    { id: 'academicSearch', name: 'Specialized Agents: Scholar & CodeX', tiers: [{ name: 'Low', price: 90 }, { name: 'Medium', price: 180 }, { name: 'High', price: 270 }] },
-    { id: 'documentAnalysis', name: 'Analyst Agent: Deep Document Insights', tiers: [{ name: 'Low', price: 120 }, { name: 'Medium', price: 240 }, { name: 'High', price: 360 }] },
-    { id: 'videoGeneration', name: 'Multimedia AI: Video Generation', tiers: [{ name: 'Low', price: 150 }, { name: 'Medium', price: 300 }, { name: 'High', price: 450 }] },
-    { id: 'multiSourceAnalysis', name: 'Agent Hive Mind: Collaborative Analysis', tiers: [{ name: 'Low', price: 180 }, { name: 'Medium', price: 360 }, { name: 'High', price: 540 }] },
-    { id: 'redTeamSimulations', name: 'Crucible: AI Red Teaming Simulations', tiers: [{ name: 'Low', price: 210 }, { name: 'Medium', price: 420 }, { name: 'High', price: 630 }] },
-];
+export default function PricingPage() {
+    const [tier, setTier] = useState(1); // 0: Spark, 1: Nexus, 2: Omni
 
-const tiers = [
-    {
-        name: "Casual",
-        icon: Sparkles,
-        prices: { daily: "₹30", weekly: "₹180", monthly: "₹600", yearly: "₹6,000" },
-        description: "For occasional use and trying out core features.",
-        features: [
-            { text: "Standard AI Knowledge Chat", included: true },
-            { text: "Basic Academic & Code Search", included: true },
-            { text: "Analyze 2 Documents per Day", included: true },
-            { text: "Generate 1 Video per Day (up to 5s)", included: false },
-            { text: "Deep Dive Multi-Source Analysis", included: false },
-            { text: "Crucible Red Team Simulations", included: false },
-            { text: "Collaborative Workspaces", included: false },
-            { text: "Priority Support", included: false },
-        ],
-        isPopular: false,
-    },
-    {
-        name: "Student",
-        icon: BrainCircuit,
-        prices: { daily: "₹60", weekly: "₹360", monthly: "₹1,199", yearly: "₹11,999" },
-        description: "For students and researchers who need powerful learning tools.",
-        features: [
-            { text: "Standard AI Knowledge Chat", included: true },
-            { text: "Advanced Academic & Code Search", included: true },
-            { text: "Analyze 20 Documents per Day", included: true },
-            { text: "Generate 5 Videos per Day (up to 10s)", included: true },
-            { text: "Deep Dive Multi-Source Analysis", included: true },
-            { text: "Crucible Red Team Simulations", included: false },
-            { text: "Collaborative Workspaces", included: false },
-            { text: "Priority Support", included: false },
-        ],
-        isPopular: false,
-    },
-    {
-        name: "Professional",
-        icon: Shield,
-        prices: { daily: "₹120", weekly: "₹720", monthly: "₹2,399", yearly: "₹23,999" },
-        description: "For professionals and power users who need the full suite of tools.",
-        features: [
-            { text: "Standard AI Knowledge Chat", included: true },
-            { text: "Advanced Academic & Code Search", included: true },
-            { text: "Unlimited Document Analysis", included: true },
-            { text: "Unlimited Video Generation (up to 30s)", included: true },
-            { text: "Deep Dive Multi-Source Analysis", included: true },
-            { text: "Crucible Red Team Simulations", included: true },
-            { text: "Collaborative Workspaces (Up to 5 Users)", included: true },
-            { text: "Priority Support", included: true },
-        ],
-        isPopular: true,
-    },
-    {
-        name: "Enterprise",
-        icon: Building,
-        prices: { daily: "Custom", weekly: "Custom", monthly: "Custom", yearly: "Custom" },
-        description: "For teams and organizations requiring custom solutions.",
-        features: [
-            { text: "Everything in Professional", included: true },
-            { text: "On-Premise Deployment Options", included: true },
-            { text: "Dedicated Support & SLAs", included: true },
-            { text: "Custom Agent & Tool Development", included: true },
-            { text: "Team-based Usage Analytics", included: true },
-            { text: "Volume-based Pricing", included: true },
-        ],
-        isPopular: false,
-    }
-];
-
-type Duration = "daily" | "weekly" | "monthly" | "yearly";
-
-export default function ProPage() {
-    const [durations, setDurations] = useState<Record<string, Duration>>({
-        Casual: 'monthly',
-        Student: 'monthly',
-        Professional: 'monthly',
-        Enterprise: 'yearly',
-    });
-    const [selectedPages, setSelectedPages] = useState<Record<string, boolean>>({});
-    const [usageTiers, setUsageTiers] = useState<Record<string, number>>({});
-
-    const handleDurationChange = (tierName: string, value: Duration) => {
-        setDurations(prev => ({...prev, [tierName]: value}));
-    }
-
-    const handlePageSelection = (pageId: string) => {
-        setSelectedPages(prev => ({ ...prev, [pageId]: !prev[pageId] }));
-    };
-
-    const handleUsageChange = (pageId: string, value: number) => {
-        setUsageTiers(prev => ({ ...prev, [pageId]: value }));
-    };
-
-    const calculateCustomPrice = () => {
-        return pages.reduce((total, page) => {
-            if (selectedPages[page.id]) {
-                const tierIndex = usageTiers[page.id] || 0;
-                return total + page.tiers[tierIndex].price;
-            }
-            return total;
-        }, 0);
-    };
-
-    const generateWhatsAppLink = (tierName: string) => {
-        const phoneNumber = "919687820005"; // Assuming Indian country code
-        const duration = durations[tierName];
-        let message = `Hello! I am interested in the ${tierName} plan`;
-        if (tierName === 'Custom') {
-            const customPages = pages
-                .filter(page => selectedPages[page.id])
-                .map(page => {
-                    const tierIndex = usageTiers[page.id] || 0;
-                    return `${page.name} (${page.tiers[tierIndex].name} usage)`;
-                });
-            message += ` with the following pages: ${customPages.join(', ')}. The total price is ₹${calculateCustomPrice()}`;
-        } else if (tierName !== 'Enterprise') {
-            message += ` with a ${duration} subscription.`;
-        } else {
-            message += '.';
+    const tiers = [
+        {
+            name: "Spark",
+            identity: "Student",
+            priceUSD: "$0",
+            priceINR: "₹0",
+            description: "For those just waking up to the new reality.",
+            color: "blue",
+            features: [
+                "Standard Neural Access",
+                "Basic Generative Capabilities",
+                "Local Memory (Non-Persistent)",
+                "Community Support"
+            ]
+        },
+        {
+            name: "Nexus",
+            identity: "Creator",
+            priceUSD: "$19",
+            priceINR: "₹1,599",
+            description: "For architects of the digital age.",
+            color: "cyan",
+            features: [
+                "High-Velocity Rendering Engine",
+                "Unlimited Generative Access",
+                "Persistent Knowledge Graph",
+                "Priority Cortex Allocation",
+                "Commercial Rights"
+            ]
+        },
+        {
+            name: "Omni",
+            identity: "Sovereign",
+            priceUSD: "$99",
+            priceINR: "₹7,999",
+            description: "Total dominion over the machine.",
+            color: "emerald",
+            features: [
+                "God Mode (Autonomous Agents)",
+                "Military-Grade Stealth Protocol",
+                "Dedicated Neural Cluster",
+                "API Access (Direct)",
+                "24/7 Priority Signal"
+            ]
         }
-        const encodedMessage = encodeURIComponent(message);
-        return `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-    };
+    ];
 
-  return (
-    <div className="container mx-auto p-4 md:p-8 space-y-12">
-      <div className="text-center">
-        <h1 className="font-headline text-4xl font-bold text-primary">AGI-S Plans & Pricing</h1>
-        <p className="text-muted-foreground text-lg mt-2 max-w-3xl mx-auto">
-          Choose the plan that fits your needs. Unlock the full potential of AGI-S with advanced features, unlimited usage, and priority access.
-        </p>
-      </div>
+    const currentTier = tiers[tier];
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8 items-start">
-        {tiers.map(tier => {
-            const Icon = tier.icon;
-            const currentDuration = durations[tier.name];
-            const currentPrice = tier.prices[currentDuration];
-            
-            return (
-            <Card key={tier.name} className={cn("flex flex-col h-full", tier.isPopular ? "border-primary border-2 shadow-primary/20 shadow-lg" : "")}>
-                <CardHeader className="items-center text-center">
-                    <div className="p-3 bg-primary/10 rounded-full border-4 border-primary/20 mb-2">
-                        <Icon className="h-8 w-8 text-primary" />
-                    </div>
-                    <CardTitle className="font-headline text-2xl">{tier.name}</CardTitle>
-                    <CardDescription>{tier.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1 space-y-6">
-                    <div className="text-center">
-                         <div className="flex items-baseline justify-center gap-2">
-                            <span className="text-4xl font-bold">{currentPrice}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            {currentPrice !== 'Custom' && `per ${currentDuration.replace('ly', '')}`}
-                        </p>
-                    </div>
+    return (
+        <div className="relative min-h-screen bg-black text-white font-sans selection:bg-cyan-500/30 overflow-hidden flex flex-col items-center justify-center">
+            <PrismBackground />
 
-                     {currentPrice !== 'Custom' && (
-                        <div>
-                            <Select
-                                value={currentDuration}
-                                onValueChange={(value: Duration) => handleDurationChange(tier.name, value)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select duration" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="daily">Daily</SelectItem>
-                                    <SelectItem value="weekly">Weekly</SelectItem>
-                                    <SelectItem value="monthly">Monthly</SelectItem>
-                                    <SelectItem value="yearly">Yearly</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    )}
+            {/* Header */}
+            <div className="relative z-10 text-center mb-16 px-4">
+                <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4">
+                    Resource <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Allocation</span>
+                </h1>
+                <p className="text-gray-400 max-w-xl mx-auto text-lg">
+                    Select your identity. The system adapts to your needs.
+                </p>
+            </div>
 
-                    <ul className="space-y-3 text-sm">
-                    {tier.features.map(feature => (
-                        <li key={feature.text} className="flex items-start">
-                            {feature.included ? 
-                                <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" /> : 
-                                <X className="h-5 w-5 text-red-500 mr-2 flex-shrink-0" />
-                            }
-                            <span className={cn(!feature.included && "text-muted-foreground line-through")}>{feature.text}</span>
-                        </li>
+            {/* Identity Slider */}
+            <div className="relative z-10 w-full max-w-3xl px-6 mb-16">
+                <div className="relative h-16 bg-white/5 rounded-full p-1 flex items-center justify-between border border-white/10 backdrop-blur-md">
+                    {/* Slider Background Track */}
+                    <motion.div
+                        className="absolute h-14 bg-white/10 rounded-full"
+                        initial={false}
+                        animate={{
+                            left: `${(tier * 33.33) + 0.5}%`,
+                            width: '32%'
+                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+
+                    {/* Identity Buttons */}
+                    {tiers.map((t, index) => (
+                        <button
+                            key={t.name}
+                            onClick={() => setTier(index)}
+                            className={`relative z-10 w-1/3 h-full rounded-full text-sm md:text-lg font-bold transition-colors duration-300 ${tier === index ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
+                        >
+                            {t.identity}
+                        </button>
                     ))}
-                    </ul>
-                </CardContent>
-                <CardContent>
-                    <Button asChild className="w-full" size="lg" variant={tier.name === 'Enterprise' ? 'outline' : 'default'}>
-                        <Link href={generateWhatsAppLink(tier.name)} target="_blank">
-                            {tier.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
-                        </Link>
-                    </Button>
-                </CardContent>
-            </Card>
-        )})}
-        <Card className="flex flex-col h-full bg-gradient-to-br from-primary/10 to-primary/20 shadow-lg shadow-primary/20 border-2 border-primary">
-            <CardHeader className="items-center text-center">
-                <div className="p-3 bg-primary/10 rounded-full border-4 border-primary/20 mb-2">
-                    <Sparkles className="h-8 w-8 text-primary animate-pulse" />
                 </div>
-                <CardTitle className="font-headline text-2xl">Custom Plan</CardTitle>
-                <CardDescription>Build your own plan by selecting the features you need.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 space-y-6">
-                <div className="text-center">
-                    <div className="flex items-baseline justify-center gap-2">
-                        <span className="text-4xl font-bold text-primary animate-pulse">₹{calculateCustomPrice()}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                        per month
-                    </p>
-                </div>
+            </div>
 
-                <ul className="space-y-4 text-sm">
-                    {pages.map(page => {
-                        const tierIndex = usageTiers[page.id] || 0;
-                        return (
-                        <li key={page.id} className="p-2 rounded-lg transition-all duration-300"
-                        style={selectedPages[page.id] ? {background: 'rgba(var(--primary-rgb), 0.1)', boxShadow: '0 0 10px rgba(var(--primary-rgb), 0.3)'} : {}}>
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                    <Checkbox
-                                        id={page.id}
-                                        checked={selectedPages[page.id]}
-                                        onCheckedChange={() => handlePageSelection(page.id)}
-                                        className="mr-2"
-                                    />
-                                    <label htmlFor={page.id} className="cursor-pointer">{page.name}</label>
-                                </div>
-                                <span>₹{page.tiers[tierIndex].price}</span>
+            {/* Card Container */}
+            <div className="relative z-10 w-full max-w-md px-6 perspective-1000">
+                <AnimatePresence mode='wait'>
+                    <motion.div
+                        key={tier}
+                        initial={{ opacity: 0, rotateY: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, rotateY: 0, scale: 1 }}
+                        exit={{ opacity: 0, rotateY: 10, scale: 0.95 }}
+                        transition={{ duration: 0.4 }}
+                        className={`relative rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl p-8 overflow-hidden shadow-2xl shadow-${currentTier.color}-500/20`}
+                    >
+                        {/* Dynamic Glow */}
+                        <div className={`absolute top-0 right-0 p-32 bg-${currentTier.color}-500/10 blur-[80px] rounded-full pointer-events-none`}></div>
+
+                        {/* Price & Name */}
+                        <div className="mb-8">
+                            <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-${currentTier.color}-500/20 text-${currentTier.color}-400 mb-4`}>
+                                Project {currentTier.name}
                             </div>
-                            {selectedPages[page.id] && (
-                                <div className="mt-2">
-                                    <Slider
-                                        defaultValue={[0]}
-                                        max={2}
-                                        step={1}
-                                        onValueChange={(value) => handleUsageChange(page.id, value[0])}
-                                    />
-                                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                                        <span>Low</span>
-                                        <span>Medium</span>
-                                        <span>High</span>
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-5xl font-bold">{currentTier.priceUSD}</span>
+                                <span className="text-xl text-gray-500">/mo</span>
+                            </div>
+                            <div className="text-sm text-gray-400 mt-1">({currentTier.priceINR} / mo)</div>
+                            <p className="mt-4 text-gray-300 leading-relaxed">
+                                {currentTier.description}
+                            </p>
+                        </div>
+
+                        {/* Features List - No Limits Shown */}
+                        <div className="space-y-4 mb-8">
+                            {currentTier.features.map((feature, i) => (
+                                <div key={i} className="flex items-center gap-3">
+                                    <div className={`p-1 rounded-full bg-${currentTier.color}-500/20`}>
+                                        <Check className={`h-4 w-4 text-${currentTier.color}-400`} />
                                     </div>
+                                    <span className="text-gray-200 text-sm">{feature}</span>
                                 </div>
-                            )}
-                        </li>
-                    )})}
-                </ul>
-            </CardContent>
-            <CardContent>
-                <Button asChild className="w-full" size="lg">
-                    <Link href={generateWhatsAppLink('Custom')} target="_blank">
-                        Get Started
-                    </Link>
-                </Button>
-            </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+                            ))}
+                        </div>
+
+                        {/* Action Button */}
+                        <Button
+                            className={`w-full h-12 text-lg font-bold bg-${currentTier.color}-600 hover:bg-${currentTier.color}-500 transition-all shadow-lg shadow-${currentTier.color}-900/20`}
+                            onClick={() => {
+                                // Placeholder for Payment Link Logic
+                                const paymentLinks = [
+                                    "", // Free
+                                    "https://buy.stripe.com/test_nexus", // Nexus (Sample)
+                                    "https://buy.stripe.com/test_omni"   // Omni (Sample)
+                                ];
+                                if (tier > 0) {
+                                    window.open(paymentLinks[tier], '_blank');
+                                } else {
+                                    window.location.href = '/login';
+                                }
+                            }}
+                        >
+                            {tier === 0 ? "Initialize System" : "Allocate Resources"}
+                        </Button>
+
+                        <div className="mt-6 text-center">
+                            <p className="text-xs text-gray-500">
+                                {tier === 0 ? "No credit card required." : "Secure encryption via Stripe."}
+                            </p>
+                        </div>
+
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+
+        </div>
+    );
 }
