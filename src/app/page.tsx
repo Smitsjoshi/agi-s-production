@@ -80,6 +80,7 @@ export default function LandingPage() {
               <Link href="/api" className="hover:text-white transition-colors">API</Link>
               <Link href="/enterprise" className="hover:text-white transition-colors">Enterprise</Link>
               <Link href="/safety" className="hover:text-white transition-colors">Safety</Link>
+              <Link href="/pricing" className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500 font-bold hover:opacity-80 transition-opacity">Pro</Link>
             </div>
           </div>
           <div className="flex items-center gap-4">
