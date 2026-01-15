@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AGI-S: Ghost Protocol",
+  "name": "AGI-S: UAL 2.0",
   "version": "1.0.0",
-  "description": "The Browser Daemon for Sovereign Intelligence.",
+  "description": "The Universal Action Layer (UAL) 2.0 for Sovereign Intelligence.",
   "permissions": [
     "activeTab",
     "scripting",
@@ -17,8 +17,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -31,11 +35,6 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "AGI-S Status"
-  },
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "default_title": "UAL 2.0 Status"
   }
 }
