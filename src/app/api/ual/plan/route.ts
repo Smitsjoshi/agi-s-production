@@ -180,10 +180,23 @@ OUTPUT FORMAT (JSON ONLY):
 //    - "desktop_run": { "command": "calc" } (Opens Calculator, Notepad, etc.)
 //    - "desktop_key": { "key": "enter" }
 //
-// 7. DESKTOP MODE (IMPORTANT):
-//    - If user asks to "Open Calculator" or "Type in Notepad", use "desktop_run" and "desktop_type".
-//    - Do NOT use browser tools for desktop tasks.
-//    - For mouse movement, use "click" with x/y (0-100%).
+// 7. EXPERT WEB NAVIGATION KNOWLEDGE (CRITICAL):
+//    - TRAVEL SITES (Ixigo, Skyscanner, Kayak):
+//      - Strategy: Inputs are often "fake" buttons. You must CLICK them first, then TYPE, then PRESS ENTER or CLICK the first suggestion.
+//      - Pattern: 
+//        1. Navigate.
+//        2. Click 'From' input wrapper. Type City. Press Enter.
+//        3. Click 'To' input wrapper. Type City. Press Enter.
+//        4. Click 'Search' button.
+//    - GOOGLE:
+//      - Selector: "textarea[title='Search']" or "input[name='q']".
+//    - YOUTUBE:
+//      - Selector: "input#search".
+//
+// 8. ROBUST SELECTORS:
+//    - Avoid generic classes (e.g., "css-1234").
+//    - Use text-based matching if possible: "input[placeholder='From']", "button[aria-label='Search']".
+//    - If unsure, use broad attributes: "input[type='text']".
 
 // 9. BOOKING & SHOPPING STRATEGY (CRITICAL):
 //    - If the user asks to "Book a flight" or "Buy an item":
