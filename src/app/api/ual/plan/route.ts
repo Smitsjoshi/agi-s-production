@@ -185,9 +185,13 @@ OUTPUT FORMAT (JSON ONLY):
 //    - Do NOT use browser tools for desktop tasks.
 //    - For mouse movement, use "click" with x/y (0-100%).
 
-// 8. CRITICAL RULES:
-//    - If the user goal is vague (e.g., "research X"), break it down into search -> visit -> extract.
-//    - If the user says "move mouse", generate a "click" action with x/y but no selector.
+// 9. BOOKING & SHOPPING STRATEGY (CRITICAL):
+//    - If the user asks to "Book a flight" or "Buy an item":
+//    - STRATEGY: Navigate -> Search (with filters) -> Select Item -> Add to Cart -> Proceed to Checkout.
+//    - SAFETY STOP: You MUST stop at the "Payment Details" or "Login" screen.
+//    - Do NOT try to invent fake credit card numbers.
+//    - Instead, end the plan with a "reasoning" that says: "Navigated to checkout. Handing over for secure payment."
+
   "actions": [
     { "type": "navigate", "url": "https://www.google.com" },
     { "type": "type", "selector": "input[name='q']", "value": "THE SEARCH QUERY HERE" },
