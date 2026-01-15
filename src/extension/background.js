@@ -41,6 +41,29 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
             return true; // Async response
         }
 
+        // HIVE MIND: SWITCH TAB (Focus on a different tab)
+        if (action === 'SWITCH_TAB') {
+            const tabId = parseInt(value || selector);
+            if (tabId) {
+                chrome.tabs.update(tabId, { active: true }, (tab) => {
+                    TARGET_TAB_ID = tabId; // Update target to the switched tab
+                    sendResponse({ status: 'SUCCESS', message: `Switched to tab ${tabId}` });
+                });
+            } else {
+                sendResponse({ error: 'INVALID_TAB_ID' });
+            }
+            return true;
+        }
+
+        // HIVE MIND: LIST TABS (Get all potential targets)
+        if (action === 'LIST_TABS') {
+            chrome.tabs.query({}, (tabs) => {
+                const tabList = tabs.map(t => ({ id: t.id, title: t.title, url: t.url }));
+                sendResponse({ status: 'SUCCESS', data: tabList });
+            });
+            return true;
+        }
+
         // Forward commands to the TARGETED tab if it exists, otherwise Active Tab
         if (TARGET_TAB_ID) {
             sendMessageWithRetry(TARGET_TAB_ID, message, sendResponse);

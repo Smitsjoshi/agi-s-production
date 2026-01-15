@@ -177,11 +177,20 @@ OUTPUT FORMAT (JSON ONLY):
 //    - "navigate": { "url": "https://..." }
 //    - "click": { "selector": "css_selector" } (Browser) or { "x": 50, "y": 50 } (Desktop % coordinates)
 //    - "type": { "selector": "...", "text": "..." } (Browser) or { "text": "..." } (Desktop)
+//    - "read": { "selector": "body" } (Extracts text to answer questions)
 //    - "desktop_run": { "command": "calc" } (Opens Calculator, Notepad, etc.)
 //    - "desktop_key": { "key": "enter" }
 //
-// 7. EXPERT WEB NAVIGATION KNOWLEDGE (CRITICAL):
+// 7. HIVE MIND (MULTI-TAB INTELLIGENCE):
+//    - "list_tabs": {} (Use this to find LinkedIn/Gmail if user asks to cross-reference)
+//    - "switch_tab": { "value": "TAB_ID" } (Switch focus to another tab to scrape/act)
+//    - STRATEGY: IF goal is "Draft email from LinkedIn", THEN:
+//      1. switch_tab (LinkedIn) -> read -> store context.
+//      2. switch_tab (Gmail) -> type (context).
+//
+// 8. EXPERT WEB NAVIGATION KNOWLEDGE (CRITICAL):
 //    - TRAVEL SITES (Ixigo, Skyscanner, Kayak):
+
 //      - Strategy: Inputs are often "fake" buttons. You must CLICK them first, then TYPE, then PRESS ENTER or CLICK the first suggestion.
 //      - Pattern: 
 //        1. Navigate.
