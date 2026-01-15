@@ -80,25 +80,50 @@ export default function CanvasPage() {
         setTimeout(() => addLog('success', 'Context Fusion Complete. (Simulation)'), 2000);
     };
 
-    const handleGodModeStart = () => {
+    const handleGodModeStart = async () => {
         if (!goal) return;
         setIsExecuting(true);
         addLog('info', `[SOVEREIGN OS] Initiating Task: "${goal}"`);
 
-        // SIMULATION OF A COMPLEX AGENTIC LOOP
-        // In a real implementation, this would call an API with the goal, 
-        // which then sends multiple UAL commands back to the client/extension.
-        setTimeout(() => {
-            dispatchUAL('READ', undefined, undefined, 'EXECUTE'); // First, read the world
-            setTimeout(() => {
-                addLog('info', '[PLANNER] Analyzing DOM Tree...');
-                setTimeout(() => {
-                    addLog('success', '[EXECUTOR] Found objective target.');
-                    setIsExecuting(false);
-                    toast({ title: "Task Complete", description: "Sovereign OS executed 4 actions." });
-                }, 2000);
-            }, 1000);
-        }, 500);
+        try {
+            // 1. Snapshot the current state (Real Scan)
+            addLog('info', '[SENSOR] Scanning active tab...');
+            // In a full implementation, we'd wait for the READ response. 
+            // For now, we'll send the goal to the Planner API directly.
+
+            const response = await fetch('/api/ual/plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ goal })
+            });
+
+            if (!response.ok) throw new Error('Planner API failed');
+
+            const plan = await response.json();
+            addLog('success', `[PLANNER] Generated ${plan.actions.length} step strategy.`);
+
+            // 2. Execute Real Actions
+            let i = 0;
+            for (const action of plan.actions) {
+                i++;
+                addLog('info', `[EXECUTOR] Step ${i}: ${action.type} ${action.selector || ''}`);
+
+                // Dispatch to Real Extension
+                dispatchUAL(action.type.toUpperCase(), action.selector, action.value, 'EXECUTE');
+
+                // Artificial delay for visual pacing (so it doesn't happen instantly)
+                await new Promise(r => setTimeout(r, 1000));
+            }
+
+            addLog('success', '[SOVEREIGN OS] Mission Accomplished.');
+            toast({ title: "Task Complete", description: `Executed ${plan.actions.length} autonomous actions.` });
+
+        } catch (error: any) {
+            addLog('error', `[FAILURE] ${error.message}`);
+            toast({ title: "Execution Failed", description: error.message, variant: "destructive" });
+        } finally {
+            setIsExecuting(false);
+        }
     };
 
     return (
@@ -114,10 +139,10 @@ export default function CanvasPage() {
             <div className="h-20 border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl z-50 flex items-center justify-between px-8 sticky top-0">
                 <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.1)]">
-                        <Cpu className="h-5 w-5 text-cyan-400" />
+                        <Globe className="h-5 w-5 text-cyan-400" />
                     </div>
                     <div>
-                        <h1 className="text-xl font-bold tracking-tight">Sovereign OS</h1>
+                        <h1 className="text-xl font-bold tracking-tight">Orbit</h1>
                         <div className="flex items-center gap-2">
                             <div className={`h-1.5 w-1.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></div>
                             <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
