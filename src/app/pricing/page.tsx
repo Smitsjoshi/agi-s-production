@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Check, X, Shield, Cpu, Zap, Globe, Database, HelpCircle } from 'lucide-react';
+import { Check, X, Shield, Cpu, Zap, Globe, Database, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PrismBackground from '@/components/ui/prism-background';
 import Link from 'next/link';
