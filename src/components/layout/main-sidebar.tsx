@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Compass, MessageSquare, Users, Clapperboard, Palette, Cpu, Landmark, Wind, BookCheck, ShieldHalf, Briefcase, Sparkles, User, LogOut, Workflow, Code, Star, BookOpen, GitMerge, Puzzle, Key, LifeBuoy, HelpCircle, Bell, Lock, GitCommit } from 'lucide-react';
+import { Compass, MessageSquare, Users, Clapperboard, Palette, Cpu, Landmark, Wind, BookCheck, ShieldHalf, Briefcase, Sparkles, User, LogOut, Workflow, Code, Star, BookOpen, GitMerge, Puzzle, Key, LifeBuoy, HelpCircle, Bell, Lock, GitCommit, Globe } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
