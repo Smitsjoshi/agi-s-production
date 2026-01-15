@@ -1,10 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Check, X, Shield, Cpu, Zap, Globe, Database, Building2 } from 'lucide-react';
+import { Check, X, Shield, Cpu, Zap, Globe, Database, Building2, Sliders } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PrismBackground from '@/components/ui/prism-background';
 import Link from 'next/link';
+import { useState } from 'react';
+import { Slider } from '@/components/ui/slider';
 
 export default function PricingPage() {
     return (
@@ -26,9 +28,11 @@ export default function PricingPage() {
                     Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400">Intelligence Level</span>
                 </h1>
                 <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
-                    We do not charge for "storage" or "pages". We charge for **Autonomy Level**.
+                    Unlock the world's most advanced autonomous operating system.
                     <br />
-                    <span className="text-sm text-gray-500 mt-2 block">(Note: All plans require your own API Keys for LLM inference. You pay minimal platform fees + your actual usage.)</span>
+                    <span className="text-sm text-gray-500 mt-2 block">
+                        True Autonomy. No Limits.
+                    </span>
                 </p>
             </div>
 
@@ -126,37 +130,10 @@ export default function PricingPage() {
                     </Link>
                 </motion.div>
 
-                {/* TIER 4: ENTERPRISE (New) */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-                    className="relative flex flex-col rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 hover:bg-white/10 transition-all group"
-                >
-                    <div className="mb-6">
-                        <h3 className="text-xl font-bold text-white mb-2">Enterprise</h3>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-4xl font-bold">Custom</span>
-                        </div>
-                        <p className="text-sm text-gray-400 mt-4 leading-relaxed">
-                            For organizations requiring private instances and dedicated support.
-                        </p>
-                    </div>
-                    <div className="flex-1 space-y-4 mb-8 border-t border-white/5 pt-8">
-                        <Feature icon={Building2} text="Private Cloud Deployment" active={true} />
-                        <Feature icon={Shield} text="SSO & Advanced Security" active={true} />
-                        <Feature icon={Database} text="Custom Model Fine-tuning" active={true} />
-                        <Feature icon={Globe} text="Unlimited Bandwidth" active={true} />
-                        <Feature icon={Zap} text="24/7 Dedicated Engineer" active={true} />
-                    </div>
-                    <Link href="/enterprise">
-                        <Button className="w-full bg-white text-black hover:bg-gray-200 font-bold">
-                            Contact Sales
-                        </Button>
-                    </Link>
-                </motion.div>
+                {/* TIER 4: BUILD YOUR OWN / CUSTOM (INTERACTIVE) */}
+                <CustomPricingCard />
 
             </div>
-
-
 
             {/* Enterprise/Contact */}
             <div className="text-center relative z-10">
@@ -176,5 +153,94 @@ function Feature({ icon: Icon, text, active }: { icon: any, text: string, active
             <Icon className={`h-5 w-5 shrink-0 ${active ? 'text-cyan-400' : 'text-gray-500'}`} />
             <span className="text-sm text-gray-300">{text}</span>
         </div>
+    );
+}
+
+function CustomPricingCard() {
+    const [usageLevel, setUsageLevel] = useState([50]); // 0 to 100
+
+    const getPrice = (level: number) => {
+        if (level < 30) return 49;
+        if (level < 70) return 149;
+        return 499;
+    };
+
+    const getLabel = (level: number) => {
+        if (level < 30) return "Starter";
+        if (level < 70) return "Growth";
+        return "Scale";
+    };
+
+    const getFeatures = (level: number) => {
+        if (level < 30) return [
+            { text: "5 Active Agents", active: true },
+            { text: "Standard Memory", active: true },
+            { text: "Community Support", active: true }
+        ];
+        if (level < 70) return [
+            { text: "20 Active Agents", active: true },
+            { text: "Extended Memory (Vector)", active: true },
+            { text: "Priority Support", active: true }
+        ];
+        return [
+            { text: "Unlimited Agents", active: true },
+            { text: "Infinite Memory", active: true },
+            { text: "Dedicated Success Manager", active: true }
+        ];
+    };
+
+    const price = getPrice(usageLevel[0]);
+    const label = getLabel(usageLevel[0]);
+    const features = getFeatures(usageLevel[0]);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+            className="relative flex flex-col rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 hover:bg-white/10 transition-all group"
+        >
+            <div className="mb-6">
+                <h3 className="text-xl font-bold text-white mb-2">Build Your Own</h3>
+                <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold">${price}</span>
+                    <span className="text-gray-500">/mo</span>
+                </div>
+                <p className="text-sm text-gray-400 mt-4 leading-relaxed">
+                    Adjust the slider to match your estimated usage and autonomy needs.
+                </p>
+
+                {/* SLIDER UI */}
+                <div className="mt-6 mb-2">
+                    <div className="flex justify-between text-xs text-cyan-400 font-mono mb-2 uppercase tracking-wide">
+                        <span>Low</span>
+                        <span>High</span>
+                    </div>
+                    <Slider
+                        defaultValue={[50]}
+                        max={100}
+                        step={1}
+                        className="w-full"
+                        onValueChange={setUsageLevel}
+                    />
+                    <div className="mt-2 text-center text-sm font-bold text-white bg-white/10 rounded-lg py-1">
+                        Level: {label}
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex-1 space-y-4 mb-8 border-t border-white/5 pt-8 transition-all duration-300">
+                {features.map((f, i) => (
+                    <Feature key={i} icon={Check} text={f.text} active={f.active} />
+                ))}
+
+                <Feature icon={Sliders} text="Customizable Parameters" active={true} />
+                <Feature icon={Zap} text="Dynamic Scaling" active={true} />
+            </div>
+
+            <Link href={`/login?plan=custom&level=${label.toLowerCase()}`}>
+                <Button className="w-full bg-white text-black hover:bg-gray-200 font-bold">
+                    Create {label} Plan
+                </Button>
+            </Link>
+        </motion.div>
     );
 }
