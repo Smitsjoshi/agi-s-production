@@ -58,7 +58,12 @@ export default function OrbitPage() {
                 // Fix: The Planner returns 'url' for navigate, but 'value' for type. We map 'url' to 'value' here.
                 const effectiveValue = action.value || action.url;
                 dispatchUAL(action.type.toUpperCase(), action.selector, effectiveValue);
-                await new Promise(r => setTimeout(r, 1000)); // Pacing
+
+                // INTELLIGENT PACING:
+                // If we found a NAVIGATE action, we MUST wait for the page to load (5 seconds).
+                // Otherwise, standard 1s pacing.
+                const delay = action.type.toUpperCase() === 'NAVIGATE' ? 5000 : 1000;
+                await new Promise(r => setTimeout(r, delay));
             }
 
             setStatus('Mission Complete');
