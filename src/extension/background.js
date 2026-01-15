@@ -9,6 +9,7 @@ const ALLOWED_ORIGINS = [
 
 // Memory Store for 'Hive Mind' (Context sharing)
 let HIVE_CONTEXT = {};
+let TARGET_TAB_ID = null; // Track the tab we are controlling
 
 chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
     if (!ALLOWED_ORIGINS.includes(sender.origin || '')) {
@@ -20,7 +21,7 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
         sendResponse({ status: 'CONNECTED', version: '2.0.0' });
     }
 
-    // EXECUTE: Run action on Active Tab
+    // EXECUTE: Run action on Active Tab or Targeted Tab
     if (message.type === 'EXECUTE') {
         const { action, value, selector } = message;
 
@@ -28,7 +29,11 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
         if (action === 'NAVIGATE') {
             const url = value || selector;
             if (url) {
-                chrome.tabs.create({ url: url.startsWith('http') ? url : `https://${url}` });
+                chrome.tabs.create({ url: url.startsWith('http') ? url : `https://${url}` }, (tab) => {
+                    // CRITICAL FIX: Track this new tab as the Target
+                    TARGET_TAB_ID = tab.id;
+                    console.log('[UAL] Targeted Tab:', TARGET_TAB_ID);
+                });
                 sendResponse({ status: 'SUCCESS', message: 'Opened new tab' });
             } else {
                 sendResponse({ status: 'ERROR', message: 'No URL provided' });
@@ -36,14 +41,18 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
             return true; // Async response
         }
 
-        // Forward other commands (CLICK, TYPE, PRESS, READ) to the active tab
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs[0]?.id) {
-                sendMessageWithRetry(tabs[0].id, message, sendResponse);
-            } else {
-                sendResponse({ error: 'NO_ACTIVE_TAB' });
-            }
-        });
+        // Forward commands to the TARGETED tab if it exists, otherwise Active Tab
+        if (TARGET_TAB_ID) {
+            sendMessageWithRetry(TARGET_TAB_ID, message, sendResponse);
+        } else {
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs[0]?.id) {
+                    sendMessageWithRetry(tabs[0].id, message, sendResponse);
+                } else {
+                    sendResponse({ error: 'NO_ACTIVE_TAB' });
+                }
+            });
+        }
         return true;
     }
 
